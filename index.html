@@ -28,7 +28,7 @@
       font-family: 'Outfit', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
-      font-size: 13px;
+      font-size: 15px;
       line-height: 1.2;
       display: flex;
       flex-direction: column;
@@ -50,7 +50,7 @@
       flex-direction: column;
       padding: 8px 10px 6px;
       gap: 6px;
-      max-width: 1100px;
+      max-width: 1150px;
       margin: 0 auto;
       width: 100%;
     }
@@ -66,7 +66,7 @@
     }
 
     .title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
       white-space: nowrap;
     }
@@ -74,7 +74,7 @@
     .title span { color: var(--accent); }
 
     .mez {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--accent);
       background: rgba(212,175,55,0.15);
@@ -87,7 +87,7 @@
       flex: 1;
       min-height: 0;
       display: grid;
-      grid-template-columns: 1fr 200px;
+      grid-template-columns: 1fr 290px;
       gap: 8px;
     }
 
@@ -102,12 +102,12 @@
     }
 
     .panel-head {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.07em;
       color: var(--muted);
-      padding: 4px 8px;
+      padding: 5px 10px;
       background: rgba(0,0,0,0.2);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
@@ -116,7 +116,7 @@
     .panel-head .pill {
       float: right;
       color: #4cc978;
-      font-size: 10px;
+      font-size: 12px;
     }
 
     table {
@@ -125,12 +125,12 @@
     }
 
     th {
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--muted);
-      padding: 3px 5px;
+      padding: 4px 6px;
       text-align: left;
       background: rgba(0,0,0,0.15);
       border-bottom: 1px solid var(--border);
@@ -139,7 +139,7 @@
     th.c, td.c { text-align: center; }
 
     td {
-      padding: 2px 5px;
+      padding: 3px 6px;
       border-bottom: 1px solid rgba(255,255,255,0.03);
       vertical-align: middle;
     }
@@ -153,18 +153,19 @@
     }
 
     .match-row.live td { background: rgba(76,201,120,0.07); }
+    .match-row.finished td { background: rgba(255,255,255,0.03); }
 
-    .time { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 12px; }
-    .cd { font-weight: 400; color: var(--muted); font-size: 10px; }
-    .live-txt { color: #4cc978; font-size: 10px; font-weight: 700; }
+    .time { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 14px; }
+    .cd { font-weight: 400; color: var(--muted); font-size: 12px; }
+    .live-txt { color: #4cc978; font-size: 12px; font-weight: 700; }
 
     .grp {
       display: inline-block;
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
-      padding: 1px 4px;
+      padding: 2px 5px;
       border-radius: 3px;
-      min-width: 16px;
+      min-width: 18px;
       text-align: center;
     }
 
@@ -183,16 +184,26 @@
 
     .fixture {
       font-weight: 600;
-      font-size: 12px;
+      font-size: 14px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .tv {
-      font-size: 10px;
+    .score {
       font-weight: 700;
-      padding: 1px 4px;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .score.live-score { color: #4cc978; }
+    .score.final-score { color: var(--text); }
+    .score .min { font-size: 11px; font-weight: 600; opacity: 0.85; }
+
+    .tv {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 5px;
       border-radius: 3px;
       white-space: nowrap;
     }
@@ -201,26 +212,32 @@
     .tv-servus { background:rgba(0,120,200,0.18); color:#7ec8ff; }
 
     .date-row td {
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      padding: 3px 5px 1px;
+      padding: 4px 6px 2px;
       background: rgba(0,0,0,0.12);
       border-bottom: none;
     }
+
+    .third-panel .panel-head { font-size: 14px; padding: 6px 10px; }
+    .third-panel th { font-size: 13px; padding: 5px 8px; }
+    .third-panel td { font-size: 14px; padding: 4px 8px; }
+    .third-panel .t-team { font-size: 14px; max-width: 150px; }
+    .third-panel .t-grp { font-size: 12px; }
 
     .third-scroll tr.qualified td { background: rgba(76,201,120,0.06); }
     .third-scroll tr.cutline td { border-bottom: 2px solid rgba(212,175,55,0.45); }
     .third-scroll tr.out td { opacity: 0.45; }
 
-    .t-team { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
-    .t-grp { font-size: 10px; opacity: 0.65; }
+    .t-team { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .t-grp { opacity: 0.65; }
 
     footer {
       flex-shrink: 0;
-      font-size: 10px;
+      font-size: 12px;
       color: var(--muted);
       text-align: center;
       opacity: 0.6;
@@ -228,12 +245,13 @@
 
     @media (max-width: 600px) {
       .grid {
-        grid-template-columns: 1fr 155px;
+        grid-template-columns: 1fr 200px;
         gap: 5px;
       }
-      .title { font-size: 14px; }
-      .fixture { font-size: 11px; }
-      .t-team { max-width: 72px; }
+      .title { font-size: 16px; }
+      .fixture { font-size: 13px; }
+      .third-panel .t-team { max-width: 88px; font-size: 12px; }
+      .third-panel td { font-size: 12px; }
     }
   </style>
 </head>
@@ -241,7 +259,7 @@
   <div class="page">
     <header>
       <div class="title">🏆 <span>WM 2026</span> · Nächste Spiele</div>
-      <div class="mez">MEZ</div>
+      <div class="mez">MEZ · Live</div>
     </header>
 
     <div class="grid">
@@ -254,6 +272,7 @@
                 <th>Zeit</th>
                 <th class="c">Gr</th>
                 <th>Spiel</th>
+                <th class="c">Res</th>
                 <th class="c">TV</th>
               </tr>
             </thead>
@@ -262,7 +281,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel third-panel">
         <div class="panel-head">3. Plätze <span class="pill">Top 8 →</span></div>
         <div class="third-scroll">
           <table>
@@ -280,40 +299,45 @@
       </section>
     </div>
 
-    <footer>Stand 26.06.2026 · * Gruppe offen</footer>
+    <footer id="footer-note">Live-Daten · * Gruppe offen</footer>
   </div>
 
   <script>
+    const ESPN_SCORE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
+    const ESPN_STANDINGS = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
+
     const MATCHES = [
-      { home: 'Norwegen', away: 'Frankreich', homeFlag: '🇳🇴', awayFlag: '🇫🇷', group: 'I', broadcaster: 'ServusTV', start: '2026-06-26T21:00:00+02:00' },
-      { home: 'Senegal', away: 'Irak', homeFlag: '🇸🇳', awayFlag: '🇮🇶', group: 'I', broadcaster: 'ORF', start: '2026-06-26T21:00:00+02:00' },
-      { home: 'Kap Verde', away: 'Saudi-Arabien', homeFlag: '🇨🇻', awayFlag: '🇸🇦', group: 'H', broadcaster: 'ServusTV', start: '2026-06-27T02:00:00+02:00' },
-      { home: 'Uruguay', away: 'Spanien', homeFlag: '🇺🇾', awayFlag: '🇪🇸', group: 'H', broadcaster: 'ORF', start: '2026-06-27T02:00:00+02:00' },
-      { home: 'Ägypten', away: 'Iran', homeFlag: '🇪🇬', awayFlag: '🇮🇷', group: 'G', broadcaster: 'ServusTV', start: '2026-06-27T05:00:00+02:00' },
-      { home: 'Neuseeland', away: 'Belgien', homeFlag: '🇳🇿', awayFlag: '🇧🇪', group: 'G', broadcaster: 'ORF', start: '2026-06-27T05:00:00+02:00' },
-      { home: 'Ghana', away: 'Kroatien', homeFlag: '🇬🇭', awayFlag: '🇭🇷', group: 'L', broadcaster: 'ServusTV', start: '2026-06-27T23:00:00+02:00' },
-      { home: 'Panama', away: 'England', homeFlag: '🇵🇦', awayFlag: '🏴', group: 'L', broadcaster: 'ORF', start: '2026-06-27T23:00:00+02:00' },
-      { home: 'Portugal', away: 'Kolumbien', homeFlag: '🇵🇹', awayFlag: '🇨🇴', group: 'K', broadcaster: 'ServusTV', start: '2026-06-28T01:30:00+02:00' },
-      { home: 'Usbekistan', away: 'DR Kongo', homeFlag: '🇺🇿', awayFlag: '🇨🇩', group: 'K', broadcaster: 'ORF', start: '2026-06-28T01:30:00+02:00' },
-      { home: 'Algerien', away: 'Österreich', homeFlag: '🇩🇿', awayFlag: '🇦🇹', group: 'J', broadcaster: 'ORF', start: '2026-06-28T04:00:00+02:00' },
-      { home: 'Jordanien', away: 'Argentinien', homeFlag: '🇯🇴', awayFlag: '🇦🇷', group: 'J', broadcaster: 'ServusTV', start: '2026-06-28T04:00:00+02:00' },
-      { home: 'Südafrika', away: 'Kanada', homeFlag: '🇿🇦', awayFlag: '🇨🇦', group: 'B', broadcaster: 'ServusTV', start: '2026-06-28T21:00:00+02:00' },
+      { home: 'Norwegen', away: 'Frankreich', homeFlag: '🇳🇴', awayFlag: '🇫🇷', group: 'I', broadcaster: 'ServusTV', espnId: '760475', espnHome: true, start: '2026-06-26T21:00:00+02:00' },
+      { home: 'Senegal', away: 'Irak', homeFlag: '🇸🇳', awayFlag: '🇮🇶', group: 'I', broadcaster: 'ORF', espnId: '760474', espnHome: true, start: '2026-06-26T21:00:00+02:00' },
+      { home: 'Kroatien', away: 'Ghana', homeFlag: '🇭🇷', awayFlag: '🇬🇭', group: 'L', broadcaster: 'ServusTV', espnId: '760480', espnHome: true, start: '2026-06-27T23:00:00+02:00' },
+      { home: 'Kap Verde', away: 'Saudi-Arabien', homeFlag: '🇨🇻', awayFlag: '🇸🇦', group: 'H', broadcaster: 'ServusTV', espnId: '760478', espnHome: true, start: '2026-06-27T02:00:00+02:00' },
+      { home: 'Uruguay', away: 'Spanien', homeFlag: '🇺🇾', awayFlag: '🇪🇸', group: 'H', broadcaster: 'ORF', espnId: '760479', espnHome: true, start: '2026-06-27T02:00:00+02:00' },
+      { home: 'Ägypten', away: 'Iran', homeFlag: '🇪🇬', awayFlag: '🇮🇷', group: 'G', broadcaster: 'ServusTV', espnId: '760476', espnHome: true, start: '2026-06-27T05:00:00+02:00' },
+      { home: 'Neuseeland', away: 'Belgien', homeFlag: '🇳🇿', awayFlag: '🇧🇪', group: 'G', broadcaster: 'ORF', espnId: '760477', espnHome: true, start: '2026-06-27T05:00:00+02:00' },
+      { home: 'Panama', away: 'England', homeFlag: '🇵🇦', awayFlag: '🏴', group: 'L', broadcaster: 'ORF', espnId: '760485', espnHome: true, start: '2026-06-27T23:00:00+02:00' },
+      { home: 'Kolumbien', away: 'Portugal', homeFlag: '🇨🇴', awayFlag: '🇵🇹', group: 'K', broadcaster: 'ServusTV', espnId: '760481', espnHome: true, start: '2026-06-28T01:30:00+02:00' },
+      { home: 'DR Kongo', away: 'Usbekistan', homeFlag: '🇨🇩', awayFlag: '🇺🇿', group: 'K', broadcaster: 'ORF', espnId: '760482', espnHome: true, start: '2026-06-28T01:30:00+02:00' },
+      { home: 'Algerien', away: 'Österreich', homeFlag: '🇩🇿', awayFlag: '🇦🇹', group: 'J', broadcaster: 'ORF', espnId: '760484', espnHome: true, start: '2026-06-28T04:00:00+02:00' },
+      { home: 'Jordanien', away: 'Argentinien', homeFlag: '🇯🇴', awayFlag: '🇦🇷', group: 'J', broadcaster: 'ServusTV', espnId: '760483', espnHome: true, start: '2026-06-28T04:00:00+02:00' },
+      { home: 'Südafrika', away: 'Kanada', homeFlag: '🇿🇦', awayFlag: '🇨🇦', group: 'B', broadcaster: 'ServusTV', espnId: '760486', espnHome: true, start: '2026-06-28T21:00:00+02:00' },
     ];
 
-    const THIRD_PLACE = [
-      { team: 'Schweden', flag: '🇸🇪', group: 'F', pts: 4, gd: 0, final: true, qualified: true },
-      { team: 'Ecuador', flag: '🇪🇨', group: 'E', pts: 4, gd: 0, final: true, qualified: true },
-      { team: 'Bosnien-Herz.', flag: '🇧🇦', group: 'B', pts: 4, gd: -1, final: true, qualified: true },
-      { team: 'Paraguay', flag: '🇵🇾', group: 'D', pts: 4, gd: -2, final: true, qualified: false },
-      { team: 'Kroatien', flag: '🇭🇷', group: 'L', pts: 3, gd: 0, final: false, qualified: false },
-      { team: 'Südkorea', flag: '🇰🇷', group: 'A', pts: 3, gd: -1, final: true, qualified: false },
-      { team: 'Algerien', flag: '🇩🇿', group: 'J', pts: 3, gd: -2, final: false, qualified: false },
-      { team: 'Schottland', flag: '🏴', group: 'C', pts: 3, gd: -3, final: true, qualified: false },
-      { team: 'Kap Verde', flag: '🇨🇻', group: 'H', pts: 2, gd: 0, final: false, qualified: false },
-      { team: 'Belgien', flag: '🇧🇪', group: 'G', pts: 2, gd: 0, final: false, qualified: false },
-      { team: 'DR Kongo', flag: '🇨🇩', group: 'K', pts: 1, gd: -1, final: false, qualified: false },
-      { team: 'Senegal', flag: '🇸🇳', group: 'I', pts: 0, gd: -3, final: false, qualified: false },
-    ];
+    const TEAM_META = {
+      'Mexico': ['Mexiko', '🇲🇽'], 'South Korea': ['Südkorea', '🇰🇷'], 'South Africa': ['Südafrika', '🇿🇦'],
+      'Czechia': ['Tschechien', '🇨🇿'], 'Bosnia and Herzegovina': ['Bosnien-Herz.', '🇧🇦'],
+      'Bosnia-Herzegovina': ['Bosnien-Herz.', '🇧🇦'], 'Scotland': ['Schottland', '🏴'],
+      'Ecuador': ['Ecuador', '🇪🇨'], 'Sweden': ['Schweden', '🇸🇪'], 'Paraguay': ['Paraguay', '🇵🇾'],
+      'Croatia': ['Kroatien', '🇭🇷'], 'Algeria': ['Algerien', '🇩🇿'], 'Cape Verde': ['Kap Verde', '🇨🇻'],
+      'Belgium': ['Belgien', '🇧🇪'], 'DR Congo': ['DR Kongo', '🇨🇩'], 'Congo DR': ['DR Kongo', '🇨🇩'],
+      'Senegal': ['Senegal', '🇸🇳'], 'Iran': ['Iran', '🇮🇷'], 'Uzbekistan': ['Usbekistan', '🇺🇿'],
+      'Jordan': ['Jordanien', '🇯🇴'], 'Ghana': ['Ghana', '🇬🇭'], 'Panama': ['Panama', '🇵🇦'],
+    };
+
+    const CLINCHED = new Set(['Sweden', 'Ecuador', 'Bosnia and Herzegovina', 'Bosnia-Herzegovina']);
+
+    let liveScores = {};
+    let thirdPlaceData = null;
+    let lastFetch = null;
 
     const MATCH_DURATION_MS = 2 * 60 * 60 * 1000;
     const tz = 'Europe/Berlin';
@@ -342,20 +366,120 @@
       return `${m}m`;
     }
 
-    function isLive(start, now) {
-      return now >= start.getTime() && now < start.getTime() + MATCH_DURATION_MS;
+    function espnDateParam(date) {
+      const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'UTC', year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+      return p.replace(/-/g, '');
     }
 
-    function render() {
+    async function fetchLiveData() {
+      const dates = [...new Set(MATCHES.map(m => espnDateParam(new Date(m.start))))];
+      const scoreMap = {};
+
+      await Promise.all(dates.map(async (d) => {
+        try {
+          const res = await fetch(`${ESPN_SCORE}?dates=${d}`);
+          const data = await res.json();
+          for (const e of data.events || []) {
+            const c = e.competitions[0];
+            const st = c.status;
+            const comps = c.competitors;
+            const home = comps.find(x => x.homeAway === 'home');
+            const away = comps.find(x => x.homeAway === 'away');
+            scoreMap[e.id] = {
+              homeScore: home?.score ?? '0',
+              awayScore: away?.score ?? '0',
+              state: st.type.state,
+              description: st.type.description,
+              clock: st.displayClock || '',
+              period: st.period || 0,
+            };
+          }
+        } catch (_) {}
+      }));
+
+      liveScores = scoreMap;
+
+      try {
+        const res = await fetch(ESPN_STANDINGS);
+        const data = await res.json();
+        const third = [];
+
+        for (const g of data.children || []) {
+          const group = g.abbreviation.replace('Group ', '');
+          for (const e of g.standings?.entries || []) {
+            const stats = Object.fromEntries(e.stats.map(s => [s.abbreviation, s]));
+            const rank = parseInt(stats.R?.displayValue, 10);
+            if (rank !== 3) continue;
+            const en = e.team.displayName;
+            const meta = TEAM_META[en] || [en, ''];
+            const gdRaw = stats.GD?.displayValue || '0';
+            const gd = parseInt(gdRaw.replace('+', ''), 10) || 0;
+            third.push({
+              team: meta[0],
+              flag: meta[1],
+              group,
+              pts: parseInt(stats.P?.displayValue, 10) || 0,
+              gd,
+              played: parseInt(stats.GP?.displayValue, 10) || 0,
+              qualified: CLINCHED.has(en),
+              final: (parseInt(stats.GP?.displayValue, 10) || 0) >= 3,
+            });
+          }
+        }
+
+        third.sort((a, b) => b.pts - a.pts || b.gd - a.gd);
+        thirdPlaceData = third;
+      } catch (_) {}
+
+      lastFetch = new Date();
+    }
+
+    function getScoreHtml(match) {
+      const s = liveScores[match.espnId];
+      if (!s || s.state === 'pre') return '<span class="score" style="color:var(--muted)">–</span>';
+
+      const hs = match.espnHome ? s.homeScore : s.awayScore;
+      const as = match.espnHome ? s.awayScore : s.homeScore;
+      const score = `${hs}:${as}`;
+
+      if (s.state === 'in') {
+        const min = s.clock ? `${s.clock}'` : 'LIVE';
+        return `<span class="score live-score">${score} <span class="min">${min}</span></span>`;
+      }
+      if (s.state === 'post') {
+        return `<span class="score final-score">${score}</span>`;
+      }
+      return `<span class="score">${score}</span>`;
+    }
+
+    function getStatusClass(match, now) {
+      const s = liveScores[match.espnId];
+      if (s?.state === 'in') return ' live';
+      if (s?.state === 'post') return ' finished';
+      const start = new Date(match.start);
+      if (now >= start.getTime() && now < start.getTime() + MATCH_DURATION_MS) return ' live';
+      return '';
+    }
+
+    function renderMatches() {
       const now = new Date();
       const upcoming = MATCHES
         .map(m => ({ ...m, startDate: new Date(m.start) }))
-        .filter(m => m.startDate.getTime() + MATCH_DURATION_MS > now.getTime())
-        .sort((a, b) => a.startDate - b.startDate);
+        .filter(m => {
+          const s = liveScores[m.espnId];
+          if (s?.state === 'in') return true;
+          return m.startDate.getTime() + MATCH_DURATION_MS > now.getTime();
+        })
+        .sort((a, b) => {
+          const sa = liveScores[a.espnId]?.state === 'in' ? 0 : 1;
+          const sb = liveScores[b.espnId]?.state === 'in' ? 0 : 1;
+          if (sa !== sb) return sa - sb;
+          return a.startDate - b.startDate;
+        });
 
       const tbody = document.getElementById('matches');
       if (!upcoming.length) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:8px">Keine Spiele</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:8px">Keine Spiele</td></tr>';
         return;
       }
 
@@ -365,19 +489,27 @@
       for (const m of upcoming) {
         const dateKey = formatDateShort(m.startDate);
         if (dateKey !== lastDate) {
-          html += `<tr class="date-row"><td colspan="4">${dateKey}</td></tr>`;
+          html += `<tr class="date-row"><td colspan="5">${dateKey}</td></tr>`;
           lastDate = dateKey;
         }
 
-        const live = isLive(m.startDate, now);
-        const cd = live ? '' : formatCountdown(m.startDate - now);
+        const s = liveScores[m.espnId];
+        const live = s?.state === 'in';
+        const finished = s?.state === 'post';
+        const cd = (!live && !finished) ? formatCountdown(m.startDate - now) : '';
         const tvClass = m.broadcaster === 'ORF' ? 'tv-orf' : 'tv-servus';
 
+        let timeCell;
+        if (live) timeCell = '<span class="live-txt">LIVE</span>';
+        else if (finished) timeCell = '<span class="cd">Ende</span>';
+        else timeCell = `${formatTime(m.startDate)}${cd ? `<br><span class="cd">${cd}</span>` : ''}`;
+
         html += `
-          <tr class="match-row${live ? ' live' : ''}">
-            <td class="time">${live ? '<span class="live-txt">LIVE</span>' : `${formatTime(m.startDate)}${cd ? `<br><span class="cd">${cd}</span>` : ''}`}</td>
+          <tr class="match-row${getStatusClass(m, now)}">
+            <td class="time">${timeCell}</td>
             <td class="c"><span class="grp group-${m.group}">${m.group}</span></td>
             <td class="fixture">${m.homeFlag} ${m.home} – ${m.away} ${m.awayFlag}</td>
+            <td class="c">${getScoreHtml(m)}</td>
             <td class="c"><span class="tv ${tvClass}">${m.broadcaster === 'ORF' ? 'ORF' : 'Servus'}</span></td>
           </tr>`;
       }
@@ -390,12 +522,14 @@
     }
 
     function renderThirdPlace() {
-      const sorted = [...THIRD_PLACE].sort((a, b) => {
-        if (b.pts !== a.pts) return b.pts - a.pts;
-        return b.gd - a.gd;
-      });
+      const data = thirdPlaceData;
+      const tbody = document.getElementById('third-place-body');
+      if (!data?.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">Laden…</td></tr>';
+        return;
+      }
 
-      document.getElementById('third-place-body').innerHTML = sorted.map((t, i) => {
+      tbody.innerHTML = data.map((t, i) => {
         const rank = i + 1;
         let cls = '';
         if (t.qualified) cls = 'qualified';
@@ -412,9 +546,23 @@
       }).join('');
     }
 
-    render();
-    renderThirdPlace();
-    setInterval(render, 30000);
+    function updateFooter() {
+      const el = document.getElementById('footer-note');
+      if (lastFetch) {
+        const t = formatTime(lastFetch);
+        el.textContent = `Live · aktualisiert ${t} MEZ · * Gruppe offen`;
+      }
+    }
+
+    async function refresh() {
+      await fetchLiveData();
+      renderMatches();
+      renderThirdPlace();
+      updateFooter();
+    }
+
+    refresh();
+    setInterval(refresh, 60000);
   </script>
 </body>
 </html>
