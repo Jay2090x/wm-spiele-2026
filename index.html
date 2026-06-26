@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WM 2026 – Nächste Spiele</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a1f14;
+      --card: rgba(255,255,255,0.05);
+      --accent: #d4af37;
+      --text: #f0f4f0;
+      --muted: #8fa899;
+      --border: rgba(255,255,255,0.09);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.2;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(26,77,50,0.5), transparent);
+      pointer-events: none;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 10px 6px;
+      gap: 6px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .title span { color: var(--accent); }
+
+    .mez {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(212,175,55,0.15);
+      padding: 2px 7px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+
+    .grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      gap: 8px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .panel-head {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      padding: 4px 8px;
+      background: rgba(0,0,0,0.2);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .panel-head .pill {
+      float: right;
+      color: #4cc978;
+      font-size: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      padding: 3px 5px;
+      text-align: left;
+      background: rgba(0,0,0,0.15);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th.c, td.c { text-align: center; }
+
+    td {
+      padding: 2px 5px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .match-scroll, .third-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .match-row.live td { background: rgba(76,201,120,0.07); }
+
+    .time { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 12px; }
+    .cd { font-weight: 400; color: var(--muted); font-size: 10px; }
+    .live-txt { color: #4cc978; font-size: 10px; font-weight: 700; }
+
+    .grp {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    .group-A { background:#006847; color:#c8f7dc; }
+    .group-B { background:#c1121f; color:#ffe0e0; }
+    .group-C { background:#0077b6; color:#caf0f8; }
+    .group-D { background:#7b2cbf; color:#e0aaff; }
+    .group-E { background:#bc6c25; color:#fefae0; }
+    .group-F { background:#e85d04; color:#fff1e6; }
+    .group-G { background:#2d6a4f; color:#b7e4c7; }
+    .group-H { background:#1d3557; color:#a8dadc; }
+    .group-I { background:#6a0572; color:#f0c6ff; }
+    .group-J { background:#bc4749; color:#ffe8e8; }
+    .group-K { background:#e76f51; color:#fff3ed; }
+    .group-L { background:#3a5a40; color:#d8f3dc; }
+
+    .fixture {
+      font-weight: 600;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tv {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .tv-orf { background:rgba(200,16,46,0.2); color:#ff8fa3; }
+    .tv-servus { background:rgba(0,120,200,0.18); color:#7ec8ff; }
+
+    .date-row td {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 3px 5px 1px;
+      background: rgba(0,0,0,0.12);
+      border-bottom: none;
+    }
+
+    .third-scroll tr.qualified td { background: rgba(76,201,120,0.06); }
+    .third-scroll tr.cutline td { border-bottom: 2px solid rgba(212,175,55,0.45); }
+    .third-scroll tr.out td { opacity: 0.45; }
+
+    .t-team { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+    .t-grp { font-size: 10px; opacity: 0.65; }
+
+    footer {
+      flex-shrink: 0;
+      font-size: 10px;
+      color: var(--muted);
+      text-align: center;
+      opacity: 0.6;
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr 155px;
+        gap: 5px;
+      }
+      .title { font-size: 14px; }
+      .fixture { font-size: 11px; }
+      .t-team { max-width: 72px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="title">🏆 <span>WM 2026</span> · Nächste Spiele</div>
+      <div class="mez">MEZ</div>
+    </header>
+
+    <div class="grid">
+      <section class="panel">
+        <div class="panel-head">Anstehende Spiele</div>
+        <div class="match-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Zeit</th>
+                <th class="c">Gr</th>
+                <th>Spiel</th>
+                <th class="c">TV</th>
+              </tr>
+            </thead>
+            <tbody id="matches"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">3. Plätze <span class="pill">Top 8 →</span></div>
+        <div class="third-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th class="c">#</th>
+                <th>Team</th>
+                <th class="c">P</th>
+                <th class="c">TD</th>
+              </tr>
+            </thead>
+            <tbody id="third-place-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <footer>Stand 26.06.2026 · * Gruppe offen</footer>
+  </div>
+
+  <script>
+    const MATCHES = [
+      { home: 'Norwegen', away: 'Frankreich', homeFlag: '🇳🇴', awayFlag: '🇫🇷', group: 'I', broadcaster: 'ServusTV', start: '2026-06-26T21:00:00+02:00' },
+      { home: 'Senegal', away: 'Irak', homeFlag: '🇸🇳', awayFlag: '🇮🇶', group: 'I', broadcaster: 'ORF', start: '2026-06-26T21:00:00+02:00' },
+      { home: 'Kap Verde', away: 'Saudi-Arabien', homeFlag: '🇨🇻', awayFlag: '🇸🇦', group: 'H', broadcaster: 'ServusTV', start: '2026-06-27T02:00:00+02:00' },
+      { home: 'Uruguay', away: 'Spanien', homeFlag: '🇺🇾', awayFlag: '🇪🇸', group: 'H', broadcaster: 'ORF', start: '2026-06-27T02:00:00+02:00' },
+      { home: 'Ägypten', away: 'Iran', homeFlag: '🇪🇬', awayFlag: '🇮🇷', group: 'G', broadcaster: 'ServusTV', start: '2026-06-27T05:00:00+02:00' },
+      { home: 'Neuseeland', away: 'Belgien', homeFlag: '🇳🇿', awayFlag: '🇧🇪', group: 'G', broadcaster: 'ORF', start: '2026-06-27T05:00:00+02:00' },
+      { home: 'Ghana', away: 'Kroatien', homeFlag: '🇬🇭', awayFlag: '🇭🇷', group: 'L', broadcaster: 'ServusTV', start: '2026-06-27T23:00:00+02:00' },
+      { home: 'Panama', away: 'England', homeFlag: '🇵🇦', awayFlag: '🏴', group: 'L', broadcaster: 'ORF', start: '2026-06-27T23:00:00+02:00' },
+      { home: 'Portugal', away: 'Kolumbien', homeFlag: '🇵🇹', awayFlag: '🇨🇴', group: 'K', broadcaster: 'ServusTV', start: '2026-06-28T01:30:00+02:00' },
+      { home: 'Usbekistan', away: 'DR Kongo', homeFlag: '🇺🇿', awayFlag: '🇨🇩', group: 'K', broadcaster: 'ORF', start: '2026-06-28T01:30:00+02:00' },
+      { home: 'Algerien', away: 'Österreich', homeFlag: '🇩🇿', awayFlag: '🇦🇹', group: 'J', broadcaster: 'ORF', start: '2026-06-28T04:00:00+02:00' },
+      { home: 'Jordanien', away: 'Argentinien', homeFlag: '🇯🇴', awayFlag: '🇦🇷', group: 'J', broadcaster: 'ServusTV', start: '2026-06-28T04:00:00+02:00' },
+      { home: 'Südafrika', away: 'Kanada', homeFlag: '🇿🇦', awayFlag: '🇨🇦', group: 'B', broadcaster: 'ServusTV', start: '2026-06-28T21:00:00+02:00' },
+    ];
+
+    const THIRD_PLACE = [
+      { team: 'Schweden', flag: '🇸🇪', group: 'F', pts: 4, gd: 0, final: true, qualified: true },
+      { team: 'Ecuador', flag: '🇪🇨', group: 'E', pts: 4, gd: 0, final: true, qualified: true },
+      { team: 'Bosnien-Herz.', flag: '🇧🇦', group: 'B', pts: 4, gd: -1, final: true, qualified: true },
+      { team: 'Paraguay', flag: '🇵🇾', group: 'D', pts: 4, gd: -2, final: true, qualified: false },
+      { team: 'Kroatien', flag: '🇭🇷', group: 'L', pts: 3, gd: 0, final: false, qualified: false },
+      { team: 'Südkorea', flag: '🇰🇷', group: 'A', pts: 3, gd: -1, final: true, qualified: false },
+      { team: 'Algerien', flag: '🇩🇿', group: 'J', pts: 3, gd: -2, final: false, qualified: false },
+      { team: 'Schottland', flag: '🏴', group: 'C', pts: 3, gd: -3, final: true, qualified: false },
+      { team: 'Kap Verde', flag: '🇨🇻', group: 'H', pts: 2, gd: 0, final: false, qualified: false },
+      { team: 'Belgien', flag: '🇧🇪', group: 'G', pts: 2, gd: 0, final: false, qualified: false },
+      { team: 'DR Kongo', flag: '🇨🇩', group: 'K', pts: 1, gd: -1, final: false, qualified: false },
+      { team: 'Senegal', flag: '🇸🇳', group: 'I', pts: 0, gd: -3, final: false, qualified: false },
+    ];
+
+    const MATCH_DURATION_MS = 2 * 60 * 60 * 1000;
+    const tz = 'Europe/Berlin';
+
+    function formatTime(date) {
+      return new Intl.DateTimeFormat('de-DE', { timeZone: tz, hour: '2-digit', minute: '2-digit' }).format(date);
+    }
+
+    function formatDateShort(date) {
+      const now = new Date();
+      const today = new Date(now.toLocaleString('en-US', { timeZone: tz }));
+      today.setHours(0, 0, 0, 0);
+      const matchDay = new Date(date.toLocaleString('en-US', { timeZone: tz }));
+      matchDay.setHours(0, 0, 0, 0);
+      const diff = (matchDay - today) / 86400000;
+      if (diff === 0) return 'Heute';
+      if (diff === 1) return 'Morgen';
+      return new Intl.DateTimeFormat('de-DE', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(date);
+    }
+
+    function formatCountdown(ms) {
+      if (ms <= 0) return '';
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      if (h > 0) return `${h}h${m > 0 ? m : ''}`;
+      return `${m}m`;
+    }
+
+    function isLive(start, now) {
+      return now >= start.getTime() && now < start.getTime() + MATCH_DURATION_MS;
+    }
+
+    function render() {
+      const now = new Date();
+      const upcoming = MATCHES
+        .map(m => ({ ...m, startDate: new Date(m.start) }))
+        .filter(m => m.startDate.getTime() + MATCH_DURATION_MS > now.getTime())
+        .sort((a, b) => a.startDate - b.startDate);
+
+      const tbody = document.getElementById('matches');
+      if (!upcoming.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:8px">Keine Spiele</td></tr>';
+        return;
+      }
+
+      let html = '';
+      let lastDate = '';
+
+      for (const m of upcoming) {
+        const dateKey = formatDateShort(m.startDate);
+        if (dateKey !== lastDate) {
+          html += `<tr class="date-row"><td colspan="4">${dateKey}</td></tr>`;
+          lastDate = dateKey;
+        }
+
+        const live = isLive(m.startDate, now);
+        const cd = live ? '' : formatCountdown(m.startDate - now);
+        const tvClass = m.broadcaster === 'ORF' ? 'tv-orf' : 'tv-servus';
+
+        html += `
+          <tr class="match-row${live ? ' live' : ''}">
+            <td class="time">${live ? '<span class="live-txt">LIVE</span>' : `${formatTime(m.startDate)}${cd ? `<br><span class="cd">${cd}</span>` : ''}`}</td>
+            <td class="c"><span class="grp group-${m.group}">${m.group}</span></td>
+            <td class="fixture">${m.homeFlag} ${m.home} – ${m.away} ${m.awayFlag}</td>
+            <td class="c"><span class="tv ${tvClass}">${m.broadcaster === 'ORF' ? 'ORF' : 'Servus'}</span></td>
+          </tr>`;
+      }
+
+      tbody.innerHTML = html;
+    }
+
+    function formatGd(gd) {
+      return gd > 0 ? `+${gd}` : `${gd}`;
+    }
+
+    function renderThirdPlace() {
+      const sorted = [...THIRD_PLACE].sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        return b.gd - a.gd;
+      });
+
+      document.getElementById('third-place-body').innerHTML = sorted.map((t, i) => {
+        const rank = i + 1;
+        let cls = '';
+        if (t.qualified) cls = 'qualified';
+        else if (rank <= 8) cls = rank === 8 ? 'qualified cutline' : 'qualified';
+        else cls = 'out';
+
+        return `
+          <tr class="${cls}">
+            <td class="c">${rank}</td>
+            <td class="t-team">${t.flag} ${t.team}<span class="t-grp"> ${t.group}${t.final ? '' : '*'}</span></td>
+            <td class="c">${t.pts}</td>
+            <td class="c">${formatGd(t.gd)}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    render();
+    renderThirdPlace();
+    setInterval(render, 30000);
+  </script>
+</body>
+</html>
