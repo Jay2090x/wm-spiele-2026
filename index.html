@@ -243,15 +243,77 @@
       opacity: 0.6;
     }
 
-    @media (max-width: 600px) {
-      .grid {
-        grid-template-columns: 1fr 200px;
-        gap: 5px;
+    @media (max-width: 768px) {
+      html, body {
+        height: auto;
+        min-height: 100dvh;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
-      .title { font-size: 16px; }
-      .fixture { font-size: 13px; }
-      .third-panel .t-team { max-width: 88px; font-size: 12px; }
-      .third-panel td { font-size: 12px; }
+
+      .page {
+        height: auto;
+        min-height: 100dvh;
+        padding: 10px 12px 12px;
+        gap: 10px;
+      }
+
+      .grid {
+        flex: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .panel {
+        flex: none;
+        min-height: auto;
+      }
+
+      .match-scroll,
+      .third-scroll {
+        flex: none;
+        overflow: visible;
+      }
+
+      .title {
+        font-size: 16px;
+        white-space: normal;
+      }
+
+      .fixture {
+        font-size: 13px;
+        white-space: normal;
+        line-height: 1.3;
+      }
+
+      .matches-table th,
+      .matches-table td {
+        padding: 5px 4px;
+      }
+
+      .matches-table th:nth-child(1),
+      .matches-table td:nth-child(1) { width: 54px; }
+      .matches-table th:nth-child(2),
+      .matches-table td:nth-child(2) { width: 30px; }
+      .matches-table th:nth-child(4),
+      .matches-table td:nth-child(4) { width: 52px; }
+      .matches-table th:nth-child(5),
+      .matches-table td:nth-child(5) { width: 46px; }
+
+      .third-panel {
+        width: 100%;
+      }
+
+      .third-panel .t-team {
+        max-width: none;
+        font-size: 14px;
+      }
+
+      .third-panel td,
+      .third-panel th {
+        padding: 6px 10px;
+      }
     }
   </style>
 </head>
@@ -263,10 +325,10 @@
     </header>
 
     <div class="grid">
-      <section class="panel">
+      <section class="panel matches-panel">
         <div class="panel-head">Anstehende Spiele</div>
         <div class="match-scroll">
-          <table>
+          <table class="matches-table">
             <thead>
               <tr>
                 <th>Zeit</th>
