@@ -1,0 +1,29 @@
+name: Update visitor stats
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch hits.sh stats
+        run: |
+          curl -fsSL "https://hits.sh/api/urns/jay2090x.github.io/wm-spiele-2026" \
+            | python3 -c "
+          import json, sys, datetime
+          data = json.load(sys.stdin)
+          data['updated'] = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+          json.dump(data, open('visitor-stats.json','w'), indent=2)
+          print(json.dumps(data, indent=2))
+          "
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Update visitor-stats.json
+          file_pattern: visitor-stats.json

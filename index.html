@@ -382,12 +382,35 @@
 
     .modal-loading { text-align: center; color: var(--muted); font-size: 13px; padding: 12px 0; }
 
-    .visitor-modal { max-width: 320px; text-align: center; }
+    .visitor-modal { max-width: 360px; text-align: center; }
     .visitor-modal h2 { font-size: 16px; color: var(--accent); }
     .visitor-badge-wrap { margin: 12px 0 8px; display: flex; justify-content: center; }
     .visitor-badge-wrap img { height: 36px; width: auto; border-radius: 4px; }
     .visitor-label { font-size: 13px; color: var(--muted); }
     .visitor-geo { font-size: 15px; color: var(--text); margin-top: 10px; font-weight: 600; }
+
+    .visitor-weeks {
+      width: 100%;
+      margin-top: 14px;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    .visitor-weeks th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.15);
+    }
+
+    .visitor-weeks td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .visitor-weeks tr:last-child td { border-bottom: none; }
+    .visitor-weeks .c { text-align: right; font-weight: 700; color: var(--accent); }
+    .visitor-weeks-head { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 12px; text-align: left; }
 
     @media (max-width: 768px) {
       html, body { height: auto; min-height: 100dvh; overflow-x: hidden; overflow-y: auto; }
@@ -417,7 +440,7 @@
   <div class="page">
     <header>
       <div class="title"><span title="WM 2026">🏆</span> <span>WM 2026</span> · Nächste Spiele</div>
-      <div class="mez">MEZ · Live</div>
+      <div class="mez">Live</div>
     </header>
 
     <div class="grid">
@@ -493,6 +516,11 @@
         <div class="visitor-badge-wrap"><img id="visitor-badge" src="" alt="Besucherzahl"></div>
         <div class="visitor-label">Seitenaufrufe gesamt</div>
         <div class="visitor-geo" id="visitor-geo"></div>
+        <div class="visitor-weeks-head">Letzte Wochen</div>
+        <table class="visitor-weeks">
+          <thead><tr><th>Woche</th><th class="c">Besucher</th></tr></thead>
+          <tbody id="visitor-weeks-body"><tr><td colspan="2" style="text-align:center;color:var(--muted)">Laden…</td></tr></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -623,6 +651,16 @@
     const matchSummaryCache = {};
 
     function c(key) { return COUNTRIES[key] || { name:key, flag:'', pop:0, capital:'–', continent:'–', lat:20, lng:0, area:'–', conf:'–' }; }
+
+    function teamDisplayMeta(en) {
+      if (TEAM_META[en]) return TEAM_META[en];
+      const key = ESPN_TO_KEY[en];
+      if (key) {
+        const co = c(key);
+        return [co.name, co.flag, key];
+      }
+      return [en, '', ''];
+    }
 
     function matchFromLookup(id, meta) {
       const home = c(meta.homeKey);
@@ -826,7 +864,7 @@
             const stats = Object.fromEntries(e.stats.map(s => [s.abbreviation, s]));
             if (parseInt(stats.R?.displayValue, 10) !== 3) continue;
             const en = e.team.displayName;
-            const meta = TEAM_META[en] || [en, '', ESPN_TO_KEY[en] || ''];
+            const meta = teamDisplayMeta(en);
             const gdRaw = stats.GD?.displayValue || '0';
             third.push({
               team: meta[0], flag: meta[1], key: meta[2], group,
@@ -1028,7 +1066,7 @@
 
       document.getElementById('modal-title').textContent = `${home.flag} ${home.name} – ${away.name} ${away.flag}`;
       document.getElementById('modal-meta').textContent =
-        `Gruppe ${m.group} · ${formatTime(m.startDate)} MEZ · ${m.broadcaster}`;
+        `Gruppe ${m.group} · ${formatTime(m.startDate)} · ${m.broadcaster}`;
 
       let scoreText = '– : –';
       if (s.state === 'in' || s.state === 'post') {
@@ -1038,7 +1076,7 @@
         if (isLive) scoreText += `  (${s.clock || 'LIVE'}')`;
         if (s.state === 'post') scoreText += '  · Endstand';
       } else {
-        scoreText = `Anstoß ${formatTime(m.startDate)} MEZ`;
+        scoreText = `Anstoß ${formatTime(m.startDate)}`;
       }
       document.getElementById('modal-score').textContent = scoreText;
 
@@ -1105,7 +1143,7 @@
         thirdTeams: thirdPlaceData?.length || 0,
         refreshCount, uptimeMin,
         nextMatch: nextMatch ? `${nextMatch.home} – ${nextMatch.away} in ${formatCountdown(nextMatch.startDate - new Date())}` : '–',
-        austria: austriaMatch ? `${austriaMatch.home} vs ${austriaMatch.away} · ${formatTime(austriaMatch.startDate)} MEZ` : '–',
+        austria: austriaMatch ? `${austriaMatch.home} vs ${austriaMatch.away} · ${formatTime(austriaMatch.startDate)}` : '–',
         popPlaying: DISPLAY_MATCHES.filter(m => liveScores[m.espnId]?.state === 'in')
           .reduce((s, m) => s + c(m.homeKey).pop + c(m.awayKey).pop, 0).toFixed(1),
       };
@@ -1119,9 +1157,37 @@
         <div class="stat-item"><div class="val">${s.matchesLive}</div><div class="lbl">Live</div></div>
         <div class="stat-item"><div class="val">${s.matchesDone}</div><div class="lbl">Beendet</div></div>
         <div class="stat-item"><div class="val">${s.progress}%</div><div class="lbl">Fortschritt</div></div>
-        <div class="stat-item"><div class="val">${s.avgGoals}</div><div class="lbl">Ø Tore</div></div>
-        <div class="stat-item"><div class="val">${s.liveGroups}</div><div class="lbl">Live-Gruppen</div></div>
-        <div class="stat-item"><div class="val">${s.inZone}/8</div><div class="lbl">Top-8-Zone</div></div>`;
+        <div class="stat-item"><div class="val">${s.avgGoals}</div><div class="lbl">Ø Tore</div></div>`;
+    }
+
+    function formatWeekRange(from, to) {
+      const f = new Date(from + 'T12:00:00');
+      const t = new Date(to + 'T12:00:00');
+      const fd = f.getDate(), fm = f.getMonth() + 1;
+      const td = t.getDate(), tm = t.getMonth() + 1;
+      if (fm === tm) return `${fd}.–${td}.${fm}.`;
+      return `${fd}.${fm}.–${td}.${tm}.`;
+    }
+
+    function renderVisitorWeeks(data) {
+      const tbody = document.getElementById('visitor-weeks-body');
+      const items = (data?.items || []).slice().reverse();
+      if (!items.length) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--muted)">Noch keine Daten</td></tr>';
+        return;
+      }
+      tbody.innerHTML = items.map(w => {
+        const total = (w.data || []).reduce((s, d) => s + (d.value || 0), 0);
+        return `<tr><td>${formatWeekRange(w.from, w.to)}</td><td class="c">${total.toLocaleString('de-DE')}</td></tr>`;
+      }).join('');
+    }
+
+    async function fetchVisitorWeeks() {
+      try {
+        const res = await fetch('visitor-stats.json?' + Date.now());
+        if (res.ok) return renderVisitorWeeks(await res.json());
+      } catch (_) {}
+      renderVisitorWeeks(null);
     }
 
     function openVisitorCounter() {
@@ -1134,12 +1200,13 @@
       } else {
         geoEl.textContent = 'Standort unbekannt';
       }
+      fetchVisitorWeeks();
       document.getElementById('visitor-overlay').classList.add('open');
     }
 
     function updateFooter() {
       const el = document.getElementById('footer-note');
-      if (lastFetch) el.textContent = `Live · ${formatTime(lastFetch)} MEZ · Tippen für Details · * offen`;
+      if (lastFetch) el.textContent = `Live · ${formatTime(lastFetch)} · Tippen für Details · * offen`;
     }
 
     async function refresh() {
