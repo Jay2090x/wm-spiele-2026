@@ -71,7 +71,6 @@
     }
 
     .title span { color: var(--accent); }
-    .title .trophy-btn { cursor: pointer; display: inline-block; }
 
     .mez {
       font-size: 15px;
@@ -205,7 +204,46 @@
     .t-team { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .t-grp { opacity: 0.65; }
 
-    footer { flex-shrink: 0; font-size: 14px; color: var(--muted); text-align: center; opacity: 0.6; }
+    .stats-block {
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      padding: 6px 8px 8px;
+      background: rgba(0,0,0,0.12);
+    }
+
+    .stats-head {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+
+    .stat-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 6px;
+    }
+
+    .stat-item .val { font-size: 15px; font-weight: 700; color: var(--accent); line-height: 1.1; }
+    .stat-item .lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+
+    .stats-note {
+      margin-top: 5px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.25;
+    }
+
+    footer { flex-shrink: 0; font-size: 14px; color: var(--muted); text-align: center; opacity: 0.6; cursor: default; user-select: none; }
 
     .overlay {
       position: fixed;
@@ -282,7 +320,7 @@
       height: 80px;
       border-radius: 6px;
       margin-top: 8px;
-      object-fit: cover;
+      border: none;
       background: #1a3a28;
     }
 
@@ -290,43 +328,10 @@
     .team-card dt { color: var(--muted); }
     .team-card dd { font-weight: 600; }
 
-    .counter-modal { max-width: 640px; }
-    .counter-modal h2 { font-size: 16px; color: var(--accent); }
-
-    .counter-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .counter-item {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-    }
-
-    .counter-item .val { font-size: 22px; font-weight: 700; color: var(--accent); }
-    .counter-item .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
-
-    .counter-section {
-      margin-top: 14px;
-      font-size: 12px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 4px;
-    }
-
-    .counter-hint {
-      font-size: 10px;
-      color: var(--muted);
-      text-align: center;
-      margin-top: 10px;
-      opacity: 0.5;
-    }
+    .visitor-modal { max-width: 320px; text-align: center; }
+    .visitor-modal h2 { font-size: 16px; color: var(--accent); }
+    .visitor-count { font-size: 48px; font-weight: 700; color: var(--accent); margin: 16px 0 6px; }
+    .visitor-label { font-size: 13px; color: var(--muted); }
 
     @media (max-width: 768px) {
       html, body { height: auto; min-height: 100dvh; overflow-x: hidden; overflow-y: auto; }
@@ -340,14 +345,13 @@
       .third-panel { width: 100%; }
       .third-panel .t-team { max-width: none; }
       .team-cards { grid-template-columns: 1fr; }
-      .counter-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="page">
     <header>
-      <div class="title"><span class="trophy-btn" id="secret-trigger" title="WM 2026">🏆</span> <span>WM 2026</span> · Nächste Spiele</div>
+      <div class="title"><span title="WM 2026">🏆</span> <span>WM 2026</span> · Nächste Spiele</div>
       <div class="mez">MEZ · Live</div>
     </header>
 
@@ -386,10 +390,15 @@
             <tbody id="third-place-body"></tbody>
           </table>
         </div>
+        <div class="stats-block" id="stats-block">
+          <div class="stats-head">Statistik</div>
+          <div class="stats-grid" id="stats-grid"></div>
+          <div class="stats-note" id="stats-note"></div>
+        </div>
       </section>
     </div>
 
-    <footer id="footer-note">Live-Daten · Tippen für Details · * Gruppe offen</footer>
+    <footer id="footer-note" title="">Live-Daten · Tippen für Details · * Gruppe offen</footer>
   </div>
 
   <div class="overlay" id="match-overlay">
@@ -408,20 +417,23 @@
     </div>
   </div>
 
-  <div class="overlay" id="counter-overlay">
-    <div class="modal counter-modal">
-      <div class="modal-head">
-        <div><h2>📊 WM 2026 · Geheim-Counter</h2><div class="meta">Umfassende Live-Statistik</div></div>
-        <button class="modal-close" id="counter-close" aria-label="Schließen">✕</button>
+  <div class="overlay" id="visitor-overlay">
+    <div class="modal visitor-modal">
+      <div class="modal-head" style="justify-content:center;border:none;padding-bottom:0">
+        <div><h2>Besucher</h2></div>
+        <button class="modal-close" id="visitor-close" aria-label="Schließen" style="position:absolute;right:12px;top:12px">✕</button>
       </div>
-      <div class="modal-body" id="counter-body"></div>
-      <div class="counter-hint">5× auf 🏆 tippen zum Öffnen</div>
+      <div class="modal-body">
+        <div class="visitor-count" id="visitor-count">–</div>
+        <div class="visitor-label">Seitenaufrufe gesamt</div>
+      </div>
     </div>
   </div>
 
   <script>
     const ESPN_SCORE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
     const ESPN_STANDINGS = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
+    const HITS_URL = 'https://hits.sh/jay2090x.github.io/wm-spiele-2026.svg';
     const FINISHED_VISIBLE_MS = 24 * 60 * 60 * 1000;
     const MATCH_DURATION_MS = 105 * 60 * 1000;
     const tz = 'Europe/Berlin';
@@ -518,8 +530,9 @@
     let lastFetch = null;
     let refreshCount = 0;
     let pageStart = Date.now();
-    let secretClicks = 0;
-    let secretTimer = null;
+    let visitorClicks = 0;
+    let visitorTimer = null;
+    let visitorCount = null;
 
     function c(key) { return COUNTRIES[key] || { name:key, flag:'', pop:0, capital:'–', continent:'–', lat:20, lng:0, area:'–', conf:'–' }; }
 
@@ -583,8 +596,21 @@
       return [...dates];
     }
 
-    function mapUrl(lat, lng) {
-      return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=4&size=300x100&markers=${lat},${lng},red`;
+    function mapEmbed(lat, lng, name) {
+      const padLng = 8;
+      const padLat = 5;
+      const bbox = `${lng - padLng},${lat - padLat},${lng + padLng},${lat + padLat}`;
+      const src = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat}%2C${lng}`;
+      return `<iframe class="map" title="Karte ${name}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${src}"></iframe>`;
+    }
+
+    async function trackVisitor() {
+      try {
+        const res = await fetch(HITS_URL, { cache: 'no-store' });
+        const svg = await res.text();
+        const m = svg.match(/aria-label="hits:\s*(\d+)"/);
+        if (m) visitorCount = parseInt(m[1], 10);
+      } catch (_) {}
     }
 
     async function fetchLiveData() {
@@ -824,7 +850,7 @@
               <dt>Fläche</dt><dd>${team.area}</dd>
               <dt>Verband</dt><dd>${team.conf}</dd>
             </dl>
-            <img class="map" src="${mapUrl(team.lat, team.lng)}" alt="Karte ${team.name}" loading="lazy">
+            ${mapEmbed(team.lat, team.lng, team.name)}
           </div>`;
       }
 
@@ -872,33 +898,26 @@
       };
     }
 
-    function openCounter() {
+    function renderStats() {
       const s = computeCounterStats();
-      document.getElementById('counter-body').innerHTML = `
-        <div class="counter-grid">
-          <div class="counter-item"><div class="val">${s.totalGoals}</div><div class="lbl">Tore gesamt (API)</div></div>
-          <div class="counter-item"><div class="val">${s.goalsToday}</div><div class="lbl">Tore heute</div></div>
-          <div class="counter-item"><div class="val">${s.matchesDone}</div><div class="lbl">Spiele beendet</div></div>
-          <div class="counter-item"><div class="val">${s.matchesLive}</div><div class="lbl">Spiele live</div></div>
-          <div class="counter-item"><div class="val">${s.matchesUpcoming}</div><div class="lbl">Spiele offen (API)</div></div>
-          <div class="counter-item"><div class="val">${s.progress}%</div><div class="lbl">Turnier-Fortschritt</div></div>
-          <div class="counter-item"><div class="val">${s.avgGoals}</div><div class="lbl">Ø Tore / Spiel</div></div>
-          <div class="counter-item"><div class="val">${s.liveGroups}</div><div class="lbl">Gruppen mit Live-Spiel</div></div>
-          <div class="counter-item"><div class="val">${s.thirdTeams}</div><div class="lbl">Drittplatzierte</div></div>
-          <div class="counter-item"><div class="val">${s.inZone}</div><div class="lbl">In Top-8-Zone</div></div>
-          <div class="counter-item"><div class="val">${s.groupsOpen}</div><div class="lbl">Offene Gruppen (*)</div></div>
-          <div class="counter-item"><div class="val">${s.popPlaying}M</div><div class="lbl">Einw. bei Live-Spielen</div></div>
-          <div class="counter-item"><div class="val">${s.refreshCount}</div><div class="lbl">API-Aktualisierungen</div></div>
-          <div class="counter-item"><div class="val">${s.uptimeMin}m</div><div class="lbl">Seiten-Laufzeit</div></div>
-        </div>
-        <div class="counter-section">Nächstes Spiel</div>
-        <p style="margin-top:6px;font-size:14px">${s.nextMatch}</p>
-        <div class="counter-section">Österreich</div>
-        <p style="margin-top:6px;font-size:14px">${s.austria}</p>
-        <div class="counter-section">Live-Gruppen</div>
-        <p style="margin-top:6px;font-size:13px;color:var(--muted)">${Object.entries(groupLive).map(([g,v]) => `Gr. ${g}: ${v.label} (${v.clock}')`).join(' · ') || 'Keine Live-Spiele'}</p>
-      `;
-      document.getElementById('counter-overlay').classList.add('open');
+      document.getElementById('stats-grid').innerHTML = `
+        <div class="stat-item"><div class="val">${s.totalGoals}</div><div class="lbl">Tore gesamt</div></div>
+        <div class="stat-item"><div class="val">${s.goalsToday}</div><div class="lbl">Tore heute</div></div>
+        <div class="stat-item"><div class="val">${s.matchesLive}</div><div class="lbl">Live</div></div>
+        <div class="stat-item"><div class="val">${s.matchesDone}</div><div class="lbl">Beendet</div></div>
+        <div class="stat-item"><div class="val">${s.progress}%</div><div class="lbl">Fortschritt</div></div>
+        <div class="stat-item"><div class="val">${s.avgGoals}</div><div class="lbl">Ø Tore</div></div>
+        <div class="stat-item"><div class="val">${s.liveGroups}</div><div class="lbl">Live-Gruppen</div></div>
+        <div class="stat-item"><div class="val">${s.inZone}/8</div><div class="lbl">Top-8-Zone</div></div>`;
+      const liveTxt = Object.entries(groupLive).map(([g, v]) => `Gr. ${g}: ${v.label}`).join(' · ') || '–';
+      document.getElementById('stats-note').innerHTML =
+        `<strong>Nächstes:</strong> ${s.nextMatch}<br><strong>Österreich:</strong> ${s.austria}<br><strong>Live:</strong> ${liveTxt}`;
+    }
+
+    function openVisitorCounter() {
+      document.getElementById('visitor-count').textContent =
+        visitorCount != null ? visitorCount.toLocaleString('de-DE') : '–';
+      document.getElementById('visitor-overlay').classList.add('open');
     }
 
     function updateFooter() {
@@ -910,8 +929,8 @@
       await fetchLiveData();
       renderMatches();
       renderThirdPlace();
+      renderStats();
       updateFooter();
-      if (document.getElementById('counter-overlay').classList.contains('open')) openCounter();
     }
 
     document.getElementById('matches').addEventListener('click', (e) => {
@@ -921,16 +940,17 @@
 
     document.getElementById('modal-close').onclick = () => document.getElementById('match-overlay').classList.remove('open');
     document.getElementById('match-overlay').onclick = (e) => { if (e.target.id === 'match-overlay') e.target.classList.remove('open'); };
-    document.getElementById('counter-close').onclick = () => document.getElementById('counter-overlay').classList.remove('open');
-    document.getElementById('counter-overlay').onclick = (e) => { if (e.target.id === 'counter-overlay') e.target.classList.remove('open'); };
+    document.getElementById('visitor-close').onclick = () => document.getElementById('visitor-overlay').classList.remove('open');
+    document.getElementById('visitor-overlay').onclick = (e) => { if (e.target.id === 'visitor-overlay') e.target.classList.remove('open'); };
 
-    document.getElementById('secret-trigger').addEventListener('click', () => {
-      secretClicks++;
-      clearTimeout(secretTimer);
-      secretTimer = setTimeout(() => { secretClicks = 0; }, 2000);
-      if (secretClicks >= 5) { secretClicks = 0; openCounter(); }
+    document.getElementById('footer-note').addEventListener('click', () => {
+      visitorClicks++;
+      clearTimeout(visitorTimer);
+      visitorTimer = setTimeout(() => { visitorClicks = 0; }, 2000);
+      if (visitorClicks >= 5) { visitorClicks = 0; openVisitorCounter(); }
     });
 
+    trackVisitor();
     refresh();
     setInterval(refresh, 60000);
   </script>
