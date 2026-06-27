@@ -308,6 +308,53 @@
       font-size: 12px;
     }
 
+    .team-card-btn { cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+    .team-card-btn:hover { background: rgba(255,255,255,0.07); border-color: rgba(212,175,55,0.35); }
+    .team-row { cursor: pointer; }
+    .team-row:hover td { background: rgba(255,255,255,0.04); }
+
+    .team-modal { max-width: 480px; }
+    .team-section {
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .team-section h4 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      padding: 8px 10px;
+      background: rgba(0,0,0,0.15);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .group-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .group-table th { font-size: 11px; padding: 5px 6px; }
+    .group-table td { padding: 4px 6px; }
+    .group-table tr.highlight td { background: rgba(212,175,55,0.12); font-weight: 700; }
+    .group-table .t-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+
+    .recent-list { list-style: none; font-size: 13px; }
+    .recent-list li {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+    .recent-list li:last-child { border-bottom: none; }
+    .recent-date { color: var(--muted); font-size: 11px; min-width: 52px; }
+    .recent-score { font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .recent-live { color: #4cc978; font-size: 11px; font-weight: 700; }
+
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
     .team-card h3 { font-size: 15px; margin-bottom: 6px; }
     .team-card .country-img {
       width: 100%;
@@ -506,6 +553,21 @@
     </div>
   </div>
 
+  <div class="overlay" id="team-overlay" style="z-index:110">
+    <div class="modal team-modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="team-modal-title"></h2>
+          <div class="meta" id="team-modal-meta"></div>
+        </div>
+        <button class="modal-close" id="team-modal-close" aria-label="Schließen">✕</button>
+      </div>
+      <div class="modal-body" id="team-modal-body">
+        <div class="modal-loading">Laden…</div>
+      </div>
+    </div>
+  </div>
+
   <div class="overlay" id="visitor-overlay">
     <div class="modal visitor-modal">
       <div class="modal-head" style="justify-content:center;border:none;padding-bottom:0">
@@ -530,6 +592,8 @@
     const ESPN_STANDINGS = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
     const ESPN_SUMMARY = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary';
     const HITS_URL = 'https://hits.sh/jay2090x.github.io/wm-spiele-2026.svg';
+    const SHORT_URL = 'https://is.gd/bCGUlI';
+    const ESPN_TEAMS = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/teams';
     const FINISHED_VISIBLE_MS = 24 * 60 * 60 * 1000;
     const MATCH_DURATION_MS = 105 * 60 * 1000;
     const tz = 'Europe/Berlin';
@@ -635,8 +699,19 @@
       Italy:'Italien', Netherlands:'Niederlande', Brazil:'Brasilien', Japan:'Japan', Croatia:'Kroatien',
     };
 
+    const KEY_TO_ESPN_ID = {
+      norwegen:'464', frankreich:'478', senegal:'654', irak:'4375', kapverde:'2597', saudi:'655',
+      uruguay:'212', spanien:'164', aegypten:'2620', iran:'469', neuseeland:'2666', belgien:'459',
+      kroatien:'477', ghana:'4469', panama:'2659', england:'448', kolumbien:'208', portugal:'482',
+      drkongo:'2850', usbekistan:'2570', algerien:'624', oesterreich:'474', jordanien:'2917',
+      argentinien:'202', suedafrika:'467', kanada:'206', schweden:'466', ecuador:'209', bosnien:'452',
+      paraguay:'210', suedkorea:'451', schottland:'580', deutschland:'481', niederlande:'449', usa:'660',
+      brasilien:'205', japan:'627',
+    };
+
     let liveScores = {};
     let groupLive = {};
+    let groupStandings = {};
     let thirdPlaceData = null;
     let allEvents = [];
     let lastFetch = null;
@@ -649,6 +724,7 @@
     let modalPollTimer = null;
     const wikiImageCache = {};
     const matchSummaryCache = {};
+    const teamScheduleCache = {};
 
     function c(key) { return COUNTRIES[key] || { name:key, flag:'', pop:0, capital:'–', continent:'–', lat:20, lng:0, area:'–', conf:'–' }; }
 
@@ -858,26 +934,44 @@
         const res = await fetch(ESPN_STANDINGS);
         const data = await res.json();
         const third = [];
+        const groups = {};
         for (const g of data.children || []) {
           const group = g.abbreviation.replace('Group ', '');
+          const entries = [];
           for (const e of g.standings?.entries || []) {
             const stats = Object.fromEntries(e.stats.map(s => [s.abbreviation, s]));
-            if (parseInt(stats.R?.displayValue, 10) !== 3) continue;
             const en = e.team.displayName;
             const meta = teamDisplayMeta(en);
             const gdRaw = stats.GD?.displayValue || '0';
-            third.push({
+            const row = {
+              espnEn: en,
               team: meta[0], flag: meta[1], key: meta[2], group,
+              gp: parseInt(stats.GP?.displayValue, 10) || 0,
+              w: parseInt(stats.W?.displayValue, 10) || 0,
+              d: parseInt(stats.D?.displayValue, 10) || 0,
+              l: parseInt(stats.L?.displayValue, 10) || 0,
+              gd: gdRaw,
               pts: parseInt(stats.P?.displayValue, 10) || 0,
-              gd: parseInt(gdRaw.replace('+', ''), 10) || 0,
-              played: parseInt(stats.GP?.displayValue, 10) || 0,
-              qualified: CLINCHED.has(en),
-              final: (parseInt(stats.GP?.displayValue, 10) || 0) >= 3,
-            });
+              rank: parseInt(stats.R?.displayValue, 10) || 0,
+            };
+            entries.push(row);
+            if (row.rank === 3) {
+              third.push({
+                team: row.team, flag: row.flag, key: row.key, group,
+                pts: row.pts,
+                gd: parseInt(String(gdRaw).replace('+', ''), 10) || 0,
+                played: row.gp,
+                qualified: CLINCHED.has(en),
+                final: row.gp >= 3,
+              });
+            }
           }
+          entries.sort((a, b) => a.rank - b.rank);
+          groups[group] = entries;
         }
         third.sort((a, b) => b.pts - a.pts || b.gd - a.gd);
         thirdPlaceData = third;
+        groupStandings = groups;
       } catch (_) {}
 
       lastFetch = new Date();
@@ -991,8 +1085,9 @@
         else if (rank <= 8) cls = rank === 8 ? 'qualified cutline' : 'qualified';
         else cls = 'out';
 
+        const keyAttr = t.key ? ` data-team-key="${t.key}"` : '';
         return `
-          <tr class="${cls}">
+          <tr class="${cls} team-row"${keyAttr}>
             <td class="c">${rank}</td>
             <td class="t-team">${t.flag} ${t.team}<span class="t-grp"> ${t.group}${t.final ? '' : '*'}</span></td>
             <td class="c">${t.pts}</td>
@@ -1038,12 +1133,106 @@
       return `<div class="venue-block">${img}<div class="venue-info"><strong>📍 ${vName || 'Spielort'}</strong><div class="loc">${loc}</div>${att ? `<div class="loc">${att}</div>` : ''}</div></div>`;
     }
 
-    function renderTeamCard(team, imgUrl) {
+    function parseCompScore(score) {
+      if (score == null) return '–';
+      if (typeof score === 'object') return score.displayValue ?? '–';
+      return String(score);
+    }
+
+    function findTeamGroup(key) {
+      for (const [grp, teams] of Object.entries(groupStandings)) {
+        if (teams.some(t => t.key === key)) return grp;
+      }
+      for (const m of DISPLAY_MATCHES) {
+        if (m.homeKey === key || m.awayKey === key) return m.group;
+      }
+      return null;
+    }
+
+    function renderGroupStandingsHtml(group, highlightKey) {
+      const rows = groupStandings[group] || [];
+      if (!rows.length) return '<div class="goals-empty" style="padding:10px">Keine Tabellendaten</div>';
+      const body = rows.map(r => {
+        const hl = r.key === highlightKey ? ' class="highlight"' : '';
+        const gd = String(r.gd).startsWith('+') || String(r.gd).startsWith('-') ? r.gd : (parseInt(r.gd, 10) > 0 ? '+' + r.gd : r.gd);
+        return `<tr${hl}><td class="c">${r.rank}</td><td class="t-name">${r.flag} ${r.team}</td><td class="c">${r.gp}</td><td class="c">${r.w}</td><td class="c">${r.d}</td><td class="c">${r.l}</td><td class="c">${gd}</td><td class="c">${r.pts}</td></tr>`;
+      }).join('');
+      return `<table class="group-table"><thead><tr><th class="c">#</th><th>Team</th><th class="c">Sp</th><th class="c">S</th><th class="c">U</th><th class="c">N</th><th class="c">TD</th><th class="c">P</th></tr></thead><tbody>${body}</tbody></table>`;
+    }
+
+    async function fetchTeamSchedule(teamKey) {
+      const espnId = KEY_TO_ESPN_ID[teamKey];
+      if (!espnId) return [];
+      if (teamScheduleCache[teamKey]) return teamScheduleCache[teamKey];
+      try {
+        const res = await fetch(`${ESPN_TEAMS}/${espnId}/schedule`);
+        const data = await res.json();
+        const games = (data.events || []).map(e => {
+          const c = e.competitions[0];
+          const st = c.status.type;
+          const home = c.competitors.find(x => x.homeAway === 'home');
+          const away = c.competitors.find(x => x.homeAway === 'away');
+          return {
+            date: new Date(e.date),
+            state: st.state,
+            homeEn: home?.team?.displayName || '',
+            awayEn: away?.team?.displayName || '',
+            homeScore: parseCompScore(home?.score),
+            awayScore: parseCompScore(away?.score),
+          };
+        }).sort((a, b) => b.date - a.date);
+        teamScheduleCache[teamKey] = games;
+        return games;
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function renderRecentGamesHtml(games, teamKey) {
+      if (!games.length) return '<div class="goals-empty" style="padding:10px">Keine Spiele</div>';
+      const items = games.slice(0, 4).map(g => {
+        const home = teamFromEn(g.homeEn);
+        const away = teamFromEn(g.awayEn);
+        const date = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit' }).format(g.date);
+        let score = '';
+        if (g.state === 'in') score = `<span class="recent-live">LIVE ${g.homeScore}:${g.awayScore}</span>`;
+        else if (g.state === 'post') score = `<span class="recent-score">${g.homeScore}:${g.awayScore}</span>`;
+        else score = `<span style="color:var(--muted)">${formatTime(g.date)}</span>`;
+        return `<li><span class="recent-date">${date}</span><span>${home.flag} ${home.name} – ${away.name} ${away.flag}</span>${score}</li>`;
+      }).join('');
+      return `<ul class="recent-list">${items}</ul>`;
+    }
+
+    async function openTeamModal(teamKey) {
+      const team = c(teamKey);
+      const group = findTeamGroup(teamKey);
+      document.getElementById('team-modal-title').textContent = `${team.flag} ${team.name}`;
+      document.getElementById('team-modal-meta').textContent = group ? `Gruppe ${group} · WM 2026` : 'WM 2026';
+      document.getElementById('team-modal-body').innerHTML = '<div class="modal-loading">Laden…</div>';
+      document.getElementById('team-overlay').classList.add('open');
+
+      const games = await fetchTeamSchedule(teamKey);
+      document.getElementById('team-modal-body').innerHTML = `
+        <div class="team-section">
+          <h4>Gruppe ${group || '–'}</h4>
+          ${group ? renderGroupStandingsHtml(group, teamKey) : '<div class="goals-empty" style="padding:10px">–</div>'}
+        </div>
+        <div class="team-section">
+          <h4>Letzte Spiele</h4>
+          ${renderRecentGamesHtml(games, teamKey)}
+        </div>`;
+    }
+
+    function closeTeamModal() {
+      document.getElementById('team-overlay').classList.remove('open');
+    }
+
+    function renderTeamCard(team, imgUrl, teamKey) {
       const img = imgUrl
         ? `<img class="country-img" src="${imgUrl}" alt="Flagge ${team.name}" loading="lazy">`
         : `<div class="flag-fallback">${team.flag}</div>`;
       return `
-        <div class="team-card">
+        <div class="team-card team-card-btn" data-team-key="${teamKey}" role="button" tabindex="0">
           <h3>${team.flag} ${team.name}</h3>
           ${img}
           <dl>
@@ -1090,7 +1279,7 @@
         venueName: s.venue, venueCity: s.venueCity, venueCountry: s.venueCountry, attendance: null,
       }, stadiumImg);
       document.getElementById('modal-goals').innerHTML = renderGoalsHtml(summary?.goals, isLive);
-      document.getElementById('modal-teams').innerHTML = renderTeamCard(home, homeImg) + renderTeamCard(away, awayImg);
+      document.getElementById('modal-teams').innerHTML = renderTeamCard(home, homeImg, m.homeKey) + renderTeamCard(away, awayImg, m.awayKey);
     }
 
     async function openMatchModal(espnId) {
@@ -1206,7 +1395,9 @@
 
     function updateFooter() {
       const el = document.getElementById('footer-note');
-      if (lastFetch) el.textContent = `Live · ${formatTime(lastFetch)} · Tippen für Details · * offen`;
+      if (lastFetch) {
+        el.innerHTML = `Live · ${formatTime(lastFetch)} · Tippen für Details · * offen · <a href="${SHORT_URL}" target="_blank" rel="noopener">Kurzlink</a>`;
+      }
     }
 
     async function refresh() {
@@ -1228,6 +1419,19 @@
 
     document.getElementById('modal-close').onclick = closeMatchModal;
     document.getElementById('match-overlay').onclick = (e) => { if (e.target.id === 'match-overlay') closeMatchModal(); };
+
+    document.getElementById('modal-teams').addEventListener('click', (e) => {
+      const card = e.target.closest('[data-team-key]');
+      if (card?.dataset.teamKey) openTeamModal(card.dataset.teamKey);
+    });
+
+    document.getElementById('third-place-body').addEventListener('click', (e) => {
+      const row = e.target.closest('[data-team-key]');
+      if (row?.dataset.teamKey) openTeamModal(row.dataset.teamKey);
+    });
+
+    document.getElementById('team-modal-close').onclick = closeTeamModal;
+    document.getElementById('team-overlay').onclick = (e) => { if (e.target.id === 'team-overlay') closeTeamModal(); };
     document.getElementById('visitor-close').onclick = () => document.getElementById('visitor-overlay').classList.remove('open');
     document.getElementById('visitor-overlay').onclick = (e) => { if (e.target.id === 'visitor-overlay') e.target.classList.remove('open'); };
 
