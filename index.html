@@ -436,15 +436,15 @@
     .visitor-label { font-size: 13px; color: var(--muted); }
     .visitor-geo { font-size: 15px; color: var(--text); margin-top: 10px; font-weight: 600; }
 
-    .visitor-weeks {
+    .visitor-days {
       width: 100%;
-      margin-top: 14px;
+      margin-top: 8px;
       border-collapse: collapse;
       font-size: 13px;
       text-align: left;
     }
 
-    .visitor-weeks th {
+    .visitor-days th {
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -454,10 +454,10 @@
       background: rgba(0,0,0,0.15);
     }
 
-    .visitor-weeks td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-    .visitor-weeks tr:last-child td { border-bottom: none; }
-    .visitor-weeks .c { text-align: right; font-weight: 700; color: var(--accent); }
-    .visitor-weeks-head { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 12px; text-align: left; }
+    .visitor-days td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .visitor-days tr:last-child td { border-bottom: none; }
+    .visitor-days .c { text-align: right; font-weight: 700; color: var(--accent); }
+    .visitor-days-head { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 12px; text-align: left; }
 
     @media (max-width: 768px) {
       html, body { height: auto; min-height: 100dvh; overflow-x: hidden; overflow-y: auto; }
@@ -578,10 +578,10 @@
         <div class="visitor-badge-wrap"><img id="visitor-badge" src="" alt="Besucherzahl"></div>
         <div class="visitor-label">Seitenaufrufe gesamt</div>
         <div class="visitor-geo" id="visitor-geo"></div>
-        <div class="visitor-weeks-head">Letzte Wochen</div>
-        <table class="visitor-weeks">
-          <thead><tr><th>Woche</th><th class="c">Besucher</th></tr></thead>
-          <tbody id="visitor-weeks-body"><tr><td colspan="2" style="text-align:center;color:var(--muted)">Laden…</td></tr></tbody>
+        <div class="visitor-days-head">Besucher pro Tag</div>
+        <table class="visitor-days">
+          <thead><tr><th>Tag</th><th class="c">Anzahl</th></tr></thead>
+          <tbody id="visitor-days-body"><tr><td colspan="2" style="text-align:center;color:var(--muted)">Laden…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -592,7 +592,7 @@
     const ESPN_STANDINGS = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
     const ESPN_SUMMARY = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary';
     const HITS_URL = 'https://hits.sh/jay2090x.github.io/wm-spiele-2026.svg';
-    const SHORT_URL = 'https://is.gd/bCGUlI';
+    const SHORT_URL = 'https://jay2090x.github.io/wm2026/';
     const ESPN_TEAMS = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/teams';
     const FINISHED_VISIBLE_MS = 24 * 60 * 60 * 1000;
     const MATCH_DURATION_MS = 105 * 60 * 1000;
@@ -1349,34 +1349,37 @@
         <div class="stat-item"><div class="val">${s.avgGoals}</div><div class="lbl">Ø Tore</div></div>`;
     }
 
-    function formatWeekRange(from, to) {
-      const f = new Date(from + 'T12:00:00');
-      const t = new Date(to + 'T12:00:00');
-      const fd = f.getDate(), fm = f.getMonth() + 1;
-      const td = t.getDate(), tm = t.getMonth() + 1;
-      if (fm === tm) return `${fd}.–${td}.${fm}.`;
-      return `${fd}.${fm}.–${td}.${tm}.`;
+    function formatDayLabel(dayStr) {
+      const d = new Date(dayStr + 'T12:00:00');
+      const wd = new Intl.DateTimeFormat('de-DE', { weekday: 'short' }).format(d);
+      const dm = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit' }).format(d);
+      return `${wd}, ${dm}`;
     }
 
-    function renderVisitorWeeks(data) {
-      const tbody = document.getElementById('visitor-weeks-body');
-      const items = (data?.items || []).slice().reverse();
-      if (!items.length) {
+    function renderVisitorDays(data) {
+      const tbody = document.getElementById('visitor-days-body');
+      const days = [];
+      for (const w of data?.items || []) {
+        for (const d of w.data || []) {
+          if (d.day) days.push({ day: d.day, value: d.value || 0 });
+        }
+      }
+      days.sort((a, b) => b.day.localeCompare(a.day));
+      if (!days.length) {
         tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--muted)">Noch keine Daten</td></tr>';
         return;
       }
-      tbody.innerHTML = items.map(w => {
-        const total = (w.data || []).reduce((s, d) => s + (d.value || 0), 0);
-        return `<tr><td>${formatWeekRange(w.from, w.to)}</td><td class="c">${total.toLocaleString('de-DE')}</td></tr>`;
-      }).join('');
+      tbody.innerHTML = days.map(d =>
+        `<tr><td>${formatDayLabel(d.day)}</td><td class="c">${d.value.toLocaleString('de-DE')}</td></tr>`
+      ).join('');
     }
 
-    async function fetchVisitorWeeks() {
+    async function fetchVisitorDays() {
       try {
         const res = await fetch('visitor-stats.json?' + Date.now());
-        if (res.ok) return renderVisitorWeeks(await res.json());
+        if (res.ok) return renderVisitorDays(await res.json());
       } catch (_) {}
-      renderVisitorWeeks(null);
+      renderVisitorDays(null);
     }
 
     function openVisitorCounter() {
@@ -1389,14 +1392,14 @@
       } else {
         geoEl.textContent = 'Standort unbekannt';
       }
-      fetchVisitorWeeks();
+      fetchVisitorDays();
       document.getElementById('visitor-overlay').classList.add('open');
     }
 
     function updateFooter() {
       const el = document.getElementById('footer-note');
       if (lastFetch) {
-        el.innerHTML = `Live · ${formatTime(lastFetch)} · Tippen für Details · * offen · <a href="${SHORT_URL}" target="_blank" rel="noopener">Kurzlink</a>`;
+        el.innerHTML = `Live · ${formatTime(lastFetch)} · Tippen für Details · * offen · <a href="${SHORT_URL}" target="_blank" rel="noopener">wm2026</a>`;
       }
     }
 
