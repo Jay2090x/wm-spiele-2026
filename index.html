@@ -19,16 +19,13 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html, body {
-      height: 100dvh;
-      overflow: hidden;
-    }
+    html, body { height: 100dvh; overflow: hidden; }
 
     body {
       font-family: 'Outfit', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
-      font-size: 15px;
+      font-size: 17px;
       line-height: 1.2;
       display: flex;
       flex-direction: column;
@@ -66,15 +63,18 @@
     }
 
     .title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
       white-space: nowrap;
+      cursor: default;
+      user-select: none;
     }
 
     .title span { color: var(--accent); }
+    .title .trophy-btn { cursor: pointer; display: inline-block; }
 
     .mez {
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 600;
       color: var(--accent);
       background: rgba(212,175,55,0.15);
@@ -87,7 +87,7 @@
       flex: 1;
       min-height: 0;
       display: grid;
-      grid-template-columns: 1fr 290px;
+      grid-template-columns: 1fr 320px;
       gap: 8px;
     }
 
@@ -102,7 +102,7 @@
     }
 
     .panel-head {
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.07em;
@@ -113,19 +113,12 @@
       flex-shrink: 0;
     }
 
-    .panel-head .pill {
-      float: right;
-      color: #4cc978;
-      font-size: 12px;
-    }
+    .panel-head .pill { float: right; color: #4cc978; font-size: 14px; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    table { width: 100%; border-collapse: collapse; }
 
     th {
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -137,31 +130,25 @@
     }
 
     th.c, td.c { text-align: center; }
-
-    td {
-      padding: 3px 6px;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      vertical-align: middle;
-    }
-
+    td { padding: 3px 6px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
 
-    .match-scroll, .third-scroll {
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
-    }
+    .match-scroll, .third-scroll { flex: 1; min-height: 0; overflow: hidden; }
 
+    .match-row { cursor: pointer; transition: background 0.15s; }
+    .match-row:hover td { background: rgba(255,255,255,0.04); }
     .match-row.live td { background: rgba(76,201,120,0.07); }
-    .match-row.finished td { background: rgba(255,255,255,0.03); }
+    .match-row.past td { opacity: 0.55; }
+    .match-row.past .fixture { text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.25); }
 
-    .time { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 14px; }
-    .cd { font-weight: 400; color: var(--muted); font-size: 12px; }
-    .live-txt { color: #4cc978; font-size: 12px; font-weight: 700; }
+    .time { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 16px; }
+    .cd { font-weight: 400; color: var(--muted); font-size: 14px; }
+    .live-txt { color: #4cc978; font-size: 14px; font-weight: 700; }
+    .past-txt { color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase; }
 
     .grp {
       display: inline-block;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 700;
       padding: 2px 5px;
       border-radius: 3px;
@@ -182,37 +169,20 @@
     .group-K { background:#e76f51; color:#fff3ed; }
     .group-L { background:#3a5a40; color:#d8f3dc; }
 
-    .fixture {
-      font-weight: 600;
-      font-size: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .fixture { font-weight: 600; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .score {
-      font-weight: 700;
-      font-size: 14px;
-      white-space: nowrap;
-    }
-
+    .score { font-weight: 700; font-size: 16px; white-space: nowrap; }
     .score.live-score { color: #4cc978; }
     .score.final-score { color: var(--text); }
-    .score .min { font-size: 11px; font-weight: 600; opacity: 0.85; }
+    .score .min { font-size: 13px; font-weight: 600; opacity: 0.85; }
+    .score.tiny { font-size: 13px; }
 
-    .tv {
-      font-size: 12px;
-      font-weight: 700;
-      padding: 2px 5px;
-      border-radius: 3px;
-      white-space: nowrap;
-    }
-
+    .tv { font-size: 14px; font-weight: 700; padding: 2px 5px; border-radius: 3px; white-space: nowrap; }
     .tv-orf { background:rgba(200,16,46,0.2); color:#ff8fa3; }
     .tv-servus { background:rgba(0,120,200,0.18); color:#7ec8ff; }
 
     .date-row td {
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--muted);
       text-transform: uppercase;
@@ -222,11 +192,11 @@
       border-bottom: none;
     }
 
-    .third-panel .panel-head { font-size: 14px; padding: 6px 10px; }
-    .third-panel th { font-size: 13px; padding: 5px 8px; }
-    .third-panel td { font-size: 14px; padding: 4px 8px; }
-    .third-panel .t-team { font-size: 14px; max-width: 150px; }
-    .third-panel .t-grp { font-size: 12px; }
+    .third-panel .panel-head { font-size: 16px; padding: 7px 12px; }
+    .third-panel th { font-size: 15px; padding: 6px 10px; }
+    .third-panel td { font-size: 16px; padding: 5px 10px; }
+    .third-panel .t-team { font-size: 16px; max-width: 140px; }
+    .third-panel .t-grp { font-size: 14px; }
 
     .third-scroll tr.qualified td { background: rgba(76,201,120,0.06); }
     .third-scroll tr.cutline td { border-bottom: 2px solid rgba(212,175,55,0.45); }
@@ -235,98 +205,155 @@
     .t-team { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .t-grp { opacity: 0.65; }
 
-    footer {
+    footer { flex-shrink: 0; font-size: 14px; color: var(--muted); text-align: center; opacity: 0.6; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .overlay.open { display: flex; }
+
+    .modal {
+      background: #0f2619;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 90dvh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .modal-head {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .modal-head h2 { font-size: 17px; font-weight: 700; line-height: 1.3; }
+    .modal-head .meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .modal-close {
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: var(--text);
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
       flex-shrink: 0;
+    }
+
+    .modal-body { padding: 14px 16px 16px; }
+
+    .modal-score {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .team-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .team-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 12px;
+    }
+
+    .team-card h3 { font-size: 15px; margin-bottom: 6px; }
+    .team-card .map {
+      width: 100%;
+      height: 80px;
+      border-radius: 6px;
+      margin-top: 8px;
+      object-fit: cover;
+      background: #1a3a28;
+    }
+
+    .team-card dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; margin-top: 6px; }
+    .team-card dt { color: var(--muted); }
+    .team-card dd { font-weight: 600; }
+
+    .counter-modal { max-width: 640px; }
+    .counter-modal h2 { font-size: 16px; color: var(--accent); }
+
+    .counter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .counter-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .counter-item .val { font-size: 22px; font-weight: 700; color: var(--accent); }
+    .counter-item .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .counter-section {
+      margin-top: 14px;
       font-size: 12px;
       color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+    }
+
+    .counter-hint {
+      font-size: 10px;
+      color: var(--muted);
       text-align: center;
-      opacity: 0.6;
+      margin-top: 10px;
+      opacity: 0.5;
     }
 
     @media (max-width: 768px) {
-      html, body {
-        height: auto;
-        min-height: 100dvh;
-        overflow-x: hidden;
-        overflow-y: auto;
-      }
-
-      .page {
-        height: auto;
-        min-height: 100dvh;
-        padding: 10px 12px 12px;
-        gap: 10px;
-      }
-
-      .grid {
-        flex: none;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .panel {
-        flex: none;
-        min-height: auto;
-      }
-
-      .match-scroll,
-      .third-scroll {
-        flex: none;
-        overflow: visible;
-      }
-
-      .title {
-        font-size: 16px;
-        white-space: normal;
-      }
-
-      .fixture {
-        font-size: 13px;
-        white-space: normal;
-        line-height: 1.3;
-      }
-
-      .matches-table th,
-      .matches-table td {
-        padding: 5px 4px;
-      }
-
-      .matches-table th:nth-child(1),
-      .matches-table td:nth-child(1) { width: 54px; }
-      .matches-table th:nth-child(2),
-      .matches-table td:nth-child(2) { width: 30px; }
-      .matches-table th:nth-child(4),
-      .matches-table td:nth-child(4) { width: 52px; }
-      .matches-table th:nth-child(5),
-      .matches-table td:nth-child(5) { width: 46px; }
-
-      .third-panel {
-        width: 100%;
-      }
-
-      .third-panel .t-team {
-        max-width: none;
-        font-size: 14px;
-      }
-
-      .third-panel td,
-      .third-panel th {
-        padding: 6px 10px;
-      }
+      html, body { height: auto; min-height: 100dvh; overflow-x: hidden; overflow-y: auto; }
+      .page { height: auto; min-height: 100dvh; padding: 10px 12px 12px; gap: 10px; }
+      .grid { flex: none; display: flex; flex-direction: column; gap: 10px; }
+      .panel { flex: none; min-height: auto; }
+      .match-scroll, .third-scroll { flex: none; overflow: visible; }
+      .title { font-size: 18px; white-space: normal; }
+      .fixture { font-size: 15px; white-space: normal; line-height: 1.3; }
+      .matches-table th, .matches-table td { padding: 5px 4px; }
+      .third-panel { width: 100%; }
+      .third-panel .t-team { max-width: none; }
+      .team-cards { grid-template-columns: 1fr; }
+      .counter-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="page">
     <header>
-      <div class="title">🏆 <span>WM 2026</span> · Nächste Spiele</div>
+      <div class="title"><span class="trophy-btn" id="secret-trigger" title="WM 2026">🏆</span> <span>WM 2026</span> · Nächste Spiele</div>
       <div class="mez">MEZ · Live</div>
     </header>
 
     <div class="grid">
       <section class="panel matches-panel">
-        <div class="panel-head">Anstehende Spiele</div>
+        <div class="panel-head">Spiele</div>
         <div class="match-scroll">
           <table class="matches-table">
             <thead>
@@ -353,6 +380,7 @@
                 <th>Team</th>
                 <th class="c">P</th>
                 <th class="c">TD</th>
+                <th class="c">Live</th>
               </tr>
             </thead>
             <tbody id="third-place-body"></tbody>
@@ -361,48 +389,157 @@
       </section>
     </div>
 
-    <footer id="footer-note">Live-Daten · * Gruppe offen</footer>
+    <footer id="footer-note">Live-Daten · Tippen für Details · * Gruppe offen</footer>
+  </div>
+
+  <div class="overlay" id="match-overlay">
+    <div class="modal" id="match-modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="modal-title"></h2>
+          <div class="meta" id="modal-meta"></div>
+        </div>
+        <button class="modal-close" id="modal-close" aria-label="Schließen">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-score" id="modal-score"></div>
+        <div class="team-cards" id="modal-teams"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="counter-overlay">
+    <div class="modal counter-modal">
+      <div class="modal-head">
+        <div><h2>📊 WM 2026 · Geheim-Counter</h2><div class="meta">Umfassende Live-Statistik</div></div>
+        <button class="modal-close" id="counter-close" aria-label="Schließen">✕</button>
+      </div>
+      <div class="modal-body" id="counter-body"></div>
+      <div class="counter-hint">5× auf 🏆 tippen zum Öffnen</div>
+    </div>
   </div>
 
   <script>
     const ESPN_SCORE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
     const ESPN_STANDINGS = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
+    const FINISHED_VISIBLE_MS = 24 * 60 * 60 * 1000;
+    const MATCH_DURATION_MS = 105 * 60 * 1000;
+    const tz = 'Europe/Berlin';
 
-    const MATCHES = [
-      { home: 'Norwegen', away: 'Frankreich', homeFlag: '🇳🇴', awayFlag: '🇫🇷', group: 'I', broadcaster: 'ServusTV', espnId: '760475', espnHome: true, start: '2026-06-26T21:00:00+02:00' },
-      { home: 'Senegal', away: 'Irak', homeFlag: '🇸🇳', awayFlag: '🇮🇶', group: 'I', broadcaster: 'ORF', espnId: '760474', espnHome: true, start: '2026-06-26T21:00:00+02:00' },
-      { home: 'Kroatien', away: 'Ghana', homeFlag: '🇭🇷', awayFlag: '🇬🇭', group: 'L', broadcaster: 'ServusTV', espnId: '760480', espnHome: true, start: '2026-06-27T23:00:00+02:00' },
-      { home: 'Kap Verde', away: 'Saudi-Arabien', homeFlag: '🇨🇻', awayFlag: '🇸🇦', group: 'H', broadcaster: 'ServusTV', espnId: '760478', espnHome: true, start: '2026-06-27T02:00:00+02:00' },
-      { home: 'Uruguay', away: 'Spanien', homeFlag: '🇺🇾', awayFlag: '🇪🇸', group: 'H', broadcaster: 'ORF', espnId: '760479', espnHome: true, start: '2026-06-27T02:00:00+02:00' },
-      { home: 'Ägypten', away: 'Iran', homeFlag: '🇪🇬', awayFlag: '🇮🇷', group: 'G', broadcaster: 'ServusTV', espnId: '760476', espnHome: true, start: '2026-06-27T05:00:00+02:00' },
-      { home: 'Neuseeland', away: 'Belgien', homeFlag: '🇳🇿', awayFlag: '🇧🇪', group: 'G', broadcaster: 'ORF', espnId: '760477', espnHome: true, start: '2026-06-27T05:00:00+02:00' },
-      { home: 'Panama', away: 'England', homeFlag: '🇵🇦', awayFlag: '🏴', group: 'L', broadcaster: 'ORF', espnId: '760485', espnHome: true, start: '2026-06-27T23:00:00+02:00' },
-      { home: 'Kolumbien', away: 'Portugal', homeFlag: '🇨🇴', awayFlag: '🇵🇹', group: 'K', broadcaster: 'ServusTV', espnId: '760481', espnHome: true, start: '2026-06-28T01:30:00+02:00' },
-      { home: 'DR Kongo', away: 'Usbekistan', homeFlag: '🇨🇩', awayFlag: '🇺🇿', group: 'K', broadcaster: 'ORF', espnId: '760482', espnHome: true, start: '2026-06-28T01:30:00+02:00' },
-      { home: 'Algerien', away: 'Österreich', homeFlag: '🇩🇿', awayFlag: '🇦🇹', group: 'J', broadcaster: 'ORF', espnId: '760484', espnHome: true, start: '2026-06-28T04:00:00+02:00' },
-      { home: 'Jordanien', away: 'Argentinien', homeFlag: '🇯🇴', awayFlag: '🇦🇷', group: 'J', broadcaster: 'ServusTV', espnId: '760483', espnHome: true, start: '2026-06-28T04:00:00+02:00' },
-      { home: 'Südafrika', away: 'Kanada', homeFlag: '🇿🇦', awayFlag: '🇨🇦', group: 'B', broadcaster: 'ServusTV', espnId: '760486', espnHome: true, start: '2026-06-28T21:00:00+02:00' },
-    ];
-
-    const TEAM_META = {
-      'Mexico': ['Mexiko', '🇲🇽'], 'South Korea': ['Südkorea', '🇰🇷'], 'South Africa': ['Südafrika', '🇿🇦'],
-      'Czechia': ['Tschechien', '🇨🇿'], 'Bosnia and Herzegovina': ['Bosnien-Herz.', '🇧🇦'],
-      'Bosnia-Herzegovina': ['Bosnien-Herz.', '🇧🇦'], 'Scotland': ['Schottland', '🏴'],
-      'Ecuador': ['Ecuador', '🇪🇨'], 'Sweden': ['Schweden', '🇸🇪'], 'Paraguay': ['Paraguay', '🇵🇾'],
-      'Croatia': ['Kroatien', '🇭🇷'], 'Algeria': ['Algerien', '🇩🇿'], 'Cape Verde': ['Kap Verde', '🇨🇻'],
-      'Belgium': ['Belgien', '🇧🇪'], 'DR Congo': ['DR Kongo', '🇨🇩'], 'Congo DR': ['DR Kongo', '🇨🇩'],
-      'Senegal': ['Senegal', '🇸🇳'], 'Iran': ['Iran', '🇮🇷'], 'Uzbekistan': ['Usbekistan', '🇺🇿'],
-      'Jordan': ['Jordanien', '🇯🇴'], 'Ghana': ['Ghana', '🇬🇭'], 'Panama': ['Panama', '🇵🇦'],
+    const COUNTRIES = {
+      norwegen: { name:'Norwegen', flag:'🇳🇴', pop:5.5, capital:'Oslo', continent:'Europa', lat:59.91, lng:10.75, area:'385.207 km²', conf:'UEFA' },
+      frankreich: { name:'Frankreich', flag:'🇫🇷', pop:68.4, capital:'Paris', continent:'Europa', lat:48.86, lng:2.35, area:'643.801 km²', conf:'UEFA' },
+      senegal: { name:'Senegal', flag:'🇸🇳', pop:18.5, capital:'Dakar', continent:'Afrika', lat:14.69, lng:-17.44, area:'196.722 km²', conf:'CAF' },
+      irak: { name:'Irak', flag:'🇮🇶', pop:45.5, capital:'Bagdad', continent:'Asien', lat:33.31, lng:44.37, area:'438.317 km²', conf:'AFC' },
+      kapverde: { name:'Kap Verde', flag:'🇨🇻', pop:0.6, capital:'Praia', continent:'Afrika', lat:14.92, lng:-23.51, area:'4.033 km²', conf:'CAF' },
+      saudi: { name:'Saudi-Arabien', flag:'🇸🇦', pop:36.9, capital:'Riad', continent:'Asien', lat:24.71, lng:46.67, area:'2,15 Mio. km²', conf:'AFC' },
+      uruguay: { name:'Uruguay', flag:'🇺🇾', pop:3.4, capital:'Montevideo', continent:'Südamerika', lat:-34.90, lng:-56.19, area:'176.215 km²', conf:'CONMEBOL' },
+      spanien: { name:'Spanien', flag:'🇪🇸', pop:48.6, capital:'Madrid', continent:'Europa', lat:40.42, lng:-3.70, area:'505.990 km²', conf:'UEFA' },
+      aegypten: { name:'Ägypten', flag:'🇪🇬', pop:110.0, capital:'Kairo', continent:'Afrika', lat:30.04, lng:31.24, area:'1,01 Mio. km²', conf:'CAF' },
+      iran: { name:'Iran', flag:'🇮🇷', pop:89.0, capital:'Teheran', continent:'Asien', lat:35.69, lng:51.39, area:'1,65 Mio. km²', conf:'AFC' },
+      neuseeland: { name:'Neuseeland', flag:'🇳🇿', pop:5.2, capital:'Wellington', continent:'Ozeanien', lat:-41.29, lng:174.78, area:'268.021 km²', conf:'OFC' },
+      belgien: { name:'Belgien', flag:'🇧🇪', pop:11.7, capital:'Brüssel', continent:'Europa', lat:50.85, lng:4.35, area:'30.528 km²', conf:'UEFA' },
+      kroatien: { name:'Kroatien', flag:'🇭🇷', pop:3.9, capital:'Zagreb', continent:'Europa', lat:45.81, lng:15.98, area:'56.594 km²', conf:'UEFA' },
+      ghana: { name:'Ghana', flag:'🇬🇭', pop:33.5, capital:'Accra', continent:'Afrika', lat:5.56, lng:-0.20, area:'238.533 km²', conf:'CAF' },
+      panama: { name:'Panama', flag:'🇵🇦', pop:4.4, capital:'Panama-Stadt', continent:'Nordamerika', lat:8.98, lng:-79.52, area:'75.417 km²', conf:'CONCACAF' },
+      england: { name:'England', flag:'🏴', pop:56.5, capital:'London', continent:'Europa', lat:51.51, lng:-0.13, area:'130.279 km²', conf:'UEFA' },
+      kolumbien: { name:'Kolumbien', flag:'🇨🇴', pop:52.1, capital:'Bogotá', continent:'Südamerika', lat:4.71, lng:-74.07, area:'1,14 Mio. km²', conf:'CONMEBOL' },
+      portugal: { name:'Portugal', flag:'🇵🇹', pop:10.4, capital:'Lissabon', continent:'Europa', lat:38.72, lng:-9.14, area:'92.212 km²', conf:'UEFA' },
+      drkongo: { name:'DR Kongo', flag:'🇨🇩', pop:102.0, capital:'Kinshasa', continent:'Afrika', lat:-4.32, lng:15.31, area:'2,34 Mio. km²', conf:'CAF' },
+      usbekistan: { name:'Usbekistan', flag:'🇺🇿', pop:36.0, capital:'Taschkent', continent:'Asien', lat:41.30, lng:69.28, area:'448.978 km²', conf:'AFC' },
+      algerien: { name:'Algerien', flag:'🇩🇿', pop:46.0, capital:'Algier', continent:'Afrika', lat:36.75, lng:3.06, area:'2,38 Mio. km²', conf:'CAF' },
+      oesterreich: { name:'Österreich', flag:'🇦🇹', pop:9.1, capital:'Wien', continent:'Europa', lat:48.21, lng:16.37, area:'83.879 km²', conf:'UEFA' },
+      jordanien: { name:'Jordanien', flag:'🇯🇴', pop:11.3, capital:'Amman', continent:'Asien', lat:31.95, lng:35.93, area:'89.342 km²', conf:'AFC' },
+      argentinien: { name:'Argentinien', flag:'🇦🇷', pop:46.2, capital:'Buenos Aires', continent:'Südamerika', lat:-34.60, lng:-58.38, area:'2,78 Mio. km²', conf:'CONMEBOL' },
+      suedafrika: { name:'Südafrika', flag:'🇿🇦', pop:62.0, capital:'Pretoria', continent:'Afrika', lat:-25.75, lng:28.19, area:'1,22 Mio. km²', conf:'CAF' },
+      kanada: { name:'Kanada', flag:'🇨🇦', pop:41.0, capital:'Ottawa', continent:'Nordamerika', lat:45.42, lng:-75.70, area:'9,98 Mio. km²', conf:'CONCACAF' },
+      schweden: { name:'Schweden', flag:'🇸🇪', pop:10.6, capital:'Stockholm', continent:'Europa', lat:59.33, lng:18.07, area:'450.295 km²', conf:'UEFA' },
+      ecuador: { name:'Ecuador', flag:'🇪🇨', pop:18.0, capital:'Quito', continent:'Südamerika', lat:-0.18, lng:-78.47, area:'256.370 km²', conf:'CONMEBOL' },
+      bosnien: { name:'Bosnien-Herz.', flag:'🇧🇦', pop:3.2, capital:'Sarajevo', continent:'Europa', lat:43.85, lng:18.36, area:'51.197 km²', conf:'UEFA' },
+      paraguay: { name:'Paraguay', flag:'🇵🇾', pop:6.1, capital:'Asunción', continent:'Südamerika', lat:-25.26, lng:-57.58, area:'406.752 km²', conf:'CONMEBOL' },
+      suedkorea: { name:'Südkorea', flag:'🇰🇷', pop:51.7, capital:'Seoul', continent:'Asien', lat:37.57, lng:126.98, area:'100.363 km²', conf:'AFC' },
+      schottland: { name:'Schottland', flag:'🏴', pop:5.5, capital:'Edinburgh', continent:'Europa', lat:55.95, lng:-3.19, area:'77.910 km²', conf:'UEFA' },
+      deutschland: { name:'Deutschland', flag:'🇩🇪', pop:84.4, capital:'Berlin', continent:'Europa', lat:52.52, lng:13.41, area:'357.588 km²', conf:'UEFA' },
+      niederlande: { name:'Niederlande', flag:'🇳🇱', pop:17.9, capital:'Amsterdam', continent:'Europa', lat:52.37, lng:4.90, area:'41.543 km²', conf:'UEFA' },
+      usa: { name:'USA', flag:'🇺🇸', pop:335.0, capital:'Washington D.C.', continent:'Nordamerika', lat:38.91, lng:-77.04, area:'9,83 Mio. km²', conf:'CONCACAF' },
+      brasilien: { name:'Brasilien', flag:'🇧🇷', pop:216.0, capital:'Brasília', continent:'Südamerika', lat:-15.79, lng:-47.88, area:'8,51 Mio. km²', conf:'CONMEBOL' },
+      japan: { name:'Japan', flag:'🇯🇵', pop:123.0, capital:'Tokio', continent:'Asien', lat:35.68, lng:139.69, area:'377.975 km²', conf:'AFC' },
     };
 
-    const CLINCHED = new Set(['Sweden', 'Ecuador', 'Bosnia and Herzegovina', 'Bosnia-Herzegovina']);
+    const ESPN_TO_KEY = {
+      Norway:'norwegen', France:'frankreich', Senegal:'senegal', Iraq:'irak',
+      'Cape Verde':'kapverde', 'Saudi Arabia':'saudi', Uruguay:'uruguay', Spain:'spanien',
+      Egypt:'aegypten', Iran:'iran', 'New Zealand':'neuseeland', Belgium:'belgien',
+      Croatia:'kroatien', Ghana:'ghana', Panama:'panama', England:'england',
+      Colombia:'kolumbien', Portugal:'portugal', 'DR Congo':'drkongo', 'Congo DR':'drkongo',
+      Uzbekistan:'usbekistan', Algeria:'algerien', Austria:'oesterreich', Jordan:'jordanien',
+      Argentina:'argentinien', 'South Africa':'suedafrika', Canada:'kanada',
+      Sweden:'schweden', Ecuador:'ecuador', 'Bosnia and Herzegovina':'bosnien',
+      'Bosnia-Herzegovina':'bosnien', Paraguay:'paraguay', 'South Korea':'suedkorea',
+      Scotland:'schottland', Germany:'deutschland', Netherlands:'niederlande',
+      USA:'usa', Brazil:'brasilien', Japan:'japan',
+    };
+
+    const MATCH_LOOKUP = {
+      '760475': { homeKey:'norwegen', awayKey:'frankreich', group:'I', broadcaster:'ServusTV', espnHome:true, start:'2026-06-26T21:00:00+02:00' },
+      '760474': { homeKey:'senegal', awayKey:'irak', group:'I', broadcaster:'ORF', espnHome:true, start:'2026-06-26T21:00:00+02:00' },
+      '760478': { homeKey:'kapverde', awayKey:'saudi', group:'H', broadcaster:'ServusTV', espnHome:true, start:'2026-06-27T02:00:00+02:00' },
+      '760479': { homeKey:'uruguay', awayKey:'spanien', group:'H', broadcaster:'ORF', espnHome:true, start:'2026-06-27T02:00:00+02:00' },
+      '760476': { homeKey:'aegypten', awayKey:'iran', group:'G', broadcaster:'ServusTV', espnHome:true, start:'2026-06-27T05:00:00+02:00' },
+      '760477': { homeKey:'neuseeland', awayKey:'belgien', group:'G', broadcaster:'ORF', espnHome:true, start:'2026-06-27T05:00:00+02:00' },
+      '760480': { homeKey:'kroatien', awayKey:'ghana', group:'L', broadcaster:'ServusTV', espnHome:true, start:'2026-06-27T23:00:00+02:00' },
+      '760485': { homeKey:'panama', awayKey:'england', group:'L', broadcaster:'ORF', espnHome:true, start:'2026-06-27T23:00:00+02:00' },
+      '760481': { homeKey:'kolumbien', awayKey:'portugal', group:'K', broadcaster:'ServusTV', espnHome:true, start:'2026-06-28T01:30:00+02:00' },
+      '760482': { homeKey:'drkongo', awayKey:'usbekistan', group:'K', broadcaster:'ORF', espnHome:true, start:'2026-06-28T01:30:00+02:00' },
+      '760484': { homeKey:'algerien', awayKey:'oesterreich', group:'J', broadcaster:'ORF', espnHome:true, start:'2026-06-28T04:00:00+02:00' },
+      '760483': { homeKey:'jordanien', awayKey:'argentinien', group:'J', broadcaster:'ServusTV', espnHome:true, start:'2026-06-28T04:00:00+02:00' },
+      '760486': { homeKey:'suedafrika', awayKey:'kanada', group:'B', broadcaster:'ServusTV', espnHome:true, start:'2026-06-28T21:00:00+02:00' },
+      '760468': { homeKey:'ecuador', awayKey:'deutschland', group:'E', broadcaster:'ORF', espnHome:true, start:'2026-06-26T00:00:00+02:00' },
+      '760471': { homeKey:'japan', awayKey:'schweden', group:'F', broadcaster:'ORF', espnHome:true, start:'2026-06-26T01:00:00+02:00' },
+    };
+
+    const TEAM_META = {
+      Mexico:['Mexiko','🇲🇽','mexiko'], 'South Korea':['Südkorea','🇰🇷','suedkorea'],
+      'South Africa':['Südafrika','🇿🇦','suedafrika'], 'Bosnia and Herzegovina':['Bosnien-Herz.','🇧🇦','bosnien'],
+      'Bosnia-Herzegovina':['Bosnien-Herz.','🇧🇦','bosnien'], Scotland:['Schottland','🏴','schottland'],
+      Ecuador:['Ecuador','🇪🇨','ecuador'], Sweden:['Schweden','🇸🇪','schweden'],
+      Paraguay:['Paraguay','🇵🇾','paraguay'], Croatia:['Kroatien','🇭🇷','kroatien'],
+      Algeria:['Algerien','🇩🇿','algerien'], 'Cape Verde':['Kap Verde','🇨🇻','kapverde'],
+      Belgium:['Belgien','🇧🇪','belgien'], 'DR Congo':['DR Kongo','🇨🇩','drkongo'],
+      'Congo DR':['DR Kongo','🇨🇩','drkongo'], Senegal:['Senegal','🇸🇳','senegal'],
+    };
+
+    const CLINCHED = new Set(['Sweden','Ecuador','Bosnia and Herzegovina','Bosnia-Herzegovina']);
 
     let liveScores = {};
+    let groupLive = {};
     let thirdPlaceData = null;
+    let allEvents = [];
     let lastFetch = null;
+    let refreshCount = 0;
+    let pageStart = Date.now();
+    let secretClicks = 0;
+    let secretTimer = null;
 
-    const MATCH_DURATION_MS = 2 * 60 * 60 * 1000;
-    const tz = 'Europe/Berlin';
+    function c(key) { return COUNTRIES[key] || { name:key, flag:'', pop:0, capital:'–', continent:'–', lat:20, lng:0, area:'–', conf:'–' }; }
+
+    function matchFromLookup(id, meta) {
+      const home = c(meta.homeKey);
+      const away = c(meta.awayKey);
+      return {
+        espnId: id,
+        home: home.name, away: away.name,
+        homeFlag: home.flag, awayFlag: away.flag,
+        homeKey: meta.homeKey, awayKey: meta.awayKey,
+        group: meta.group,
+        broadcaster: meta.broadcaster,
+        espnHome: meta.espnHome,
+        start: meta.start,
+        startDate: new Date(meta.start),
+      };
+    }
+
+    const DISPLAY_MATCHES = Object.entries(MATCH_LOOKUP).map(([id, m]) => matchFromLookup(id, m));
 
     function formatTime(date) {
       return new Intl.DateTimeFormat('de-DE', { timeZone: tz, hour: '2-digit', minute: '2-digit' }).format(date);
@@ -417,6 +554,7 @@
       const diff = (matchDay - today) / 86400000;
       if (diff === 0) return 'Heute';
       if (diff === 1) return 'Morgen';
+      if (diff === -1) return 'Gestern';
       return new Intl.DateTimeFormat('de-DE', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(date);
     }
 
@@ -433,9 +571,27 @@
       return p.replace(/-/g, '');
     }
 
+    function getDateRange() {
+      const now = new Date();
+      const dates = new Set();
+      for (let i = -2; i <= 5; i++) {
+        const d = new Date(now);
+        d.setUTCDate(d.getUTCDate() + i);
+        dates.add(espnDateParam(d));
+      }
+      DISPLAY_MATCHES.forEach(m => dates.add(espnDateParam(new Date(m.start))));
+      return [...dates];
+    }
+
+    function mapUrl(lat, lng) {
+      return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=4&size=300x100&markers=${lat},${lng},red`;
+    }
+
     async function fetchLiveData() {
-      const dates = [...new Set(MATCHES.map(m => espnDateParam(new Date(m.start))))];
+      const dates = getDateRange();
       const scoreMap = {};
+      const gLive = {};
+      const events = [];
 
       await Promise.all(dates.map(async (d) => {
         try {
@@ -447,100 +603,124 @@
             const comps = c.competitors;
             const home = comps.find(x => x.homeAway === 'home');
             const away = comps.find(x => x.homeAway === 'away');
-            scoreMap[e.id] = {
+            const lookup = MATCH_LOOKUP[e.id];
+            const group = lookup?.group;
+
+            const entry = {
+              id: e.id,
               homeScore: home?.score ?? '0',
               awayScore: away?.score ?? '0',
               state: st.type.state,
               description: st.type.description,
               clock: st.displayClock || '',
               period: st.period || 0,
+              venue: c.venue?.fullName || '',
+              venueCity: c.venue?.address?.city || '',
+              homeEn: home?.team?.displayName || '',
+              awayEn: away?.team?.displayName || '',
+              homeAbbr: home?.team?.abbreviation || '',
+              awayAbbr: away?.team?.abbreviation || '',
+              date: e.date,
+              group,
             };
+            scoreMap[e.id] = entry;
+            events.push(entry);
+
+            if (group && st.type.state === 'in') {
+              gLive[group] = {
+                homeScore: entry.homeScore,
+                awayScore: entry.awayScore,
+                clock: entry.clock,
+                label: `${entry.homeAbbr} ${entry.homeScore}:${entry.awayScore} ${entry.awayAbbr}`,
+              };
+            }
           }
         } catch (_) {}
       }));
 
       liveScores = scoreMap;
+      groupLive = gLive;
+      allEvents = events;
 
       try {
         const res = await fetch(ESPN_STANDINGS);
         const data = await res.json();
         const third = [];
-
         for (const g of data.children || []) {
           const group = g.abbreviation.replace('Group ', '');
           for (const e of g.standings?.entries || []) {
             const stats = Object.fromEntries(e.stats.map(s => [s.abbreviation, s]));
-            const rank = parseInt(stats.R?.displayValue, 10);
-            if (rank !== 3) continue;
+            if (parseInt(stats.R?.displayValue, 10) !== 3) continue;
             const en = e.team.displayName;
-            const meta = TEAM_META[en] || [en, ''];
+            const meta = TEAM_META[en] || [en, '', ESPN_TO_KEY[en] || ''];
             const gdRaw = stats.GD?.displayValue || '0';
-            const gd = parseInt(gdRaw.replace('+', ''), 10) || 0;
             third.push({
-              team: meta[0],
-              flag: meta[1],
-              group,
+              team: meta[0], flag: meta[1], key: meta[2], group,
               pts: parseInt(stats.P?.displayValue, 10) || 0,
-              gd,
+              gd: parseInt(gdRaw.replace('+', ''), 10) || 0,
               played: parseInt(stats.GP?.displayValue, 10) || 0,
               qualified: CLINCHED.has(en),
               final: (parseInt(stats.GP?.displayValue, 10) || 0) >= 3,
             });
           }
         }
-
         third.sort((a, b) => b.pts - a.pts || b.gd - a.gd);
         thirdPlaceData = third;
       } catch (_) {}
 
       lastFetch = new Date();
+      refreshCount++;
     }
 
-    function getScoreHtml(match) {
+    function isMatchVisible(m, now) {
+      const s = liveScores[m.espnId];
+      if (s?.state === 'in') return true;
+      if (!s || s.state === 'pre') return m.startDate.getTime() + MATCH_DURATION_MS > now.getTime();
+      if (s.state === 'post') {
+        const end = m.startDate.getTime() + MATCH_DURATION_MS;
+        return end + FINISHED_VISIBLE_MS > now.getTime();
+      }
+      return m.startDate.getTime() + MATCH_DURATION_MS > now.getTime();
+    }
+
+    function getScoreHtml(match, tiny = false) {
       const s = liveScores[match.espnId];
       if (!s || s.state === 'pre') return '<span class="score" style="color:var(--muted)">–</span>';
-
       const hs = match.espnHome ? s.homeScore : s.awayScore;
       const as = match.espnHome ? s.awayScore : s.homeScore;
       const score = `${hs}:${as}`;
-
+      const cls = tiny ? 'score tiny' : 'score';
       if (s.state === 'in') {
         const min = s.clock ? `${s.clock}'` : 'LIVE';
-        return `<span class="score live-score">${score} <span class="min">${min}</span></span>`;
+        return `<span class="${cls} live-score">${score} <span class="min">${min}</span></span>`;
       }
-      if (s.state === 'post') {
-        return `<span class="score final-score">${score}</span>`;
-      }
-      return `<span class="score">${score}</span>`;
+      if (s.state === 'post') return `<span class="${cls} final-score">${score}</span>`;
+      return `<span class="${cls}">${score}</span>`;
     }
 
-    function getStatusClass(match, now) {
+    function getRowClass(match, now) {
       const s = liveScores[match.espnId];
       if (s?.state === 'in') return ' live';
-      if (s?.state === 'post') return ' finished';
-      const start = new Date(match.start);
-      if (now >= start.getTime() && now < start.getTime() + MATCH_DURATION_MS) return ' live';
+      if (s?.state === 'post') return ' past';
       return '';
     }
 
     function renderMatches() {
       const now = new Date();
-      const upcoming = MATCHES
-        .map(m => ({ ...m, startDate: new Date(m.start) }))
-        .filter(m => {
-          const s = liveScores[m.espnId];
-          if (s?.state === 'in') return true;
-          return m.startDate.getTime() + MATCH_DURATION_MS > now.getTime();
-        })
+      const visible = DISPLAY_MATCHES
+        .filter(m => isMatchVisible(m, now))
         .sort((a, b) => {
-          const sa = liveScores[a.espnId]?.state === 'in' ? 0 : 1;
-          const sb = liveScores[b.espnId]?.state === 'in' ? 0 : 1;
-          if (sa !== sb) return sa - sb;
+          const sa = liveScores[a.espnId]?.state;
+          const sb = liveScores[b.espnId]?.state;
+          if (sa === 'in' && sb !== 'in') return -1;
+          if (sb === 'in' && sa !== 'in') return 1;
+          if (sa === 'post' && sb !== 'post') return 1;
+          if (sb === 'post' && sa !== 'post') return -1;
           return a.startDate - b.startDate;
         });
 
       const tbody = document.getElementById('matches');
-      if (!upcoming.length) {
+      if (!visible.length) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:8px">Keine Spiele</td></tr>';
         return;
       }
@@ -548,7 +728,7 @@
       let html = '';
       let lastDate = '';
 
-      for (const m of upcoming) {
+      for (const m of visible) {
         const dateKey = formatDateShort(m.startDate);
         if (dateKey !== lastDate) {
           html += `<tr class="date-row"><td colspan="5">${dateKey}</td></tr>`;
@@ -557,17 +737,17 @@
 
         const s = liveScores[m.espnId];
         const live = s?.state === 'in';
-        const finished = s?.state === 'post';
-        const cd = (!live && !finished) ? formatCountdown(m.startDate - now) : '';
+        const past = s?.state === 'post';
+        const cd = (!live && !past) ? formatCountdown(m.startDate - now) : '';
         const tvClass = m.broadcaster === 'ORF' ? 'tv-orf' : 'tv-servus';
 
         let timeCell;
         if (live) timeCell = '<span class="live-txt">LIVE</span>';
-        else if (finished) timeCell = '<span class="cd">Ende</span>';
+        else if (past) timeCell = '<span class="past-txt">Beendet</span>';
         else timeCell = `${formatTime(m.startDate)}${cd ? `<br><span class="cd">${cd}</span>` : ''}`;
 
         html += `
-          <tr class="match-row${getStatusClass(m, now)}">
+          <tr class="match-row${getRowClass(m, now)}" data-espn="${m.espnId}">
             <td class="time">${timeCell}</td>
             <td class="c"><span class="grp group-${m.group}">${m.group}</span></td>
             <td class="fixture">${m.homeFlag} ${m.home} – ${m.away} ${m.awayFlag}</td>
@@ -579,19 +759,20 @@
       tbody.innerHTML = html;
     }
 
-    function formatGd(gd) {
-      return gd > 0 ? `+${gd}` : `${gd}`;
+    function getGroupLiveHtml(group) {
+      const g = groupLive[group];
+      if (!g) return '<span style="color:var(--muted);font-size:12px">–</span>';
+      return `<span class="score tiny live-score">${g.label} <span class="min">${g.clock}'</span></span>`;
     }
 
     function renderThirdPlace() {
-      const data = thirdPlaceData;
       const tbody = document.getElementById('third-place-body');
-      if (!data?.length) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">Laden…</td></tr>';
+      if (!thirdPlaceData?.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Laden…</td></tr>';
         return;
       }
 
-      tbody.innerHTML = data.map((t, i) => {
+      tbody.innerHTML = thirdPlaceData.map((t, i) => {
         const rank = i + 1;
         let cls = '';
         if (t.qualified) cls = 'qualified';
@@ -603,17 +784,126 @@
             <td class="c">${rank}</td>
             <td class="t-team">${t.flag} ${t.team}<span class="t-grp"> ${t.group}${t.final ? '' : '*'}</span></td>
             <td class="c">${t.pts}</td>
-            <td class="c">${formatGd(t.gd)}</td>
+            <td class="c">${t.gd > 0 ? '+' + t.gd : t.gd}</td>
+            <td class="c">${getGroupLiveHtml(t.group)}</td>
           </tr>`;
       }).join('');
     }
 
+    function openMatchModal(espnId) {
+      const m = DISPLAY_MATCHES.find(x => x.espnId === espnId);
+      if (!m) return;
+      const s = liveScores[espnId] || {};
+      const home = c(m.homeKey);
+      const away = c(m.awayKey);
+
+      document.getElementById('modal-title').textContent = `${home.flag} ${home.name} – ${away.name} ${away.flag}`;
+      document.getElementById('modal-meta').textContent =
+        `Gruppe ${m.group} · ${formatTime(m.startDate)} MEZ · ${s.venue || 'Stadion'} · ${m.broadcaster}`;
+
+      let scoreText = '– : –';
+      if (s.state === 'in' || s.state === 'post') {
+        const hs = m.espnHome ? s.homeScore : s.awayScore;
+        const as = m.espnHome ? s.awayScore : s.homeScore;
+        scoreText = `${hs} : ${as}`;
+        if (s.state === 'in') scoreText += `  (${s.clock || 'LIVE'}')`;
+        if (s.state === 'post') scoreText += '  · Endstand';
+      } else {
+        scoreText = `Anstoß ${formatTime(m.startDate)} MEZ`;
+      }
+      document.getElementById('modal-score').textContent = scoreText;
+
+      function teamCard(team) {
+        return `
+          <div class="team-card">
+            <h3>${team.flag} ${team.name}</h3>
+            <dl>
+              <dt>Einwohner</dt><dd>ca. ${team.pop} Mio.</dd>
+              <dt>Hauptstadt</dt><dd>${team.capital}</dd>
+              <dt>Kontinent</dt><dd>${team.continent}</dd>
+              <dt>Fläche</dt><dd>${team.area}</dd>
+              <dt>Verband</dt><dd>${team.conf}</dd>
+            </dl>
+            <img class="map" src="${mapUrl(team.lat, team.lng)}" alt="Karte ${team.name}" loading="lazy">
+          </div>`;
+      }
+
+      document.getElementById('modal-teams').innerHTML = teamCard(home) + teamCard(away);
+      document.getElementById('match-overlay').classList.add('open');
+    }
+
+    function computeCounterStats() {
+      const now = Date.now();
+      let totalGoals = 0, matchesDone = 0, matchesLive = 0, matchesUpcoming = 0, goalsToday = 0;
+      const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+
+      for (const e of allEvents) {
+        const hs = parseInt(e.homeScore, 10) || 0;
+        const as = parseInt(e.awayScore, 10) || 0;
+        if (e.state === 'post') { totalGoals += hs + as; matchesDone++; }
+        if (e.state === 'in') { totalGoals += hs + as; matchesLive++; }
+        if (e.state === 'pre') matchesUpcoming++;
+        const evDay = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date(e.date));
+        if (evDay === todayStr && e.state === 'post') goalsToday += hs + as;
+      }
+
+      const groupsOpen = thirdPlaceData ? thirdPlaceData.filter(t => !t.final).length : 0;
+      const inZone = thirdPlaceData ? thirdPlaceData.filter((_, i) => i < 8).length : 0;
+      const nextMatch = DISPLAY_MATCHES
+        .filter(m => liveScores[m.espnId]?.state !== 'post' && m.startDate > new Date())
+        .sort((a, b) => a.startDate - b.startDate)[0];
+
+      const austriaMatch = DISPLAY_MATCHES.find(m => m.homeKey === 'oesterreich' || m.awayKey === 'oesterreich');
+      const uptimeMin = Math.floor((now - pageStart) / 60000);
+
+      return {
+        totalGoals, matchesDone, matchesLive, matchesUpcoming,
+        goalsToday, groupsOpen, inZone,
+        totalWMMatches: 104,
+        progress: Math.round((matchesDone / 104) * 100),
+        avgGoals: matchesDone ? (totalGoals / matchesDone).toFixed(2) : '0',
+        liveGroups: Object.keys(groupLive).length,
+        thirdTeams: thirdPlaceData?.length || 0,
+        refreshCount, uptimeMin,
+        nextMatch: nextMatch ? `${nextMatch.home} – ${nextMatch.away} in ${formatCountdown(nextMatch.startDate - new Date())}` : '–',
+        austria: austriaMatch ? `${austriaMatch.home} vs ${austriaMatch.away} · ${formatTime(austriaMatch.startDate)} MEZ` : '–',
+        popPlaying: DISPLAY_MATCHES.filter(m => liveScores[m.espnId]?.state === 'in')
+          .reduce((s, m) => s + c(m.homeKey).pop + c(m.awayKey).pop, 0).toFixed(1),
+      };
+    }
+
+    function openCounter() {
+      const s = computeCounterStats();
+      document.getElementById('counter-body').innerHTML = `
+        <div class="counter-grid">
+          <div class="counter-item"><div class="val">${s.totalGoals}</div><div class="lbl">Tore gesamt (API)</div></div>
+          <div class="counter-item"><div class="val">${s.goalsToday}</div><div class="lbl">Tore heute</div></div>
+          <div class="counter-item"><div class="val">${s.matchesDone}</div><div class="lbl">Spiele beendet</div></div>
+          <div class="counter-item"><div class="val">${s.matchesLive}</div><div class="lbl">Spiele live</div></div>
+          <div class="counter-item"><div class="val">${s.matchesUpcoming}</div><div class="lbl">Spiele offen (API)</div></div>
+          <div class="counter-item"><div class="val">${s.progress}%</div><div class="lbl">Turnier-Fortschritt</div></div>
+          <div class="counter-item"><div class="val">${s.avgGoals}</div><div class="lbl">Ø Tore / Spiel</div></div>
+          <div class="counter-item"><div class="val">${s.liveGroups}</div><div class="lbl">Gruppen mit Live-Spiel</div></div>
+          <div class="counter-item"><div class="val">${s.thirdTeams}</div><div class="lbl">Drittplatzierte</div></div>
+          <div class="counter-item"><div class="val">${s.inZone}</div><div class="lbl">In Top-8-Zone</div></div>
+          <div class="counter-item"><div class="val">${s.groupsOpen}</div><div class="lbl">Offene Gruppen (*)</div></div>
+          <div class="counter-item"><div class="val">${s.popPlaying}M</div><div class="lbl">Einw. bei Live-Spielen</div></div>
+          <div class="counter-item"><div class="val">${s.refreshCount}</div><div class="lbl">API-Aktualisierungen</div></div>
+          <div class="counter-item"><div class="val">${s.uptimeMin}m</div><div class="lbl">Seiten-Laufzeit</div></div>
+        </div>
+        <div class="counter-section">Nächstes Spiel</div>
+        <p style="margin-top:6px;font-size:14px">${s.nextMatch}</p>
+        <div class="counter-section">Österreich</div>
+        <p style="margin-top:6px;font-size:14px">${s.austria}</p>
+        <div class="counter-section">Live-Gruppen</div>
+        <p style="margin-top:6px;font-size:13px;color:var(--muted)">${Object.entries(groupLive).map(([g,v]) => `Gr. ${g}: ${v.label} (${v.clock}')`).join(' · ') || 'Keine Live-Spiele'}</p>
+      `;
+      document.getElementById('counter-overlay').classList.add('open');
+    }
+
     function updateFooter() {
       const el = document.getElementById('footer-note');
-      if (lastFetch) {
-        const t = formatTime(lastFetch);
-        el.textContent = `Live · aktualisiert ${t} MEZ · * Gruppe offen`;
-      }
+      if (lastFetch) el.textContent = `Live · ${formatTime(lastFetch)} MEZ · Tippen für Details · * offen`;
     }
 
     async function refresh() {
@@ -621,7 +911,25 @@
       renderMatches();
       renderThirdPlace();
       updateFooter();
+      if (document.getElementById('counter-overlay').classList.contains('open')) openCounter();
     }
+
+    document.getElementById('matches').addEventListener('click', (e) => {
+      const row = e.target.closest('[data-espn]');
+      if (row) openMatchModal(row.dataset.espn);
+    });
+
+    document.getElementById('modal-close').onclick = () => document.getElementById('match-overlay').classList.remove('open');
+    document.getElementById('match-overlay').onclick = (e) => { if (e.target.id === 'match-overlay') e.target.classList.remove('open'); };
+    document.getElementById('counter-close').onclick = () => document.getElementById('counter-overlay').classList.remove('open');
+    document.getElementById('counter-overlay').onclick = (e) => { if (e.target.id === 'counter-overlay') e.target.classList.remove('open'); };
+
+    document.getElementById('secret-trigger').addEventListener('click', () => {
+      secretClicks++;
+      clearTimeout(secretTimer);
+      secretTimer = setTimeout(() => { secretClicks = 0; }, 2000);
+      if (secretClicks >= 5) { secretClicks = 0; openCounter(); }
+    });
 
     refresh();
     setInterval(refresh, 60000);
