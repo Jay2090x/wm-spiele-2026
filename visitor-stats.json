@@ -1,11 +1,11 @@
 {
-  "total": 30,
-  "monthly": 30,
+  "total": 66,
+  "monthly": 66,
   "items": [
     {
       "data": [
         {
-          "value": 30,
+          "value": 66,
           "day": "2026-06-28"
         }
       ],
@@ -13,6 +13,6 @@
       "to": "2026-06-28"
     }
   ],
-  "weekly": 30,
-  "updated": "2026-06-27T18:17:10Z"
+  "weekly": 66,
+  "updated": "2026-06-27T22:41:21Z"
 }
