@@ -139,6 +139,7 @@
     .match-row.live td { background: rgba(76,201,120,0.07); }
     .match-row.past td { opacity: 0.55; }
     .match-row.past .fixture { text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.25); }
+    .match-row.past + .match-row:not(.past) td { border-top: 1px solid rgba(255,255,255,0.1); }
 
     .time { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 16px; }
     .cd { font-weight: 400; color: var(--muted); font-size: 14px; }
@@ -236,13 +237,6 @@
     .stat-item .val { font-size: 15px; font-weight: 700; color: var(--accent); line-height: 1.1; }
     .stat-item .lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
 
-    .stats-note {
-      margin-top: 5px;
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.25;
-    }
-
     footer { flex-shrink: 0; font-size: 14px; color: var(--muted); text-align: center; opacity: 0.6; cursor: default; user-select: none; }
 
     .overlay {
@@ -317,10 +311,24 @@
     .team-card h3 { font-size: 15px; margin-bottom: 6px; }
     .team-card .country-img {
       width: 100%;
-      height: 88px;
+      height: 72px;
       border-radius: 6px;
       margin-top: 8px;
-      object-fit: cover;
+      object-fit: contain;
+      padding: 6px;
+      background: #1a3a28;
+    }
+
+    .team-card .flag-fallback {
+      width: 100%;
+      height: 72px;
+      border-radius: 6px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      line-height: 1;
       background: #1a3a28;
     }
 
@@ -376,7 +384,8 @@
 
     .visitor-modal { max-width: 320px; text-align: center; }
     .visitor-modal h2 { font-size: 16px; color: var(--accent); }
-    .visitor-count { font-size: 48px; font-weight: 700; color: var(--accent); margin: 16px 0 6px; }
+    .visitor-badge-wrap { margin: 12px 0 8px; display: flex; justify-content: center; }
+    .visitor-badge-wrap img { height: 36px; width: auto; border-radius: 4px; }
     .visitor-label { font-size: 13px; color: var(--muted); }
     .visitor-geo { font-size: 15px; color: var(--text); margin-top: 10px; font-weight: 600; }
 
@@ -396,10 +405,15 @@
       .modal { max-height: 92dvh; border-radius: 14px 14px 0 0; }
       .stadium-img { height: 110px; }
       .modal-score { font-size: 24px; }
+      .match-row.past td { padding-top: 7px; padding-bottom: 7px; }
+      .match-row.past + .match-row.past td { padding-top: 10px; }
+      .match-row.past + .match-row:not(.past) td { padding-top: 16px; }
+      .date-row + .match-row:not(.past) td { padding-top: 8px; }
     }
   </style>
 </head>
 <body>
+  <img id="hit-ping" src="https://hits.sh/jay2090x.github.io/wm-spiele-2026.svg" alt="" width="1" height="1" hidden>
   <div class="page">
     <header>
       <div class="title"><span title="WM 2026">🏆</span> <span>WM 2026</span> · Nächste Spiele</div>
@@ -444,7 +458,6 @@
         <div class="stats-block" id="stats-block">
           <div class="stats-head">Statistik</div>
           <div class="stats-grid" id="stats-grid"></div>
-          <div class="stats-note" id="stats-note"></div>
         </div>
       </section>
     </div>
@@ -477,7 +490,7 @@
         <button class="modal-close" id="visitor-close" aria-label="Schließen" style="position:absolute;right:12px;top:12px">✕</button>
       </div>
       <div class="modal-body">
-        <div class="visitor-count" id="visitor-count">–</div>
+        <div class="visitor-badge-wrap"><img id="visitor-badge" src="" alt="Besucherzahl"></div>
         <div class="visitor-label">Seitenaufrufe gesamt</div>
         <div class="visitor-geo" id="visitor-geo"></div>
       </div>
@@ -578,16 +591,14 @@
 
     const CLINCHED = new Set(['Sweden','Ecuador','Bosnia and Herzegovina','Bosnia-Herzegovina']);
 
-    const COUNTRY_WIKI = {
-      norwegen:'Norway', frankreich:'France', senegal:'Senegal', irak:'Iraq', kapverde:'Cape Verde',
-      saudi:'Saudi Arabia', uruguay:'Uruguay', spanien:'Spain', aegypten:'Egypt', iran:'Iran',
-      neuseeland:'New Zealand', belgien:'Belgium', kroatien:'Croatia', ghana:'Ghana', panama:'Panama',
-      england:'England', kolumbien:'Colombia', portugal:'Portugal', drkongo:'Democratic Republic of the Congo',
-      usbekistan:'Uzbekistan', algerien:'Algeria', oesterreich:'Austria', jordanien:'Jordan',
-      argentinien:'Argentina', suedafrika:'South Africa', kanada:'Canada', schweden:'Sweden',
-      ecuador:'Ecuador', bosnien:'Bosnia and Herzegovina', paraguay:'Paraguay', suedkorea:'South Korea',
-      schottland:'Scotland', deutschland:'Germany', niederlande:'Netherlands', usa:'United States',
-      brasilien:'Brazil', japan:'Japan',
+    const COUNTRY_ISO = {
+      norwegen:'no', frankreich:'fr', senegal:'sn', irak:'iq', kapverde:'cv', saudi:'sa',
+      uruguay:'uy', spanien:'es', aegypten:'eg', iran:'ir', neuseeland:'nz', belgien:'be',
+      kroatien:'hr', ghana:'gh', panama:'pa', england:'gb-eng', kolumbien:'co', portugal:'pt',
+      drkongo:'cd', usbekistan:'uz', algerien:'dz', oesterreich:'at', jordanien:'jo',
+      argentinien:'ar', suedafrika:'za', kanada:'ca', schweden:'se', ecuador:'ec', bosnien:'ba',
+      paraguay:'py', suedkorea:'kr', schottland:'gb-sct', deutschland:'de', niederlande:'nl',
+      usa:'us', brasilien:'br', japan:'jp',
     };
 
     const COUNTRY_DE = {
@@ -605,7 +616,6 @@
     let pageStart = Date.now();
     let visitorClicks = 0;
     let visitorTimer = null;
-    let visitorCount = null;
     let visitorGeo = { city: '', country: '' };
     let openModalId = null;
     let modalPollTimer = null;
@@ -726,13 +736,20 @@
       }
     }
 
-    async function trackVisitor() {
-      try {
-        const res = await fetch(HITS_URL, { cache: 'no-store' });
-        const svg = await res.text();
-        const m = svg.match(/aria-label="hits:\s*(\d+)"/);
-        if (m) visitorCount = parseInt(m[1], 10);
-      } catch (_) {}
+    function countryFlagUrl(key) {
+      const iso = COUNTRY_ISO[key];
+      return iso ? `https://flagcdn.com/w320/${iso}.png` : null;
+    }
+
+    function hitsBadgeUrl(extra = {}) {
+      const q = new URLSearchParams({
+        label: 'Besucher',
+        color: 'd4af37',
+        labelColor: '1a3a28',
+        style: 'flat',
+        ...extra,
+      });
+      return `${HITS_URL}?${q}`;
     }
 
     async function fetchVisitorGeo() {
@@ -985,8 +1002,8 @@
 
     function renderTeamCard(team, imgUrl) {
       const img = imgUrl
-        ? `<img class="country-img" src="${imgUrl}" alt="${team.name}" loading="lazy">`
-        : `<div class="country-img" style="display:flex;align-items:center;justify-content:center;font-size:28px">${team.flag}</div>`;
+        ? `<img class="country-img" src="${imgUrl}" alt="Flagge ${team.name}" loading="lazy">`
+        : `<div class="flag-fallback">${team.flag}</div>`;
       return `
         <div class="team-card">
           <h3>${team.flag} ${team.name}</h3>
@@ -1027,11 +1044,9 @@
 
       const summary = await fetchMatchSummary(espnId, forceSummary || isLive);
       const venueName = summary?.venueName || s.venue || '';
-      const [stadiumImg, homeImg, awayImg] = await Promise.all([
-        getWikiImage(venueName),
-        getWikiImage(COUNTRY_WIKI[m.homeKey]),
-        getWikiImage(COUNTRY_WIKI[m.awayKey]),
-      ]);
+      const stadiumImg = await getWikiImage(venueName);
+      const homeImg = countryFlagUrl(m.homeKey);
+      const awayImg = countryFlagUrl(m.awayKey);
 
       document.getElementById('modal-venue').innerHTML = renderVenueHtml(summary || {
         venueName: s.venue, venueCity: s.venueCity, venueCountry: s.venueCountry, attendance: null,
@@ -1107,14 +1122,10 @@
         <div class="stat-item"><div class="val">${s.avgGoals}</div><div class="lbl">Ø Tore</div></div>
         <div class="stat-item"><div class="val">${s.liveGroups}</div><div class="lbl">Live-Gruppen</div></div>
         <div class="stat-item"><div class="val">${s.inZone}/8</div><div class="lbl">Top-8-Zone</div></div>`;
-      const liveTxt = Object.entries(groupLive).map(([g, v]) => `Gr. ${g}: ${v.label}`).join(' · ') || '–';
-      document.getElementById('stats-note').innerHTML =
-        `<strong>Nächstes:</strong> ${s.nextMatch}<br><strong>Österreich:</strong> ${s.austria}<br><strong>Live:</strong> ${liveTxt}`;
     }
 
     function openVisitorCounter() {
-      document.getElementById('visitor-count').textContent =
-        visitorCount != null ? visitorCount.toLocaleString('de-DE') : '–';
+      document.getElementById('visitor-badge').src = hitsBadgeUrl({ _: Date.now() });
       const geoEl = document.getElementById('visitor-geo');
       if (visitorGeo.city || visitorGeo.country) {
         const city = visitorGeo.city || '–';
@@ -1160,7 +1171,6 @@
       if (visitorClicks >= 5) { visitorClicks = 0; openVisitorCounter(); }
     });
 
-    trackVisitor();
     fetchVisitorGeo();
     refresh();
     setInterval(refresh, 60000);
