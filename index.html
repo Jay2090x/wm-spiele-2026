@@ -315,12 +315,12 @@
     }
 
     .team-card h3 { font-size: 15px; margin-bottom: 6px; }
-    .team-card .map {
+    .team-card .country-img {
       width: 100%;
-      height: 80px;
+      height: 88px;
       border-radius: 6px;
       margin-top: 8px;
-      border: none;
+      object-fit: cover;
       background: #1a3a28;
     }
 
@@ -328,10 +328,57 @@
     .team-card dt { color: var(--muted); }
     .team-card dd { font-weight: 600; }
 
+    .venue-block {
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .stadium-img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      display: block;
+      background: #1a3a28;
+    }
+
+    .venue-info { padding: 10px 12px; font-size: 13px; line-height: 1.35; }
+    .venue-info strong { display: block; font-size: 15px; margin-bottom: 3px; }
+    .venue-info .loc { color: var(--muted); }
+
+    .goals-block {
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .goals-block h4 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .goals-list { list-style: none; font-size: 14px; }
+    .goals-list li { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .goals-list li:last-child { border-bottom: none; }
+    .g-min { color: var(--accent); font-weight: 700; min-width: 32px; display: inline-block; }
+    .g-assist { color: var(--muted); font-size: 12px; }
+    .goals-empty { color: var(--muted); font-size: 13px; }
+    .goals-live { color: #4cc978; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-left: 6px; }
+
+    .modal-loading { text-align: center; color: var(--muted); font-size: 13px; padding: 12px 0; }
+
     .visitor-modal { max-width: 320px; text-align: center; }
     .visitor-modal h2 { font-size: 16px; color: var(--accent); }
     .visitor-count { font-size: 48px; font-weight: 700; color: var(--accent); margin: 16px 0 6px; }
     .visitor-label { font-size: 13px; color: var(--muted); }
+    .visitor-geo { font-size: 15px; color: var(--text); margin-top: 10px; font-weight: 600; }
 
     @media (max-width: 768px) {
       html, body { height: auto; min-height: 100dvh; overflow-x: hidden; overflow-y: auto; }
@@ -345,6 +392,10 @@
       .third-panel { width: 100%; }
       .third-panel .t-team { max-width: none; }
       .team-cards { grid-template-columns: 1fr; }
+      .overlay { padding: 8px; align-items: flex-end; }
+      .modal { max-height: 92dvh; border-radius: 14px 14px 0 0; }
+      .stadium-img { height: 110px; }
+      .modal-score { font-size: 24px; }
     }
   </style>
 </head>
@@ -412,6 +463,8 @@
       </div>
       <div class="modal-body">
         <div class="modal-score" id="modal-score"></div>
+        <div id="modal-venue"></div>
+        <div id="modal-goals"></div>
         <div class="team-cards" id="modal-teams"></div>
       </div>
     </div>
@@ -426,6 +479,7 @@
       <div class="modal-body">
         <div class="visitor-count" id="visitor-count">–</div>
         <div class="visitor-label">Seitenaufrufe gesamt</div>
+        <div class="visitor-geo" id="visitor-geo"></div>
       </div>
     </div>
   </div>
@@ -433,6 +487,7 @@
   <script>
     const ESPN_SCORE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
     const ESPN_STANDINGS = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
+    const ESPN_SUMMARY = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary';
     const HITS_URL = 'https://hits.sh/jay2090x.github.io/wm-spiele-2026.svg';
     const FINISHED_VISIBLE_MS = 24 * 60 * 60 * 1000;
     const MATCH_DURATION_MS = 105 * 60 * 1000;
@@ -523,6 +578,24 @@
 
     const CLINCHED = new Set(['Sweden','Ecuador','Bosnia and Herzegovina','Bosnia-Herzegovina']);
 
+    const COUNTRY_WIKI = {
+      norwegen:'Norway', frankreich:'France', senegal:'Senegal', irak:'Iraq', kapverde:'Cape Verde',
+      saudi:'Saudi Arabia', uruguay:'Uruguay', spanien:'Spain', aegypten:'Egypt', iran:'Iran',
+      neuseeland:'New Zealand', belgien:'Belgium', kroatien:'Croatia', ghana:'Ghana', panama:'Panama',
+      england:'England', kolumbien:'Colombia', portugal:'Portugal', drkongo:'Democratic Republic of the Congo',
+      usbekistan:'Uzbekistan', algerien:'Algeria', oesterreich:'Austria', jordanien:'Jordan',
+      argentinien:'Argentina', suedafrika:'South Africa', kanada:'Canada', schweden:'Sweden',
+      ecuador:'Ecuador', bosnien:'Bosnia and Herzegovina', paraguay:'Paraguay', suedkorea:'South Korea',
+      schottland:'Scotland', deutschland:'Germany', niederlande:'Netherlands', usa:'United States',
+      brasilien:'Brazil', japan:'Japan',
+    };
+
+    const COUNTRY_DE = {
+      Austria:'Österreich', Germany:'Deutschland', Switzerland:'Schweiz', 'United States':'USA',
+      'United Kingdom':'Großbritannien', England:'England', France:'Frankreich', Spain:'Spanien',
+      Italy:'Italien', Netherlands:'Niederlande', Brazil:'Brasilien', Japan:'Japan', Croatia:'Kroatien',
+    };
+
     let liveScores = {};
     let groupLive = {};
     let thirdPlaceData = null;
@@ -533,6 +606,11 @@
     let visitorClicks = 0;
     let visitorTimer = null;
     let visitorCount = null;
+    let visitorGeo = { city: '', country: '' };
+    let openModalId = null;
+    let modalPollTimer = null;
+    const wikiImageCache = {};
+    const matchSummaryCache = {};
 
     function c(key) { return COUNTRIES[key] || { name:key, flag:'', pop:0, capital:'–', continent:'–', lat:20, lng:0, area:'–', conf:'–' }; }
 
@@ -596,12 +674,56 @@
       return [...dates];
     }
 
-    function mapEmbed(lat, lng, name) {
-      const padLng = 8;
-      const padLat = 5;
-      const bbox = `${lng - padLng},${lat - padLat},${lng + padLng},${lat + padLat}`;
-      const src = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat}%2C${lng}`;
-      return `<iframe class="map" title="Karte ${name}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${src}"></iframe>`;
+    function teamFromEn(en) {
+      const key = ESPN_TO_KEY[en];
+      return key ? c(key) : { name: en, flag: '' };
+    }
+
+    function countryDe(name) { return COUNTRY_DE[name] || name; }
+
+    async function getWikiImage(title) {
+      if (!title) return null;
+      const key = title.replace(/ /g, '_');
+      if (wikiImageCache[key] !== undefined) return wikiImageCache[key];
+      try {
+        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(key)}`);
+        if (!res.ok) { wikiImageCache[key] = null; return null; }
+        const d = await res.json();
+        const url = d.thumbnail?.source || null;
+        wikiImageCache[key] = url;
+        return url;
+      } catch (_) {
+        wikiImageCache[key] = null;
+        return null;
+      }
+    }
+
+    async function fetchMatchSummary(espnId, force = false) {
+      if (!force && matchSummaryCache[espnId]) return matchSummaryCache[espnId];
+      try {
+        const res = await fetch(`${ESPN_SUMMARY}?event=${espnId}`);
+        const data = await res.json();
+        const venue = data.gameInfo?.venue || {};
+        const goals = (data.keyEvents || [])
+          .filter(e => e.scoringPlay)
+          .map(e => ({
+            minute: e.clock?.displayValue || '?',
+            teamEn: e.team?.displayName || '',
+            scorer: e.participants?.[0]?.athlete?.displayName || (e.shortText || '').replace(/ Goal$/, ''),
+            assist: e.participants?.[1]?.athlete?.displayName || '',
+          }));
+        const summary = {
+          venueName: venue.fullName || '',
+          venueCity: venue.address?.city || '',
+          venueCountry: venue.address?.country || '',
+          attendance: data.gameInfo?.attendance || null,
+          goals,
+        };
+        matchSummaryCache[espnId] = summary;
+        return summary;
+      } catch (_) {
+        return matchSummaryCache[espnId] || null;
+      }
     }
 
     async function trackVisitor() {
@@ -610,6 +732,14 @@
         const svg = await res.text();
         const m = svg.match(/aria-label="hits:\s*(\d+)"/);
         if (m) visitorCount = parseInt(m[1], 10);
+      } catch (_) {}
+    }
+
+    async function fetchVisitorGeo() {
+      try {
+        const res = await fetch('https://ipwho.is/');
+        const d = await res.json();
+        if (d.success) visitorGeo = { city: d.city || '', country: d.country || '' };
       } catch (_) {}
     }
 
@@ -642,6 +772,7 @@
               period: st.period || 0,
               venue: c.venue?.fullName || '',
               venueCity: c.venue?.address?.city || '',
+              venueCountry: c.venue?.address?.country || '',
               homeEn: home?.team?.displayName || '',
               awayEn: away?.team?.displayName || '',
               homeAbbr: home?.team?.abbreviation || '',
@@ -816,46 +947,113 @@
       }).join('');
     }
 
-    function openMatchModal(espnId) {
+    function stopModalPoll() {
+      clearInterval(modalPollTimer);
+      modalPollTimer = null;
+    }
+
+    function startModalPoll(espnId) {
+      stopModalPoll();
+      if (liveScores[espnId]?.state === 'in') {
+        modalPollTimer = setInterval(() => renderMatchModal(espnId, true), 20000);
+      }
+    }
+
+    function renderGoalsHtml(goals, isLive) {
+      if (!goals?.length) {
+        return `<div class="goals-block"><h4>Torschützen${isLive ? '<span class="goals-live">· live</span>' : ''}</h4><div class="goals-empty">Noch keine Tore</div></div>`;
+      }
+      const items = goals.map(g => {
+        const t = teamFromEn(g.teamEn);
+        const assist = g.assist ? `<span class="g-assist"> (${g.assist})</span>` : '';
+        return `<li><span class="g-min">${g.minute}</span> ${t.flag} ${g.scorer}${assist}</li>`;
+      }).join('');
+      return `<div class="goals-block"><h4>Torschützen${isLive ? '<span class="goals-live">· live</span>' : ''}</h4><ul class="goals-list">${items}</ul></div>`;
+    }
+
+    function renderVenueHtml(summary, stadiumImg) {
+      const vName = summary?.venueName || '';
+      const vCity = summary?.venueCity || '';
+      const vCountry = summary?.venueCountry || '';
+      const loc = [vCity, vCountry].filter(Boolean).join(' · ') || '–';
+      const att = summary?.attendance ? `${summary.attendance.toLocaleString('de-DE')} Zuschauer` : '';
+      const img = stadiumImg
+        ? `<img class="stadium-img" src="${stadiumImg}" alt="${vName}" loading="lazy">`
+        : '';
+      return `<div class="venue-block">${img}<div class="venue-info"><strong>📍 ${vName || 'Spielort'}</strong><div class="loc">${loc}</div>${att ? `<div class="loc">${att}</div>` : ''}</div></div>`;
+    }
+
+    function renderTeamCard(team, imgUrl) {
+      const img = imgUrl
+        ? `<img class="country-img" src="${imgUrl}" alt="${team.name}" loading="lazy">`
+        : `<div class="country-img" style="display:flex;align-items:center;justify-content:center;font-size:28px">${team.flag}</div>`;
+      return `
+        <div class="team-card">
+          <h3>${team.flag} ${team.name}</h3>
+          ${img}
+          <dl>
+            <dt>Einwohner</dt><dd>ca. ${team.pop} Mio.</dd>
+            <dt>Hauptstadt</dt><dd>${team.capital}</dd>
+            <dt>Kontinent</dt><dd>${team.continent}</dd>
+            <dt>Fläche</dt><dd>${team.area}</dd>
+            <dt>Verband</dt><dd>${team.conf}</dd>
+          </dl>
+        </div>`;
+    }
+
+    async function renderMatchModal(espnId, forceSummary = false) {
       const m = DISPLAY_MATCHES.find(x => x.espnId === espnId);
       if (!m) return;
       const s = liveScores[espnId] || {};
       const home = c(m.homeKey);
       const away = c(m.awayKey);
+      const isLive = s.state === 'in';
 
       document.getElementById('modal-title').textContent = `${home.flag} ${home.name} – ${away.name} ${away.flag}`;
       document.getElementById('modal-meta').textContent =
-        `Gruppe ${m.group} · ${formatTime(m.startDate)} MEZ · ${s.venue || 'Stadion'} · ${m.broadcaster}`;
+        `Gruppe ${m.group} · ${formatTime(m.startDate)} MEZ · ${m.broadcaster}`;
 
       let scoreText = '– : –';
       if (s.state === 'in' || s.state === 'post') {
         const hs = m.espnHome ? s.homeScore : s.awayScore;
         const as = m.espnHome ? s.awayScore : s.homeScore;
         scoreText = `${hs} : ${as}`;
-        if (s.state === 'in') scoreText += `  (${s.clock || 'LIVE'}')`;
+        if (isLive) scoreText += `  (${s.clock || 'LIVE'}')`;
         if (s.state === 'post') scoreText += '  · Endstand';
       } else {
         scoreText = `Anstoß ${formatTime(m.startDate)} MEZ`;
       }
       document.getElementById('modal-score').textContent = scoreText;
 
-      function teamCard(team) {
-        return `
-          <div class="team-card">
-            <h3>${team.flag} ${team.name}</h3>
-            <dl>
-              <dt>Einwohner</dt><dd>ca. ${team.pop} Mio.</dd>
-              <dt>Hauptstadt</dt><dd>${team.capital}</dd>
-              <dt>Kontinent</dt><dd>${team.continent}</dd>
-              <dt>Fläche</dt><dd>${team.area}</dd>
-              <dt>Verband</dt><dd>${team.conf}</dd>
-            </dl>
-            ${mapEmbed(team.lat, team.lng, team.name)}
-          </div>`;
-      }
+      const summary = await fetchMatchSummary(espnId, forceSummary || isLive);
+      const venueName = summary?.venueName || s.venue || '';
+      const [stadiumImg, homeImg, awayImg] = await Promise.all([
+        getWikiImage(venueName),
+        getWikiImage(COUNTRY_WIKI[m.homeKey]),
+        getWikiImage(COUNTRY_WIKI[m.awayKey]),
+      ]);
 
-      document.getElementById('modal-teams').innerHTML = teamCard(home) + teamCard(away);
+      document.getElementById('modal-venue').innerHTML = renderVenueHtml(summary || {
+        venueName: s.venue, venueCity: s.venueCity, venueCountry: s.venueCountry, attendance: null,
+      }, stadiumImg);
+      document.getElementById('modal-goals').innerHTML = renderGoalsHtml(summary?.goals, isLive);
+      document.getElementById('modal-teams').innerHTML = renderTeamCard(home, homeImg) + renderTeamCard(away, awayImg);
+    }
+
+    async function openMatchModal(espnId) {
+      openModalId = espnId;
+      document.getElementById('modal-venue').innerHTML = '<div class="modal-loading">Lade Spielort…</div>';
+      document.getElementById('modal-goals').innerHTML = '';
+      document.getElementById('modal-teams').innerHTML = '<div class="modal-loading">Lade Teams…</div>';
       document.getElementById('match-overlay').classList.add('open');
+      await renderMatchModal(espnId, true);
+      startModalPoll(espnId);
+    }
+
+    function closeMatchModal() {
+      openModalId = null;
+      stopModalPoll();
+      document.getElementById('match-overlay').classList.remove('open');
     }
 
     function computeCounterStats() {
@@ -917,6 +1115,14 @@
     function openVisitorCounter() {
       document.getElementById('visitor-count').textContent =
         visitorCount != null ? visitorCount.toLocaleString('de-DE') : '–';
+      const geoEl = document.getElementById('visitor-geo');
+      if (visitorGeo.city || visitorGeo.country) {
+        const city = visitorGeo.city || '–';
+        const land = countryDe(visitorGeo.country || '');
+        geoEl.textContent = `${city} · ${land}`;
+      } else {
+        geoEl.textContent = 'Standort unbekannt';
+      }
       document.getElementById('visitor-overlay').classList.add('open');
     }
 
@@ -931,6 +1137,10 @@
       renderThirdPlace();
       renderStats();
       updateFooter();
+      if (openModalId) {
+        await renderMatchModal(openModalId, liveScores[openModalId]?.state === 'in');
+        startModalPoll(openModalId);
+      }
     }
 
     document.getElementById('matches').addEventListener('click', (e) => {
@@ -938,8 +1148,8 @@
       if (row) openMatchModal(row.dataset.espn);
     });
 
-    document.getElementById('modal-close').onclick = () => document.getElementById('match-overlay').classList.remove('open');
-    document.getElementById('match-overlay').onclick = (e) => { if (e.target.id === 'match-overlay') e.target.classList.remove('open'); };
+    document.getElementById('modal-close').onclick = closeMatchModal;
+    document.getElementById('match-overlay').onclick = (e) => { if (e.target.id === 'match-overlay') closeMatchModal(); };
     document.getElementById('visitor-close').onclick = () => document.getElementById('visitor-overlay').classList.remove('open');
     document.getElementById('visitor-overlay').onclick = (e) => { if (e.target.id === 'visitor-overlay') e.target.classList.remove('open'); };
 
@@ -951,6 +1161,7 @@
     });
 
     trackVisitor();
+    fetchVisitorGeo();
     refresh();
     setInterval(refresh, 60000);
   </script>
