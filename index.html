@@ -466,35 +466,117 @@
 
     .modal-loading { text-align: center; color: var(--muted); font-size: 13px; padding: 12px 0; }
 
-    .visitor-modal { max-width: 360px; text-align: center; }
-    .visitor-modal h2 { font-size: 16px; color: var(--accent); }
-    .visitor-badge-wrap { margin: 12px 0 8px; display: flex; justify-content: center; }
-    .visitor-badge-wrap img { height: 36px; width: auto; border-radius: 4px; }
-    .visitor-label { font-size: 13px; color: var(--muted); }
-    .visitor-geo { font-size: 15px; color: var(--text); margin-top: 10px; font-weight: 600; }
+    .visitor-modal { max-width: 440px; text-align: left; }
+    .visitor-modal .modal-head { text-align: left; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .visitor-modal .modal-head h2 { font-size: 17px; color: var(--text); }
+    .visitor-modal .modal-head .meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .visitor-body { padding-top: 12px !important; }
 
-    .visitor-days {
-      width: 100%;
-      margin-top: 8px;
-      border-collapse: collapse;
-      font-size: 13px;
-      text-align: left;
+    .visitor-hero {
+      background: linear-gradient(135deg, rgba(212,175,55,0.14), rgba(26,77,50,0.35));
+      border: 1px solid rgba(212,175,55,0.25);
+      border-radius: 10px;
+      padding: 14px 14px 12px;
+      margin-bottom: 10px;
+    }
+    .visitor-hero .big { font-size: 36px; font-weight: 700; color: var(--accent); line-height: 1; }
+    .visitor-hero .sub { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+    .visitor-trend {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 8px; font-size: 12px; font-weight: 600;
+      padding: 3px 8px; border-radius: 99px;
+    }
+    .visitor-trend.up { background: rgba(76,201,120,0.15); color: #4cc978; }
+    .visitor-trend.down { background: rgba(200,80,80,0.15); color: #f08080; }
+    .visitor-trend.flat { background: rgba(255,255,255,0.06); color: var(--muted); }
+
+    .visitor-kpis {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+      margin-bottom: 12px;
+    }
+    .visitor-kpi {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+    .visitor-kpi .val { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.1; }
+    .visitor-kpi .lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 3px; }
+
+    .visitor-section-head {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted);
+      margin: 12px 0 6px;
     }
 
+    .visitor-chart {
+      display: flex; align-items: flex-end; gap: 4px;
+      height: 80px; padding: 4px 2px 0;
+      background: rgba(0,0,0,0.12);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .visitor-bar-wrap {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      height: 100%; justify-content: flex-end; min-width: 0;
+    }
+    .visitor-bar {
+      width: 100%; max-width: 22px;
+      background: linear-gradient(to top, rgba(212,175,55,0.9), rgba(212,175,55,0.35));
+      border-radius: 3px 3px 0 0;
+      min-height: 3px;
+      transition: height 0.3s ease;
+    }
+    .visitor-bar.today { background: linear-gradient(to top, #4cc978, rgba(76,201,120,0.4)); }
+    .visitor-bar-lbl {
+      font-size: 8px; color: var(--muted); margin-top: 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+    }
+
+    .visitor-you {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 4px;
+    }
+    .visitor-you-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .visitor-you-flag { font-size: 28px; line-height: 1; }
+    .visitor-you-place { font-size: 15px; font-weight: 700; }
+    .visitor-you-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .visitor-you-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px;
+      font-size: 12px;
+    }
+    .visitor-you-grid dt { color: var(--muted); }
+    .visitor-you-grid dd { font-weight: 600; text-align: right; margin: 0; }
+
+    .visitor-days { width: 100%; border-collapse: collapse; font-size: 12px; }
     .visitor-days th {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--muted);
-      padding: 6px 8px;
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--muted); padding: 5px 6px;
       border-bottom: 1px solid var(--border);
       background: rgba(0,0,0,0.15);
     }
-
-    .visitor-days td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .visitor-days td { padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
     .visitor-days tr:last-child td { border-bottom: none; }
-    .visitor-days .c { text-align: right; font-weight: 700; color: var(--accent); }
-    .visitor-days-head { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 12px; text-align: left; }
+    .visitor-days .c { text-align: right; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .visitor-days .bar-cell { width: 45%; }
+    .visitor-day-bar {
+      height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;
+    }
+    .visitor-day-bar span {
+      display: block; height: 100%;
+      background: linear-gradient(90deg, rgba(212,175,55,0.5), var(--accent));
+      border-radius: 3px;
+    }
+    .visitor-foot {
+      margin-top: 12px; padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--muted);
+      display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+    }
 
     @media (max-width: 768px) {
       html, body { height: auto; min-height: 100dvh; overflow-x: hidden; overflow-y: auto; }
@@ -594,19 +676,15 @@
 
   <div class="overlay" id="visitor-overlay">
     <div class="modal visitor-modal">
-      <div class="modal-head" style="justify-content:center;border:none;padding-bottom:0">
-        <div><h2>Besucher</h2></div>
-        <button class="modal-close" id="visitor-close" aria-label="Schließen" style="position:absolute;right:12px;top:12px">✕</button>
+      <div class="modal-head">
+        <div>
+          <h2>📊 Besucherstatistik</h2>
+          <div class="meta">Seitenaufrufe · WM 2026 Dashboard</div>
+        </div>
+        <button class="modal-close" id="visitor-close" aria-label="Schließen">✕</button>
       </div>
-      <div class="modal-body">
-        <div class="visitor-badge-wrap"><img id="visitor-badge" src="" alt="Besucherzahl"></div>
-        <div class="visitor-label">Seitenaufrufe gesamt</div>
-        <div class="visitor-geo" id="visitor-geo"></div>
-        <div class="visitor-days-head">Besucher pro Tag</div>
-        <table class="visitor-days">
-          <thead><tr><th>Tag</th><th class="c">Anzahl</th></tr></thead>
-          <tbody id="visitor-days-body"><tr><td colspan="2" style="text-align:center;color:var(--muted)">Laden…</td></tr></tbody>
-        </table>
+      <div class="modal-body visitor-body" id="visitor-body">
+        <div class="modal-loading">Lade Statistik…</div>
       </div>
     </div>
   </div>
@@ -809,7 +887,8 @@
     let pageStart = Date.now();
     let visitorClicks = 0;
     let visitorTimer = null;
-    let visitorGeo = { city: '', country: '' };
+    let visitorGeo = {};
+    let visitorStatsCache = null;
     let openModalId = null;
     let modalPollTimer = null;
     let bracketResizeObs = null;
@@ -1243,23 +1322,195 @@
       return iso ? `https://flagcdn.com/w320/${iso}.png` : null;
     }
 
-    function hitsBadgeUrl(extra = {}) {
-      const q = new URLSearchParams({
-        label: 'Besucher',
-        color: 'd4af37',
-        labelColor: '1a3a28',
-        style: 'flat',
-        ...extra,
-      });
-      return `${HITS_URL}?${q}`;
-    }
-
     async function fetchVisitorGeo() {
       try {
         const res = await fetch('https://ipwho.is/');
         const d = await res.json();
-        if (d.success) visitorGeo = { city: d.city || '', country: d.country || '' };
+        if (!d.success) return;
+        visitorGeo = {
+          city: d.city || '',
+          region: d.region || '',
+          country: d.country || '',
+          countryCode: d.country_code || '',
+          flag: d.flag?.emoji || '',
+          isp: d.connection?.isp || '',
+          timezone: d.timezone?.id || '',
+          ip: d.ip || '',
+        };
       } catch (_) {}
+    }
+
+    function maskIp(ip) {
+      if (!ip) return '–';
+      const p = ip.split('.');
+      if (p.length === 4) return `${p[0]}.${p[1]}.•••.•••`;
+      return ip.slice(0, 8) + '…';
+    }
+
+    function parseVisitorDays(data) {
+      const map = new Map();
+      for (const w of data?.items || []) {
+        for (const d of w.data || []) {
+          if (d.day) map.set(d.day, d.value || 0);
+        }
+      }
+      return [...map.entries()]
+        .map(([day, value]) => ({ day, value }))
+        .sort((a, b) => a.day.localeCompare(b.day));
+    }
+
+    function prevDayStr(dayStr) {
+      const d = new Date(dayStr + 'T12:00:00');
+      d.setDate(d.getDate() - 1);
+      return new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(d);
+    }
+
+    function fillLastDays(days, count = 14) {
+      const map = new Map(days.map(d => [d.day, d.value]));
+      const out = [];
+      const end = new Date();
+      for (let i = count - 1; i >= 0; i--) {
+        const d = new Date(end);
+        d.setDate(d.getDate() - i);
+        const key = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(d);
+        out.push({ day: key, value: map.get(key) || 0 });
+      }
+      return out;
+    }
+
+    function computeVisitorMetrics(data) {
+      const days = parseVisitorDays(data);
+      const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+      const today = days.find(d => d.day === todayStr)?.value ?? 0;
+      const yesterday = days.find(d => d.day === prevDayStr(todayStr))?.value ?? 0;
+      const total = data?.total ?? days.reduce((s, d) => s + d.value, 0);
+      const chartDays = fillLastDays(days, 14);
+      const peak = Math.max(...chartDays.map(d => d.value), 1);
+      const activeDays = days.filter(d => d.value > 0).length || 1;
+      return {
+        total,
+        today,
+        yesterday,
+        trend: today - yesterday,
+        weekly: data?.weekly ?? chartDays.slice(-7).reduce((s, d) => s + d.value, 0),
+        monthly: data?.monthly ?? total,
+        avg: Math.round(total / activeDays),
+        peak,
+        chartDays,
+        days: [...days].sort((a, b) => b.day.localeCompare(a.day)),
+        updated: data?.updated || null,
+      };
+    }
+
+    async function fetchVisitorStats() {
+      try {
+        const res = await fetch('visitor-stats.json?' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          visitorStatsCache = data;
+          return data;
+        }
+      } catch (_) {}
+      return visitorStatsCache;
+    }
+
+    function renderVisitorChart(chartDays, peak, todayStr) {
+      return chartDays.map(d => {
+        const h = Math.max(3, Math.round((d.value / peak) * 100));
+        const isToday = d.day === todayStr;
+        const lbl = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit' }).format(new Date(d.day + 'T12:00:00'));
+        return `<div class="visitor-bar-wrap" title="${formatDayLabel(d.day)}: ${d.value}">
+          <div class="visitor-bar${isToday ? ' today' : ''}" style="height:${h}%"></div>
+          <div class="visitor-bar-lbl">${lbl}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderVisitorYou() {
+      const g = visitorGeo;
+      if (!g.city && !g.country) {
+        return `<div class="visitor-you"><div class="visitor-you-sub">Standort konnte nicht ermittelt werden.</div></div>`;
+      }
+      const place = [g.city, g.region].filter(Boolean).join(', ');
+      const land = countryDe(g.country || '') || g.country || '–';
+      return `
+        <div class="visitor-you">
+          <div class="visitor-you-top">
+            <span class="visitor-you-flag">${g.flag || '🌍'}</span>
+            <div>
+              <div class="visitor-you-place">${place || land}</div>
+              <div class="visitor-you-sub">${land} · Dein Besuch wurde gezählt ✓</div>
+            </div>
+          </div>
+          <dl class="visitor-you-grid">
+            <dt>IP (anonym)</dt><dd>${maskIp(g.ip)}</dd>
+            <dt>Provider</dt><dd>${g.isp || '–'}</dd>
+            <dt>Zeitzone</dt><dd>${g.timezone ? g.timezone.replace('_', ' ') : '–'}</dd>
+            <dt>Land</dt><dd>${g.countryCode || '–'}</dd>
+          </dl>
+        </div>`;
+    }
+
+    function renderVisitorDashboard(data) {
+      const m = computeVisitorMetrics(data);
+      const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+      let trendHtml = '';
+      if (m.today > m.yesterday) {
+        trendHtml = `<span class="visitor-trend up">▲ +${m.trend} vs. gestern</span>`;
+      } else if (m.today < m.yesterday) {
+        trendHtml = `<span class="visitor-trend down">▼ ${m.trend} vs. gestern</span>`;
+      } else {
+        trendHtml = `<span class="visitor-trend flat">= wie gestern (${m.today})</span>`;
+      }
+
+      const tableMax = Math.max(...m.days.map(d => d.value), 1);
+      const rows = m.days.length
+        ? m.days.map(d => {
+            const pct = Math.round((d.value / tableMax) * 100);
+            const share = m.total ? Math.round((d.value / m.total) * 100) : 0;
+            return `<tr>
+              <td>${formatDayLabel(d.day)}</td>
+              <td class="bar-cell"><div class="visitor-day-bar"><span style="width:${pct}%"></span></div></td>
+              <td class="c">${d.value.toLocaleString('de-DE')} <span style="color:var(--muted);font-weight:400;font-size:10px">(${share}%)</span></td>
+            </tr>`;
+          }).join('')
+        : '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:10px">Noch keine Tagesdaten</td></tr>';
+
+      const updated = m.updated
+        ? new Intl.DateTimeFormat('de-DE', { timeZone: tz, day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }).format(new Date(m.updated))
+        : '–';
+
+      document.getElementById('visitor-body').innerHTML = `
+        <div class="visitor-hero">
+          <div class="big">${m.total.toLocaleString('de-DE')}</div>
+          <div class="sub">Seitenaufrufe gesamt</div>
+          ${trendHtml}
+        </div>
+        <div class="visitor-kpis">
+          <div class="visitor-kpi"><div class="val">${m.today.toLocaleString('de-DE')}</div><div class="lbl">Heute</div></div>
+          <div class="visitor-kpi"><div class="val">${m.weekly.toLocaleString('de-DE')}</div><div class="lbl">7 Tage</div></div>
+          <div class="visitor-kpi"><div class="val">${m.monthly.toLocaleString('de-DE')}</div><div class="lbl">30 Tage</div></div>
+          <div class="visitor-kpi"><div class="val">${m.avg.toLocaleString('de-DE')}</div><div class="lbl">Ø / Tag</div></div>
+        </div>
+        <div class="visitor-section-head">Verlauf · 14 Tage</div>
+        <div class="visitor-chart">${renderVisitorChart(m.chartDays, m.peak, todayStr)}</div>
+        <div class="visitor-section-head">Dein Besuch</div>
+        ${renderVisitorYou()}
+        <div class="visitor-section-head">Tagesübersicht</div>
+        <table class="visitor-days">
+          <thead><tr><th>Tag</th><th>Verlauf</th><th class="c">Aufrufe</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="visitor-foot">
+          <span>Aktualisiert: ${updated}</span>
+          <span>hits.sh · stündlich</span>
+        </div>`;
+    }
+
+    async function loadVisitorDashboard() {
+      document.getElementById('visitor-body').innerHTML = '<div class="modal-loading">Lade Statistik…</div>';
+      const data = await fetchVisitorStats();
+      renderVisitorDashboard(data || { total: 0, items: [] });
     }
 
     async function fetchLiveData() {
@@ -1720,44 +1971,10 @@
       return `${wd}, ${dm}`;
     }
 
-    function renderVisitorDays(data) {
-      const tbody = document.getElementById('visitor-days-body');
-      const days = [];
-      for (const w of data?.items || []) {
-        for (const d of w.data || []) {
-          if (d.day) days.push({ day: d.day, value: d.value || 0 });
-        }
-      }
-      days.sort((a, b) => b.day.localeCompare(a.day));
-      if (!days.length) {
-        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--muted)">Noch keine Daten</td></tr>';
-        return;
-      }
-      tbody.innerHTML = days.map(d =>
-        `<tr><td>${formatDayLabel(d.day)}</td><td class="c">${d.value.toLocaleString('de-DE')}</td></tr>`
-      ).join('');
-    }
-
-    async function fetchVisitorDays() {
-      try {
-        const res = await fetch('visitor-stats.json?' + Date.now());
-        if (res.ok) return renderVisitorDays(await res.json());
-      } catch (_) {}
-      renderVisitorDays(null);
-    }
-
     function openVisitorCounter() {
-      document.getElementById('visitor-badge').src = hitsBadgeUrl({ _: Date.now() });
-      const geoEl = document.getElementById('visitor-geo');
-      if (visitorGeo.city || visitorGeo.country) {
-        const city = visitorGeo.city || '–';
-        const land = countryDe(visitorGeo.country || '');
-        geoEl.textContent = `${city} · ${land}`;
-      } else {
-        geoEl.textContent = 'Standort unbekannt';
-      }
-      fetchVisitorDays();
+      document.getElementById('hit-ping').src = HITS_URL + '?' + Date.now();
       document.getElementById('visitor-overlay').classList.add('open');
+      loadVisitorDashboard();
     }
 
     function updateFooter() {
