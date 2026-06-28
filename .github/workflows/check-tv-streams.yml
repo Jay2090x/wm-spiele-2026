@@ -1,0 +1,79 @@
+name: Check TV stream links
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate and update stream URLs
+        run: |
+          python3 <<'PY'
+          import json
+          import urllib.error
+          import urllib.request
+          from datetime import datetime, timezone
+
+          CANDIDATES = {
+              "ORF": [
+                  "https://on.orf.at/live?channel=orf1",
+                  "https://on.orf.at/live",
+              ],
+              "ServusTV": [
+                  "https://www.servustv.com/de/page/PN0B1EC15B2FE10/servustv-live",
+                  "https://www.servustv.com/de/live",
+              ],
+          }
+
+          def is_ok(url: str) -> bool:
+              req = urllib.request.Request(
+                  url,
+                  method="HEAD",
+                  headers={"User-Agent": "wm-spiele-tv-check/1.0"},
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=20) as resp:
+                      return 200 <= resp.status < 400
+              except Exception:
+                  pass
+              req = urllib.request.Request(
+                  url,
+                  headers={"User-Agent": "wm-spiele-tv-check/1.0"},
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=20) as resp:
+                      return 200 <= resp.getcode() < 400
+              except Exception:
+                  return False
+
+          now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+          out = {"updated": now}
+
+          for broadcaster, urls in CANDIDATES.items():
+              chosen = None
+              for url in urls:
+                  if is_ok(url):
+                      chosen = url
+                      break
+              out[broadcaster] = {
+                  "url": chosen or urls[0],
+                  "status": "ok" if chosen else "fallback",
+                  "checked": now,
+              }
+              print(f"{broadcaster}: {out[broadcaster]['url']} ({out[broadcaster]['status']})")
+
+          with open("tv-streams.json", "w", encoding="utf-8") as f:
+              json.dump(out, f, indent=2)
+              f.write("\n")
+          PY
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Update tv-streams.json
+          file_pattern: tv-streams.json

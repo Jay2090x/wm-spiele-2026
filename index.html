@@ -177,9 +177,12 @@
     .score .min { font-size: 13px; font-weight: 600; opacity: 0.85; }
     .score.tiny { font-size: 13px; }
 
-    .tv { font-size: 14px; font-weight: 700; padding: 2px 5px; border-radius: 3px; white-space: nowrap; }
+    .tv { font-size: 14px; font-weight: 700; padding: 2px 5px; border-radius: 3px; white-space: nowrap; display: inline-block; }
+    a.tv { text-decoration: none; cursor: pointer; transition: filter 0.15s, transform 0.15s; }
+    a.tv:hover { filter: brightness(1.2); transform: scale(1.04); }
     .tv-orf { background:rgba(200,16,46,0.2); color:#ff8fa3; }
     .tv-servus { background:rgba(0,120,200,0.18); color:#7ec8ff; }
+    .meta a.tv { font-size: 13px; vertical-align: baseline; }
 
     .date-row td {
       font-size: 14px;
@@ -889,6 +892,10 @@
     let visitorTimer = null;
     let visitorGeo = {};
     let visitorStatsCache = null;
+    let tvStreams = {
+      ORF: 'https://on.orf.at/live?channel=orf1',
+      ServusTV: 'https://www.servustv.com/de/page/PN0B1EC15B2FE10/servustv-live',
+    };
     let openModalId = null;
     let modalPollTimer = null;
     let bracketResizeObs = null;
@@ -915,6 +922,31 @@
       if (b === 'ORF') return 'tv-orf';
       if (b === 'ServusTV') return 'tv-servus';
       return '';
+    }
+
+    function tvStreamUrl(b) {
+      if (b === 'ORF' || b === 'ServusTV') return tvStreams[b] || null;
+      return null;
+    }
+
+    function tvLinkHtml(b) {
+      const label = tvLabel(b);
+      const cls = tvCssClass(b) || 'tv-servus';
+      const url = tvStreamUrl(b);
+      if (url) {
+        return `<a class="tv ${cls}" href="${url}" target="_blank" rel="noopener" title="Livestream öffnen">${label} ↗</a>`;
+      }
+      return `<span class="tv ${cls}">${label}</span>`;
+    }
+
+    async function loadTvStreams() {
+      try {
+        const res = await fetch('tv-streams.json?' + Date.now());
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.ORF?.url) tvStreams.ORF = data.ORF.url;
+        if (data.ServusTV?.url) tvStreams.ServusTV = data.ServusTV.url;
+      } catch {}
     }
 
     function teamDisplayMeta(en) {
@@ -1685,8 +1717,6 @@
         const live = s?.state === 'in';
         const past = s?.state === 'post';
         const cd = (!live && !past) ? formatCountdown(m.startDate - now) : '';
-        const tvClass = tvCssClass(m.broadcaster) || 'tv-servus';
-
         let timeCell;
         if (live) timeCell = '<span class="live-txt">LIVE</span>';
         else if (past) timeCell = '<span class="past-txt">Beendet</span>';
@@ -1699,7 +1729,7 @@
             <td class="c"><span class="grp ${grpCls}">${m.group}</span></td>
             <td class="fixture">${m.homeFlag} ${m.home} – ${m.away} ${m.awayFlag}</td>
             <td class="c">${getScoreHtml(m)}</td>
-            <td class="c"><span class="tv ${tvClass}">${tvLabel(m.broadcaster)}</span></td>
+            <td class="c">${tvLinkHtml(m.broadcaster)}</td>
           </tr>`;
       }
 
@@ -1869,8 +1899,8 @@
       const isLive = s.state === 'in';
 
       document.getElementById('modal-title').textContent = `${home.flag} ${home.name} – ${away.name} ${away.flag}`;
-      document.getElementById('modal-meta').textContent =
-        `Gruppe ${m.group} · ${formatTime(m.startDate)} · ${tvLabel(m.broadcaster)}`;
+      document.getElementById('modal-meta').innerHTML =
+        `Gruppe ${m.group} · ${formatTime(m.startDate)} · ${tvLinkHtml(m.broadcaster)}`;
 
       let scoreText = '– : –';
       if (s.state === 'in' || s.state === 'post') {
@@ -1985,7 +2015,7 @@
     }
 
     async function refresh() {
-      await fetchLiveData();
+      await Promise.all([fetchLiveData(), loadTvStreams()]);
       renderMatches();
       renderBracket();
       bindBracketResize();
@@ -1998,6 +2028,7 @@
     }
 
     document.getElementById('matches').addEventListener('click', (e) => {
+      if (e.target.closest('a.tv')) return;
       const row = e.target.closest('[data-espn]');
       if (row) openMatchModal(row.dataset.espn);
     });
