@@ -666,7 +666,7 @@
   </style>
 </head>
 <body>
-  <img id="hit-ping" src="https://hits.sh/jay2090x.github.io/wm-spiele-2026.svg" alt="" width="1" height="1" hidden>
+  <img id="hit-ping" alt="" width="1" height="1" hidden>
   <div class="page">
     <header>
       <div class="title"><span title="WM 2026">🏆</span> <span>WM 2026</span> · Spiele</div>
@@ -762,6 +762,7 @@
     const ESPN_STANDINGS = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
     const ESPN_SUMMARY = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary';
     const HITS_URL = 'https://hits.sh/jay2090x.github.io/wm-spiele-2026.svg';
+    const VISITOR_STORE_KEY = 'wm26_visitor_ips';
     const SHORT_URL = 'https://jay2090x.github.io/wm2026/';
     const ESPN_TEAMS = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/teams';
     const FINISHED_VISIBLE_MS = 24 * 60 * 60 * 1000;
@@ -958,6 +959,7 @@
     let visitorTimer = null;
     let visitorGeo = {};
     let visitorStatsCache = null;
+    let visitorPingCounted = null;
     let tvStreams = {
       ORF: 'https://on.orf.at/live?channel=orf1',
       ServusTV: 'https://www.servustv.com/de/page/PN0B1EC15B2FE10/servustv-live',
@@ -1420,6 +1422,40 @@
       return iso ? `https://flagcdn.com/w320/${iso}.png` : null;
     }
 
+    function visitorDayKey() {
+      return new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+    }
+
+    function loadVisitorIpStore() {
+      try {
+        return JSON.parse(localStorage.getItem(VISITOR_STORE_KEY) || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function saveVisitorIpStore(store) {
+      try {
+        localStorage.setItem(VISITOR_STORE_KEY, JSON.stringify(store));
+      } catch (_) {}
+    }
+
+    function ipCountedToday(ip) {
+      if (!ip) return false;
+      const store = loadVisitorIpStore();
+      const day = visitorDayKey();
+      return store.day === day && Array.isArray(store.ips) && store.ips.includes(ip);
+    }
+
+    function markIpCountedToday(ip) {
+      if (!ip) return;
+      const store = loadVisitorIpStore();
+      const day = visitorDayKey();
+      const ips = store.day === day ? [...(store.ips || [])] : [];
+      if (!ips.includes(ip)) ips.push(ip);
+      saveVisitorIpStore({ day, ips });
+    }
+
     async function fetchVisitorGeo() {
       try {
         const res = await fetch('https://ipwho.is/');
@@ -1436,6 +1472,23 @@
           ip: d.ip || '',
         };
       } catch (_) {}
+    }
+
+    async function pingVisitorHit() {
+      if (!visitorGeo.ip) await fetchVisitorGeo();
+      const ip = visitorGeo.ip;
+      if (!ip) {
+        visitorPingCounted = null;
+        return false;
+      }
+      if (ipCountedToday(ip)) {
+        visitorPingCounted = false;
+        return false;
+      }
+      document.getElementById('hit-ping').src = HITS_URL + '?' + Date.now();
+      markIpCountedToday(ip);
+      visitorPingCounted = true;
+      return true;
     }
 
     function maskIp(ip) {
@@ -1526,18 +1579,21 @@
 
     function renderVisitorYou() {
       const g = visitorGeo;
-      if (!g.city && !g.country) {
+      if (!g.city && !g.country && !g.ip) {
         return `<div class="visitor-you"><div class="visitor-you-sub">Standort konnte nicht ermittelt werden.</div></div>`;
       }
       const place = [g.city, g.region].filter(Boolean).join(', ');
       const land = countryDe(g.country || '') || g.country || '–';
+      let countNote = 'IP erkannt';
+      if (visitorPingCounted === true) countNote = 'Neuer Besuch gezählt (1× pro IP/Tag) ✓';
+      else if (visitorPingCounted === false) countNote = 'IP heute bereits gezählt · Gerät nicht erneut gezählt';
       return `
         <div class="visitor-you">
           <div class="visitor-you-top">
             <span class="visitor-you-flag">${g.flag || '🌍'}</span>
             <div>
               <div class="visitor-you-place">${place || land}</div>
-              <div class="visitor-you-sub">${land} · Dein Besuch wurde gezählt ✓</div>
+              <div class="visitor-you-sub">${land} · ${countNote}</div>
             </div>
           </div>
           <dl class="visitor-you-grid">
@@ -1581,7 +1637,7 @@
       document.getElementById('visitor-body').innerHTML = `
         <div class="visitor-hero">
           <div class="big">${m.total.toLocaleString('de-DE')}</div>
-          <div class="sub">Seitenaufrufe gesamt</div>
+          <div class="sub">Besucher gesamt · 1× pro IP/Tag</div>
           ${trendHtml}
         </div>
         <div class="visitor-kpis">
@@ -1601,7 +1657,7 @@
         </table>
         <div class="visitor-foot">
           <span>Aktualisiert: ${updated}</span>
-          <span>hits.sh · alle 15 Min.</span>
+          <span>hits.sh · 1×/IP/Tag · alle 15 Min.</span>
         </div>`;
     }
 
@@ -2155,7 +2211,6 @@
     }
 
     function openVisitorCounter() {
-      document.getElementById('hit-ping').src = HITS_URL + '?' + Date.now();
       document.getElementById('visitor-overlay').classList.add('open');
       loadVisitorDashboard();
     }
@@ -2217,8 +2272,11 @@
       if (visitorClicks >= 5) { visitorClicks = 0; openVisitorCounter(); }
     });
 
-    fetchVisitorGeo();
-    refresh();
+    (async () => {
+      await fetchVisitorGeo();
+      await pingVisitorHit();
+      refresh();
+    })();
     setInterval(refresh, 60000);
   </script>
 </body>
