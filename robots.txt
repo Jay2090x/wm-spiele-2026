@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jay2090x.github.io/wm-spiele-2026/sitemap.xml

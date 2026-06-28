@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="WM 2026 Live – Spiele, Ergebnisse, ORF und ServusTV">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a1f14"/>
+      <stop offset="100%" stop-color="#143d28"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="60" y="60" width="1080" height="510" rx="28" fill="rgba(255,255,255,0.04)" stroke="rgba(212,175,55,0.35)" stroke-width="2"/>
+  <text x="100" y="190" fill="#d4af37" font-family="Arial, Helvetica, sans-serif" font-size="92" font-weight="700">🏆 WM 2026</text>
+  <text x="100" y="280" fill="#f0f4f0" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="700">Live · Spiele · Ergebnisse</text>
+  <text x="100" y="360" fill="#8fa899" font-family="Arial, Helvetica, sans-serif" font-size="34">ORF 1 &amp; ServusTV Stream · Spielbaum · gratis</text>
+  <rect x="100" y="410" width="420" height="72" rx="14" fill="rgba(212,175,55,0.18)" stroke="rgba(212,175,55,0.5)" stroke-width="2"/>
+  <text x="130" y="460" fill="#d4af37" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">jay2090x.github.io/wm2026</text>
+  <circle cx="1020" cy="480" r="88" fill="rgba(76,201,120,0.12)" stroke="#4cc978" stroke-width="4"/>
+  <text x="1020" y="500" text-anchor="middle" fill="#4cc978" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">LIVE</text>
+</svg>
