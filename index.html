@@ -237,8 +237,10 @@
     .br-trophy { font-size: 32px; filter: drop-shadow(0 0 10px rgba(212,175,55,0.45)); line-height: 1; }
     .br-next-slot {
       margin-top: 8px; display: flex; gap: 3px; justify-content: center; align-items: center;
+      min-height: 14px;
     }
     .br-next-slot .br-emoji, .br-next-slot .br-flag { width: 16px; height: 11px; font-size: 11px; }
+    .br-next-slot:empty { display: none; }
 
     .stats-block {
       flex-shrink: 0;
@@ -785,6 +787,7 @@
     let visitorGeo = { city: '', country: '' };
     let openModalId = null;
     let modalPollTimer = null;
+    let bracketResizeObs = null;
     const wikiImageCache = {};
     const matchSummaryCache = {};
     const teamScheduleCache = {};
@@ -1029,7 +1032,6 @@
       const paths = [
         ...buildSideBracketLines(leafLX, centerX, leftYs.length ? leftYs : brPairYs()),
         ...buildSideBracketLines(leafRX, centerX, rightYs.length ? rightYs : brPairYs()),
-        `M ${centerX} ${trophyY} V ${Math.min(trophyY + 14, 92)}`,
       ];
       return paths.map(d => `<path d="${d}"/>`).join('');
     }
@@ -1038,7 +1040,6 @@
       const paths = [
         ...buildSideBracketLines(19, 50, brPairYs()),
         ...buildSideBracketLines(81, 50, brPairYs()),
-        'M 50 50 V 66',
       ];
       return paths.map(d => `<path d="${d}"/>`).join('');
     }
@@ -1065,6 +1066,9 @@
       const finWin = knockoutMeta['760517'] ? getKoMatchWinner('760517') : null;
       const f1Cls = finWin === finKey ? 'win' : (finWin && finWin !== finKey ? 'dim' : '');
       const f2Cls = finWin === finKey2 ? 'win' : (finWin && finWin !== finKey2 ? 'dim' : '');
+      const finalHtml = (finKey && finKey2)
+        ? `${brFlagEl(finKey, f1Cls)}${brFlagEl(finKey2, f2Cls)}`
+        : '';
 
       document.getElementById('bracket-root').innerHTML = `
         <div class="bracket-wrap">
@@ -1072,7 +1076,7 @@
           <div class="br-col left">${R32_LEFT.map(m => renderBracketPair(m, 'left')).join('')}</div>
           <div class="br-center-col">
             <div class="br-trophy">🏆</div>
-            <div class="br-next-slot">${brFlagEl(finKey, f1Cls)}${brFlagEl(finKey2, f2Cls)}</div>
+            <div class="br-next-slot">${finalHtml}</div>
           </div>
           <div class="br-col right">${R32_RIGHT.map(m => renderBracketPair(m, 'right')).join('')}</div>
         </div>`;
@@ -1080,6 +1084,16 @@
       const wrap = document.querySelector('#bracket-root .bracket-wrap');
       const svg = wrap?.querySelector('.bracket-svg');
       if (svg) svg.innerHTML = measureBracketLines(wrap);
+    }
+
+    function bindBracketResize() {
+      const wrap = document.querySelector('#bracket-root .bracket-wrap');
+      if (!wrap || bracketResizeObs) return;
+      bracketResizeObs = new ResizeObserver(() => {
+        const svg = wrap.querySelector('.bracket-svg');
+        if (svg) svg.innerHTML = measureBracketLines(wrap);
+      });
+      bracketResizeObs.observe(wrap);
     }
 
     function formatTime(date) {
@@ -1710,6 +1724,7 @@
       await fetchLiveData();
       renderMatches();
       renderBracket();
+      bindBracketResize();
       renderStats();
       updateFooter();
       if (openModalId) {
