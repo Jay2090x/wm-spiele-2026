@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WM 2026 – Kommende Spiele</title>
+  <title>WM 2026 – Spiele</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
@@ -132,7 +132,7 @@
     td { padding: 3px 6px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
 
-    .match-scroll, .bracket-scroll { flex: 1; min-height: 0; overflow: hidden; }
+    .match-scroll, .bracket-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
 
     .match-row { cursor: pointer; transition: background 0.15s; }
     .match-row:hover td { background: rgba(255,255,255,0.04); }
@@ -608,13 +608,13 @@
   <img id="hit-ping" src="https://hits.sh/jay2090x.github.io/wm-spiele-2026.svg" alt="" width="1" height="1" hidden>
   <div class="page">
     <header>
-      <div class="title"><span title="WM 2026">🏆</span> <span>WM 2026</span> · Kommende Spiele</div>
+      <div class="title"><span title="WM 2026">🏆</span> <span>WM 2026</span> · Spiele</div>
       <div class="mez">Live</div>
     </header>
 
     <div class="grid">
       <section class="panel matches-panel">
-        <div class="panel-head">Kommende Spiele <span class="pill" id="match-count"></span></div>
+        <div class="panel-head">Spiele <span class="pill" id="match-count"></span></div>
         <div class="match-scroll">
           <table class="matches-table">
             <thead>
@@ -883,6 +883,7 @@
     let groupLive = {};
     let groupStandings = {};
     let scheduleMatches = [];
+    let finishedMatchCache = {};
     let knockoutMeta = {};
     let allEvents = [];
     let lastFetch = null;
@@ -1288,7 +1289,7 @@
       for (let d = new Date(now); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
         dates.add(espnDateParam(d));
       }
-      for (let i = 1; i <= 2; i++) {
+      for (let i = 1; i <= 3; i++) {
         const past = new Date(now);
         past.setUTCDate(past.getUTCDate() - i);
         dates.add(espnDateParam(past));
@@ -1615,6 +1616,16 @@
         .map(enrichScheduleMatch)
         .sort((a, b) => a.startDate - b.startDate);
 
+      const nowMs = Date.now();
+      for (const m of scheduleMatches) {
+        const s = liveScores[m.espnId];
+        if (s?.state === 'post') finishedMatchCache[m.espnId] = m;
+      }
+      for (const [id, m] of Object.entries(finishedMatchCache)) {
+        const end = m.startDate.getTime() + MATCH_DURATION_MS;
+        if (end + FINISHED_VISIBLE_MS < nowMs) delete finishedMatchCache[id];
+      }
+
       try {
         const res = await fetch(ESPN_STANDINGS);
         const data = await res.json();
@@ -1649,15 +1660,50 @@
       refreshCount++;
     }
 
+    function matchEndMs(m) {
+      return m.startDate.getTime() + MATCH_DURATION_MS;
+    }
+
+    function isRecentlyFinished(m, now = new Date()) {
+      const end = matchEndMs(m);
+      const nowMs = now.getTime();
+      if (nowMs < end) return false;
+      const s = liveScores[m.espnId];
+      if (s?.state === 'post') return end + FINISHED_VISIBLE_MS > nowMs;
+      return end + FINISHED_VISIBLE_MS > nowMs;
+    }
+
     function isMatchVisible(m, now) {
       const s = liveScores[m.espnId];
+      const nowMs = now.getTime();
+      const startMs = m.startDate.getTime();
+      const endMs = matchEndMs(m);
       if (s?.state === 'in') return true;
       if (s?.state === 'pre') return true;
-      if (s?.state === 'post') {
-        const end = m.startDate.getTime() + MATCH_DURATION_MS;
-        return end + FINISHED_VISIBLE_MS > now.getTime();
-      }
-      return m.startDate.getTime() + MATCH_DURATION_MS > now.getTime();
+      if (s?.state === 'post') return endMs + FINISHED_VISIBLE_MS > nowMs;
+      if (nowMs < startMs) return true;
+      if (nowMs < endMs) return true;
+      return endMs + FINISHED_VISIBLE_MS > nowMs;
+    }
+
+    function getRenderableMatches() {
+      const byId = new Map();
+      const add = (m) => {
+        if (!m?.espnId) return;
+        byId.set(m.espnId, enrichScheduleMatch(m));
+      };
+      scheduleMatches.forEach(add);
+      DISPLAY_MATCHES.forEach(add);
+      Object.values(finishedMatchCache).forEach(add);
+      return [...byId.values()];
+    }
+
+    function matchListSortKey(m, now) {
+      const s = liveScores[m.espnId]?.state;
+      const finished = s === 'post' || isRecentlyFinished(m, now);
+      if (s === 'in') return [0, m.startDate.getTime()];
+      if (finished) return [1, -m.startDate.getTime()];
+      return [2, m.startDate.getTime()];
     }
 
     function getScoreHtml(match, tiny = false) {
@@ -1678,23 +1724,19 @@
     function getRowClass(match, now) {
       const s = liveScores[match.espnId];
       if (s?.state === 'in') return ' live';
-      if (s?.state === 'post') return ' past';
+      if (s?.state === 'post' || isRecentlyFinished(match, now)) return ' past';
       return '';
     }
 
     function renderMatches() {
       const now = new Date();
-      const enriched = scheduleMatches.map(enrichScheduleMatch);
-      const visible = enriched
+      const visible = getRenderableMatches()
         .filter(m => isKnownMatch(m) && isMatchVisible(m, now))
         .sort((a, b) => {
-          const sa = liveScores[a.espnId]?.state;
-          const sb = liveScores[b.espnId]?.state;
-          if (sa === 'in' && sb !== 'in') return -1;
-          if (sb === 'in' && sa !== 'in') return 1;
-          if (sa === 'post' && sb !== 'post') return 1;
-          if (sb === 'post' && sa !== 'post') return -1;
-          return a.startDate - b.startDate;
+          const ka = matchListSortKey(a, now);
+          const kb = matchListSortKey(b, now);
+          if (ka[0] !== kb[0]) return ka[0] - kb[0];
+          return ka[1] - kb[1];
         });
 
       const tbody = document.getElementById('matches');
@@ -1715,7 +1757,7 @@
 
         const s = liveScores[m.espnId];
         const live = s?.state === 'in';
-        const past = s?.state === 'post';
+        const past = s?.state === 'post' || isRecentlyFinished(m, now);
         const cd = (!live && !past) ? formatCountdown(m.startDate - now) : '';
         let timeCell;
         if (live) timeCell = '<span class="live-txt">LIVE</span>';
@@ -1734,9 +1776,16 @@
       }
 
       tbody.innerHTML = html;
-      const upcoming = enriched.filter(m => isKnownMatch(m) && liveScores[m.espnId]?.state === 'pre').length;
+      const all = getRenderableMatches().filter(m => isKnownMatch(m));
+      const upcoming = all.filter(m => liveScores[m.espnId]?.state === 'pre' && m.startDate > now).length;
+      const finished = visible.filter(m => liveScores[m.espnId]?.state === 'post' || isRecentlyFinished(m, now)).length;
       const countEl = document.getElementById('match-count');
-      if (countEl) countEl.textContent = upcoming ? `${upcoming} offen` : '';
+      if (countEl) {
+        const parts = [];
+        if (upcoming) parts.push(`${upcoming} offen`);
+        if (finished) parts.push(`${finished} beendet`);
+        countEl.textContent = parts.join(' · ');
+      }
     }
 
     function stopModalPoll() {
