@@ -1986,12 +1986,10 @@
     }
 
     function isRecentlyFinished(m, now = new Date()) {
-      const end = matchEndMs(m);
-      const nowMs = now.getTime();
-      if (nowMs < end) return false;
       const s = liveScores[m.espnId];
-      if (s?.state === 'post') return end + FINISHED_VISIBLE_MS > nowMs;
-      return end + FINISHED_VISIBLE_MS > nowMs;
+      if (s?.state === 'in' || s?.state === 'pre') return false;
+      if (s?.state !== 'post') return false;
+      return matchEndMs(m) + FINISHED_VISIBLE_MS > now.getTime();
     }
 
     function isMatchVisible(m, now) {
@@ -2003,8 +2001,9 @@
       if (s?.state === 'pre') return true;
       if (s?.state === 'post') return endMs + FINISHED_VISIBLE_MS > nowMs;
       if (nowMs < startMs) return true;
-      if (nowMs < endMs) return true;
-      return endMs + FINISHED_VISIBLE_MS > nowMs;
+      // Ohne ESPN-Status während/nach Anpfiff weiter anzeigen, nicht als beendet raten
+      if (nowMs < startMs + 150 * 60 * 1000) return true;
+      return false;
     }
 
     function getRenderableMatches() {
@@ -2055,7 +2054,7 @@
     function getRowClass(match, now) {
       const s = liveScores[match.espnId];
       if (s?.state === 'in') return ' live';
-      if (s?.state === 'post' || isRecentlyFinished(match, now)) return ' past';
+      if (s?.state === 'post') return ' past';
       return '';
     }
 
@@ -2118,7 +2117,7 @@
 
         const s = liveScores[m.espnId];
         const live = s?.state === 'in';
-        const past = s?.state === 'post' || isRecentlyFinished(m, now);
+        const past = s?.state === 'post';
         const cd = (!live && !past) ? formatCountdown(m.startDate - now) : '';
         let timeCell;
         if (live) timeCell = '<span class="live-txt">LIVE</span>';
