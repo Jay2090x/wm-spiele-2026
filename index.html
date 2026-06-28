@@ -705,6 +705,31 @@
     ];
     const R32_ALL = [...R32_LEFT, ...R32_RIGHT];
 
+    // ORF 1 / ServusTV laut offiziellem Spielplan (tv.ORF.at, ServusTV, Stand Juni 2026)
+    const TV_BY_ESPN = {
+      '760486': 'ServusTV', '760487': 'ORF', '760489': 'ORF', '760488': 'ORF',
+      '760490': 'ServusTV', '760492': 'ServusTV', '760491': 'ServusTV',
+      '760495': 'ORF', '760493': 'ORF', '760494': 'ORF',
+      '760497': 'ServusTV', '760496': 'ServusTV', '760498': 'ServusTV',
+      '760499': 'ORF', '760500': 'ORF', '760501': 'ORF',
+      '760502': 'ServusTV', '760503': 'ServusTV', '760504': 'ORF', '760505': 'ORF',
+      '760506': 'ServusTV', '760507': 'ServusTV', '760508': 'ORF', '760509': 'ORF',
+      '760514': 'ORF', '760515': 'ORF',
+      '760516': 'ServusTV', '760517': 'ORF',
+    };
+
+    // FIFA/Coca-Cola Weltrangliste, Stand 11. Juni 2026 (ESPN / FIFA)
+    const FIFA_RANK = {
+      argentinien:1, spanien:2, frankreich:3, england:4, portugal:5, brasilien:6,
+      marokko:7, niederlande:8, belgien:9, deutschland:10, kroatien:11,
+      kolumbien:13, mexiko:14, senegal:15, uruguay:16, usa:17, japan:18,
+      schweiz:19, iran:20, ecuador:23, oesterreich:24, suedkorea:25,
+      australien:27, algerien:28, aegypten:29, kanada:30, norwegen:31,
+      elfenbeinkueste:33, panama:34, schweden:38, paraguay:41, schottland:42,
+      drkongo:46, usbekistan:50, irak:57, suedafrika:60, saudi:61,
+      jordanien:63, bosnien:64, kapverde:67, ghana:73, neuseeland:85,
+    };
+
     const KO_FEEDERS = {
       'Round of 16 1 Winner': '760502', 'Round of 16 2 Winner': '760503',
       'Round of 16 3 Winner': '760507', 'Round of 16 4 Winner': '760508',
@@ -792,7 +817,26 @@
     const matchSummaryCache = {};
     const teamScheduleCache = {};
 
-    function c(key) { return COUNTRIES[key] || { name:key, flag:'', pop:0, capital:'–', continent:'–', lat:20, lng:0, area:'–', conf:'–' }; }
+    function c(key) {
+      const base = COUNTRIES[key] || { name:key, flag:'', pop:0, capital:'–', continent:'–', lat:20, lng:0, area:'–', conf:'–' };
+      return { ...base, fifa: FIFA_RANK[key] ?? null };
+    }
+
+    function resolveBroadcaster(espnId, lookup) {
+      return TV_BY_ESPN[espnId] || lookup?.broadcaster || '–';
+    }
+
+    function tvLabel(b) {
+      if (b === 'ORF') return 'ORF 1';
+      if (b === 'ServusTV') return 'Servus';
+      return b;
+    }
+
+    function tvCssClass(b) {
+      if (b === 'ORF') return 'tv-orf';
+      if (b === 'ServusTV') return 'tv-servus';
+      return '';
+    }
 
     function teamDisplayMeta(en) {
       if (TEAM_META[en]) return TEAM_META[en];
@@ -813,7 +857,7 @@
         homeFlag: home.flag, awayFlag: away.flag,
         homeKey: meta.homeKey, awayKey: meta.awayKey,
         group: meta.group,
-        broadcaster: meta.broadcaster,
+        broadcaster: resolveBroadcaster(id, meta),
         espnHome: meta.espnHome,
         start: meta.start,
         startDate: new Date(meta.start),
@@ -870,7 +914,7 @@
         homeKey: homeMeta[2] || ESPN_TO_KEY[homeEn] || '',
         awayKey: awayMeta[2] || ESPN_TO_KEY[awayEn] || '',
         group: isKo ? roundLabel(e.name || '') : (lookup?.group || 'KO'),
-        broadcaster: lookup?.broadcaster || '–',
+        broadcaster: resolveBroadcaster(e.id, lookup),
         espnHome: lookup?.espnHome ?? true,
         start: lookup?.start || e.date,
         startDate: new Date(lookup?.start || e.date),
@@ -1390,7 +1434,7 @@
         const live = s?.state === 'in';
         const past = s?.state === 'post';
         const cd = (!live && !past) ? formatCountdown(m.startDate - now) : '';
-        const tvClass = m.broadcaster === 'ORF' ? 'tv-orf' : 'tv-servus';
+        const tvClass = tvCssClass(m.broadcaster) || 'tv-servus';
 
         let timeCell;
         if (live) timeCell = '<span class="live-txt">LIVE</span>';
@@ -1404,7 +1448,7 @@
             <td class="c"><span class="grp ${grpCls}">${m.group}</span></td>
             <td class="fixture">${m.homeFlag} ${m.home} – ${m.away} ${m.awayFlag}</td>
             <td class="c">${getScoreHtml(m)}</td>
-            <td class="c"><span class="tv ${tvClass}">${m.broadcaster === 'ORF' ? 'ORF' : 'Servus'}</span></td>
+            <td class="c"><span class="tv ${tvClass}">${tvLabel(m.broadcaster)}</span></td>
           </tr>`;
       }
 
@@ -1524,7 +1568,9 @@
       const team = c(teamKey);
       const group = findTeamGroup(teamKey);
       document.getElementById('team-modal-title').textContent = `${team.flag} ${team.name}`;
-      document.getElementById('team-modal-meta').textContent = group ? `Gruppe ${group} · WM 2026` : 'WM 2026';
+      const rankTxt = team.fifa ? `FIFA #${team.fifa} · ` : '';
+      document.getElementById('team-modal-meta').textContent =
+        group ? `${rankTxt}Gruppe ${group} · WM 2026` : `${rankTxt}WM 2026`;
       document.getElementById('team-modal-body').innerHTML = '<div class="modal-loading">Laden…</div>';
       document.getElementById('team-overlay').classList.add('open');
 
@@ -1553,6 +1599,7 @@
           <h3>${team.flag} ${team.name}</h3>
           ${img}
           <dl>
+            <dt>FIFA-Rang</dt><dd>${team.fifa ? `#${team.fifa}` : '–'}</dd>
             <dt>Einwohner</dt><dd>ca. ${team.pop} Mio.</dd>
             <dt>Hauptstadt</dt><dd>${team.capital}</dd>
             <dt>Kontinent</dt><dd>${team.continent}</dd>
@@ -1572,7 +1619,7 @@
 
       document.getElementById('modal-title').textContent = `${home.flag} ${home.name} – ${away.name} ${away.flag}`;
       document.getElementById('modal-meta').textContent =
-        `Gruppe ${m.group} · ${formatTime(m.startDate)} · ${m.broadcaster}`;
+        `Gruppe ${m.group} · ${formatTime(m.startDate)} · ${tvLabel(m.broadcaster)}`;
 
       let scoreText = '– : –';
       if (s.state === 'in' || s.state === 'post') {
