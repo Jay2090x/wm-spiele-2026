@@ -216,12 +216,12 @@
     .br-bar { width: 10px; height: 2px; background: var(--accent); opacity: 0.75; flex-shrink: 0; }
 
     .br-mid {
-      width: 52px; flex-shrink: 0;
+      width: 72px; flex-shrink: 0;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       position: relative;
     }
     .br-mid svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-    .br-mid svg path { fill: none; stroke: var(--accent); stroke-width: 1.2; opacity: 0.65; }
+    .br-mid svg path { fill: none; stroke: var(--accent); stroke-width: 1.4; opacity: 0.7; vector-effect: non-scaling-stroke; }
     .br-trophy { font-size: 32px; z-index: 1; filter: drop-shadow(0 0 10px rgba(212,175,55,0.45)); line-height: 1; }
     .br-next { margin-top: 6px; z-index: 1; width: 100%; }
     .br-next-slot {
@@ -949,6 +949,38 @@
       };
     }
 
+    function buildBracketSvgPaths() {
+      const n = 8;
+      const paths = [];
+      const ys = Array.from({ length: n }, (_, i) => ((2 * i + 1) / (2 * n)) * 100);
+      const rounds = 3;
+      const midX = 50;
+
+      function sidePaths(fromX, toX) {
+        let nodes = ys.map(y => ({ y, x: fromX }));
+        const step = (toX - fromX) / rounds;
+        for (let r = 0; r < rounds; r++) {
+          const nx = fromX + step;
+          const next = [];
+          for (let i = 0; i < nodes.length; i += 2) {
+            const a = nodes[i];
+            const b = nodes[i + 1];
+            const midY = (a.y + b.y) / 2;
+            paths.push(`M ${a.x} ${a.y} H ${nx}`);
+            paths.push(`M ${b.x} ${b.y} H ${nx}`);
+            paths.push(`M ${nx} ${a.y} V ${b.y}`);
+            next.push({ y: midY, x: nx });
+          }
+          nodes = next;
+        }
+      }
+
+      sidePaths(0, midX);
+      sidePaths(100, midX);
+      paths.push(`M ${midX} 50 V 72`);
+      return paths.map(d => `<path d="${d}"/>`).join('');
+    }
+
     function renderBracketPair(m, side) {
       const s = liveScores[m.id];
       const live = s?.state === 'in';
@@ -973,19 +1005,7 @@
       const f2Cls = finWin === finKey2 ? 'win' : (finWin && finWin !== finKey2 ? 'dim' : '');
       const finalHtml = `<div class="br-next-slot">${brFlagEl(finKey, f1Cls)}${brFlagEl(finKey2, f2Cls)}</div>`;
 
-      const svgPaths = `
-        <path d="M0,6% L26,6% L26,19% L0,19%"/>
-        <path d="M0,31% L26,31% L26,44% L0,44%"/>
-        <path d="M0,56% L26,56% L26,69% L0,69%"/>
-        <path d="M0,81% L26,81% L26,94% L0,94%"/>
-        <path d="M74,6% L100,6% L100,19% L74,19%"/>
-        <path d="M74,31% L100,31% L100,44% L74,44%"/>
-        <path d="M74,56% L100,56% L100,69% L74,69%"/>
-        <path d="M74,81% L100,81% L100,94% L74,94%"/>
-        <path d="M26,12% L50,12%"/><path d="M26,38% L50,38%"/><path d="M26,62% L50,62%"/><path d="M26,88% L50,88%"/>
-        <path d="M50,25% L50,75%"/><path d="M50,50% L50,50%"/>
-        <path d="M74,12% L50,12%"/><path d="M74,38% L50,38%"/><path d="M74,62% L50,62%"/><path d="M74,88% L50,88%"/>
-      `;
+      const svgPaths = buildBracketSvgPaths();
 
       document.getElementById('bracket-root').innerHTML = `
         <div class="bracket-inner">
@@ -1229,7 +1249,6 @@
       const s = liveScores[m.espnId];
       if (s?.state === 'in') return true;
       if (s?.state === 'pre') return true;
-      if (m.isKnockout) return false;
       if (s?.state === 'post') {
         const end = m.startDate.getTime() + MATCH_DURATION_MS;
         return end + FINISHED_VISIBLE_MS > now.getTime();
