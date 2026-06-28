@@ -7,23 +7,86 @@ on:
 
 permissions:
   contents: write
+  metadata: read
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch hits.sh stats
+      - name: Fetch hits.sh stats and referrers
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -fsSL "https://hits.sh/api/urns/jay2090x.github.io/wm-spiele-2026" \
-            | python3 -c "
-          import json, sys, datetime
-          data = json.load(sys.stdin)
-          data['updated'] = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-          json.dump(data, open('visitor-stats.json','w'), indent=2)
-          print(json.dumps(data, indent=2))
-          "
+          python3 <<'PY'
+          import json
+          import os
+          import urllib.request
+          from datetime import datetime, timezone
+
+          BASE_URN = "jay2090x.github.io/wm-spiele-2026"
+          REF_BUCKETS = [
+              ("direct", "Direkt / Lesezeichen"),
+              ("google", "Google"),
+              ("facebook", "Facebook"),
+              ("instagram", "Instagram"),
+              ("twitter", "X / Twitter"),
+              ("reddit", "Reddit"),
+              ("whatsapp", "WhatsApp"),
+              ("telegram", "Telegram"),
+              ("youtube", "YouTube"),
+              ("bing", "Bing"),
+              ("duckduckgo", "DuckDuckGo"),
+              ("other", "Sonstige"),
+          ]
+
+          def fetch_json(url, headers=None):
+              req = urllib.request.Request(url, headers=headers or {"User-Agent": "wm-spiele-stats/1.0"})
+              with urllib.request.urlopen(req, timeout=25) as resp:
+                  return json.load(resp)
+
+          now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+          stats = fetch_json(f"https://hits.sh/api/urns/{BASE_URN}")
+          stats["updated"] = now
+          with open("visitor-stats.json", "w", encoding="utf-8") as f:
+              json.dump(stats, f, indent=2)
+              f.write("\n")
+          print("visitor-stats.json", stats.get("total"))
+
+          buckets = []
+          for key, label in REF_BUCKETS:
+              try:
+                  data = fetch_json(f"https://hits.sh/api/urns/{BASE_URN}/ref/{key}")
+                  count = int(data.get("total") or 0)
+              except Exception:
+                  count = 0
+              buckets.append({"id": key, "label": label, "count": count})
+              if count:
+                  print(f"ref/{key}: {count}")
+
+          github_refs = []
+          token = os.environ.get("GITHUB_TOKEN", "")
+          if token:
+              try:
+                  github_refs = fetch_json(
+                      "https://api.github.com/repos/Jay2090x/wm-spiele-2026/traffic/popular/referrers",
+                      headers={
+                          "Authorization": f"Bearer {token}",
+                          "Accept": "application/vnd.github+json",
+                          "User-Agent": "wm-spiele-stats/1.0",
+                      },
+                  )
+                  print("github referrers:", len(github_refs))
+              except Exception as exc:
+                  print("github referrers skipped:", exc)
+
+          referrers = {"updated": now, "buckets": buckets, "github": github_refs}
+          with open("visitor-referrers.json", "w", encoding="utf-8") as f:
+              json.dump(referrers, f, indent=2)
+              f.write("\n")
+          PY
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: Update visitor-stats.json
-          file_pattern: visitor-stats.json
+          commit_message: Update visitor stats and referrers
+          file_pattern: visitor-stats.json visitor-referrers.json

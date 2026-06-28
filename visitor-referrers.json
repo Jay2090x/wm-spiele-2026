@@ -1,0 +1,72 @@
+{
+  "updated": "2026-06-28T19:55:40Z",
+  "buckets": [
+    {
+      "id": "direct",
+      "label": "Direkt / Lesezeichen",
+      "count": 0
+    },
+    {
+      "id": "google",
+      "label": "Google",
+      "count": 2
+    },
+    {
+      "id": "facebook",
+      "label": "Facebook",
+      "count": 0
+    },
+    {
+      "id": "instagram",
+      "label": "Instagram",
+      "count": 0
+    },
+    {
+      "id": "twitter",
+      "label": "X / Twitter",
+      "count": 0
+    },
+    {
+      "id": "reddit",
+      "label": "Reddit",
+      "count": 0
+    },
+    {
+      "id": "whatsapp",
+      "label": "WhatsApp",
+      "count": 0
+    },
+    {
+      "id": "telegram",
+      "label": "Telegram",
+      "count": 0
+    },
+    {
+      "id": "youtube",
+      "label": "YouTube",
+      "count": 0
+    },
+    {
+      "id": "bing",
+      "label": "Bing",
+      "count": 0
+    },
+    {
+      "id": "duckduckgo",
+      "label": "DuckDuckGo",
+      "count": 0
+    },
+    {
+      "id": "other",
+      "label": "Sonstige",
+      "count": 0
+    }
+  ],
+  "github": [
+    {
+      "referrer": "github.com",
+      "count": 1,
+      "uniques": 1
+    }
+  ]
+}

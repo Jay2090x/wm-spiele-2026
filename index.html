@@ -336,7 +336,12 @@
     .stat-item .val { font-size: 15px; font-weight: 700; color: var(--accent); line-height: 1.1; }
     .stat-item .lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
 
-    footer { flex-shrink: 0; font-size: 14px; color: var(--muted); text-align: center; opacity: 0.6; cursor: default; user-select: none; }
+    footer {
+      flex-shrink: 0; font-size: 14px; color: var(--muted); text-align: center;
+      opacity: 0.6; cursor: default; user-select: none;
+      display: flex; flex-direction: column; gap: 3px; padding-top: 2px;
+    }
+    .footer-disclaimer { font-size: 10px; opacity: 0.75; margin: 0; line-height: 1.35; max-width: 620px; align-self: center; }
 
     .overlay {
       position: fixed;
@@ -639,6 +644,18 @@
       font-size: 11px; color: var(--muted);
       display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;
     }
+    .visitor-refs { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 4px; }
+    .visitor-refs th {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--muted); padding: 5px 6px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.15);
+    }
+    .visitor-refs td { padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    .visitor-refs tr:last-child td { border-bottom: none; }
+    .visitor-refs .c { text-align: right; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .visitor-refs .bar-cell { width: 42%; }
+    .visitor-ref-note { font-size: 10px; color: var(--muted); margin: 0 0 8px; line-height: 1.35; }
 
     @media (max-width: 768px) {
       html, body { height: auto; min-height: 100dvh; overflow-x: hidden; overflow-y: auto; }
@@ -667,6 +684,7 @@
 </head>
 <body>
   <img id="hit-ping" alt="" width="1" height="1" hidden>
+  <img id="hit-ref" alt="" width="1" height="1" hidden>
   <div class="page">
     <header>
       <div class="title"><span title="WM 2026">🏆</span> <span>WM 2026</span> · Spiele</div>
@@ -706,7 +724,10 @@
       </section>
     </div>
 
-    <footer id="footer-note" title="">Live-Daten · Tippen für Details · * Gruppe offen</footer>
+    <footer>
+      <div id="footer-note" title="">Live-Daten · Tippen für Details · * Gruppe offen</div>
+      <p class="footer-disclaimer">Hobby-Projekt · Kein offizieller WM-/ORF-/FIFA-Auftritt · Live-Daten ohne Gewähr · Quellen: ESPN, ipwho.is, hits.sh</p>
+    </footer>
   </div>
 
   <div class="overlay" id="match-overlay">
@@ -762,6 +783,7 @@
     const ESPN_STANDINGS = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
     const ESPN_SUMMARY = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary';
     const HITS_URL = 'https://hits.sh/jay2090x.github.io/wm-spiele-2026.svg';
+    const HITS_REF_BASE = 'https://hits.sh/jay2090x.github.io/wm-spiele-2026/ref/';
     const VISITOR_STORE_KEY = 'wm26_visitor_ips';
     const SHORT_URL = 'https://jay2090x.github.io/wm2026/';
     const ESPN_TEAMS = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/teams';
@@ -959,6 +981,7 @@
     let visitorTimer = null;
     let visitorGeo = {};
     let visitorStatsCache = null;
+    let visitorReferrersCache = null;
     let visitorPingCounted = null;
     let tvStreams = {
       ORF: 'https://on.orf.at/live?channel=orf1',
@@ -1474,6 +1497,47 @@
       } catch (_) {}
     }
 
+    function referrerBucket(ref) {
+      if (!ref) return 'direct';
+      try {
+        const h = new URL(ref).hostname.replace(/^www\./, '').toLowerCase();
+        const self = location.hostname.replace(/^www\./, '').toLowerCase();
+        if (h === self) return 'direct';
+        if (h.includes('google.')) return 'google';
+        if (h.includes('facebook.') || h === 'fb.com' || h === 'l.facebook.com' || h === 'lm.facebook.com') return 'facebook';
+        if (h.includes('instagram.')) return 'instagram';
+        if (h === 't.co' || h.includes('twitter.') || h === 'x.com' || h.includes('x.com')) return 'twitter';
+        if (h.includes('reddit.')) return 'reddit';
+        if (h.includes('whatsapp.') || h === 'wa.me') return 'whatsapp';
+        if (h.includes('telegram.') || h === 't.me') return 'telegram';
+        if (h.includes('youtube.') || h === 'youtu.be' || h === 'm.youtube.com') return 'youtube';
+        if (h.includes('bing.')) return 'bing';
+        if (h.includes('duckduckgo.')) return 'duckduckgo';
+        return 'other';
+      } catch {
+        return 'other';
+      }
+    }
+
+    function currentReferrerLabel() {
+      const ref = document.referrer;
+      if (!ref) return 'Direkt / Lesezeichen';
+      try {
+        const u = new URL(ref);
+        const self = location.hostname.replace(/^www\./, '');
+        if (u.hostname.replace(/^www\./, '') === self) return 'Direkt (intern)';
+        return u.hostname.replace(/^www\./, '');
+      } catch {
+        return 'Unbekannt';
+      }
+    }
+
+    function trackReferrerHit() {
+      const bucket = referrerBucket(document.referrer);
+      document.getElementById('hit-ref').src = `${HITS_REF_BASE}${bucket}.svg?${Date.now()}`;
+      return bucket;
+    }
+
     async function pingVisitorHit() {
       if (!visitorGeo.ip) await fetchVisitorGeo();
       const ip = visitorGeo.ip;
@@ -1486,6 +1550,7 @@
         return false;
       }
       document.getElementById('hit-ping').src = HITS_URL + '?' + Date.now();
+      trackReferrerHit();
       markIpCountedToday(ip);
       visitorPingCounted = true;
       return true;
@@ -1565,6 +1630,59 @@
       return visitorStatsCache;
     }
 
+    async function fetchVisitorReferrers() {
+      try {
+        const res = await fetch('visitor-referrers.json?' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          visitorReferrersCache = data;
+          return data;
+        }
+      } catch (_) {}
+      return visitorReferrersCache;
+    }
+
+    function renderVisitorReferrers(refData) {
+      const buckets = (refData?.buckets || []).filter(b => b.count > 0);
+      const github = (refData?.github || []).filter(g => (g.count || 0) > 0);
+      const rows = [];
+
+      for (const b of buckets) {
+        rows.push({ label: b.label, count: b.count, kind: 'Kanal' });
+      }
+      for (const g of github) {
+        const label = g.referrer || 'Direkt';
+        if (rows.some(r => r.label.toLowerCase() === label.toLowerCase())) continue;
+        rows.push({
+          label: label === 'direct' || !label ? 'Direkt (GitHub)' : label,
+          count: g.count || 0,
+          kind: 'GitHub',
+        });
+      }
+      rows.sort((a, b) => b.count - a.count);
+
+      if (!rows.length) {
+        return `<p class="visitor-ref-note">Noch keine Herkunftsdaten. Nach dem ersten geteilten Link erscheinen Quellen hier.</p>`;
+      }
+
+      const max = Math.max(...rows.map(r => r.count), 1);
+      const body = rows.map(r => {
+        const pct = Math.round((r.count / max) * 100);
+        return `<tr>
+          <td>${r.label}</td>
+          <td class="bar-cell"><div class="visitor-day-bar"><span style="width:${pct}%"></span></div></td>
+          <td class="c">${r.count.toLocaleString('de-DE')}</td>
+        </tr>`;
+      }).join('');
+
+      return `
+        <p class="visitor-ref-note">Kanäle = getrackte Besucher (1×/IP/Tag) · GitHub = Seitenaufrufe laut GitHub Pages (14 Tage)</p>
+        <table class="visitor-refs">
+          <thead><tr><th>Quelle</th><th>Verlauf</th><th class="c">Besuche</th></tr></thead>
+          <tbody>${body}</tbody>
+        </table>`;
+    }
+
     function renderVisitorChart(chartDays, peak, todayStr) {
       return chartDays.map(d => {
         const h = Math.max(3, Math.round((d.value / peak) * 100));
@@ -1597,6 +1715,7 @@
             </div>
           </div>
           <dl class="visitor-you-grid">
+            <dt>Herkunft</dt><dd>${currentReferrerLabel()}</dd>
             <dt>IP (anonym)</dt><dd>${maskIp(g.ip)}</dd>
             <dt>Provider</dt><dd>${g.isp || '–'}</dd>
             <dt>Zeitzone</dt><dd>${g.timezone ? g.timezone.replace('_', ' ') : '–'}</dd>
@@ -1605,7 +1724,7 @@
         </div>`;
     }
 
-    function renderVisitorDashboard(data) {
+    function renderVisitorDashboard(data, refData) {
       const m = computeVisitorMetrics(data);
       const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
       let trendHtml = '';
@@ -1650,6 +1769,8 @@
         <div class="visitor-chart">${renderVisitorChart(m.chartDays, m.peak, todayStr)}</div>
         <div class="visitor-section-head">Dein Besuch</div>
         ${renderVisitorYou()}
+        <div class="visitor-section-head">Herkunft · Besucher</div>
+        ${renderVisitorReferrers(refData)}
         <div class="visitor-section-head">Tagesübersicht</div>
         <table class="visitor-days">
           <thead><tr><th>Tag</th><th>Verlauf</th><th class="c">Aufrufe</th></tr></thead>
@@ -1663,8 +1784,8 @@
 
     async function loadVisitorDashboard() {
       document.getElementById('visitor-body').innerHTML = '<div class="modal-loading">Lade Statistik…</div>';
-      const data = await fetchVisitorStats();
-      renderVisitorDashboard(data || { total: 0, items: [] });
+      const [data, refs] = await Promise.all([fetchVisitorStats(), fetchVisitorReferrers()]);
+      renderVisitorDashboard(data || { total: 0, items: [] }, refs || { buckets: [], github: [] });
     }
 
     async function fetchLiveData() {
