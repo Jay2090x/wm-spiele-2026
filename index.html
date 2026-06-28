@@ -245,6 +245,65 @@
     .br-next-slot .br-emoji, .br-next-slot .br-flag { width: 16px; height: 11px; font-size: 11px; }
     .br-next-slot:empty { display: none; }
 
+    .finished-block {
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      padding: 4px 6px 5px;
+      background: rgba(0,0,0,0.08);
+      max-height: 108px;
+      overflow-y: auto;
+    }
+    .finished-block:empty, .finished-block.is-empty { display: none; }
+
+    .finished-head {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .finished-list { display: flex; flex-direction: column; gap: 1px; }
+
+    .finished-row {
+      display: grid;
+      grid-template-columns: 34px 1fr 34px;
+      gap: 4px;
+      align-items: center;
+      font-size: 11px;
+      line-height: 1.2;
+      padding: 2px 3px;
+      border-radius: 4px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .finished-row:hover { background: rgba(255,255,255,0.04); opacity: 0.9; }
+
+    .finished-score {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 11px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .finished-fixture {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .finished-grp {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: right;
+    }
+
     .stats-block {
       flex-shrink: 0;
       border-top: 1px solid var(--border);
@@ -592,6 +651,8 @@
       .matches-table th, .matches-table td { padding: 5px 4px; }
       .bracket-panel { width: 100%; }
       .bracket-wrap { min-height: 340px; min-width: 100%; grid-template-columns: 68px 1fr 46px 1fr 68px; }
+      .finished-block { max-height: none; }
+      .finished-fixture { font-size: 11px; }
       .team-cards { grid-template-columns: 1fr; }
       .overlay { padding: 8px; align-items: flex-end; }
       .modal { max-height: 92dvh; border-radius: 14px 14px 0 0; }
@@ -634,6 +695,10 @@
       <section class="panel bracket-panel">
         <div class="panel-head">Spielbaum <span class="pill">K.-o.</span></div>
         <div class="bracket-scroll" id="bracket-root"></div>
+        <div class="finished-block is-empty" id="finished-block">
+          <div class="finished-head" id="finished-head">Beendet · 24h</div>
+          <div class="finished-list" id="finished-list"></div>
+        </div>
         <div class="stats-block" id="stats-block">
           <div class="stats-head">Statistik</div>
           <div class="stats-grid" id="stats-grid"></div>
@@ -1698,12 +1763,22 @@
       return [...byId.values()];
     }
 
-    function matchListSortKey(m, now) {
+    function isListedMatch(m, now) {
+      if (!isKnownMatch(m) || !isMatchVisible(m, now)) return false;
       const s = liveScores[m.espnId]?.state;
-      const finished = s === 'post' || isRecentlyFinished(m, now);
+      return s !== 'post' && !isRecentlyFinished(m, now);
+    }
+
+    function getFinishedMatches(now = new Date()) {
+      return getRenderableMatches()
+        .filter(m => isKnownMatch(m) && (liveScores[m.espnId]?.state === 'post' || isRecentlyFinished(m, now)))
+        .sort((a, b) => b.startDate - a.startDate);
+    }
+
+    function activeMatchSortKey(m) {
+      const s = liveScores[m.espnId]?.state;
       if (s === 'in') return [0, m.startDate.getTime()];
-      if (finished) return [1, -m.startDate.getTime()];
-      return [2, m.startDate.getTime()];
+      return [1, m.startDate.getTime()];
     }
 
     function getScoreHtml(match, tiny = false) {
@@ -1728,13 +1803,43 @@
       return '';
     }
 
+    function renderFinishedMatches() {
+      const now = new Date();
+      const finished = getFinishedMatches(now);
+      const block = document.getElementById('finished-block');
+      const head = document.getElementById('finished-head');
+      const list = document.getElementById('finished-list');
+      if (!finished.length) {
+        block.classList.add('is-empty');
+        list.innerHTML = '';
+        return;
+      }
+      block.classList.remove('is-empty');
+      head.textContent = `Beendet · 24h (${finished.length})`;
+      list.innerHTML = finished.map(m => {
+        const s = liveScores[m.espnId];
+        let score = '–';
+        if (s && (s.state === 'post' || s.state === 'in')) {
+          const hs = m.espnHome ? s.homeScore : s.awayScore;
+          const as = m.espnHome ? s.awayScore : s.homeScore;
+          score = `${hs}:${as}`;
+        }
+        const grp = m.isKnockout ? 'KO' : m.group;
+        return `<div class="finished-row" data-espn="${m.espnId}" title="${formatTime(m.startDate)} · ${m.home} – ${m.away}">
+          <span class="finished-score">${score}</span>
+          <span class="finished-fixture">${m.homeFlag} ${m.home} – ${m.away} ${m.awayFlag}</span>
+          <span class="finished-grp">${grp}</span>
+        </div>`;
+      }).join('');
+    }
+
     function renderMatches() {
       const now = new Date();
       const visible = getRenderableMatches()
-        .filter(m => isKnownMatch(m) && isMatchVisible(m, now))
+        .filter(m => isListedMatch(m, now))
         .sort((a, b) => {
-          const ka = matchListSortKey(a, now);
-          const kb = matchListSortKey(b, now);
+          const ka = activeMatchSortKey(a);
+          const kb = activeMatchSortKey(b);
           if (ka[0] !== kb[0]) return ka[0] - kb[0];
           return ka[1] - kb[1];
         });
@@ -1776,14 +1881,13 @@
       }
 
       tbody.innerHTML = html;
-      const all = getRenderableMatches().filter(m => isKnownMatch(m));
-      const upcoming = all.filter(m => liveScores[m.espnId]?.state === 'pre' && m.startDate > now).length;
-      const finished = visible.filter(m => liveScores[m.espnId]?.state === 'post' || isRecentlyFinished(m, now)).length;
+      const upcoming = visible.filter(m => liveScores[m.espnId]?.state === 'pre' && m.startDate > now).length;
+      const live = visible.filter(m => liveScores[m.espnId]?.state === 'in').length;
       const countEl = document.getElementById('match-count');
       if (countEl) {
         const parts = [];
+        if (live) parts.push(`${live} live`);
         if (upcoming) parts.push(`${upcoming} offen`);
-        if (finished) parts.push(`${finished} beendet`);
         countEl.textContent = parts.join(' · ');
       }
     }
@@ -2066,6 +2170,7 @@
     async function refresh() {
       await Promise.all([fetchLiveData(), loadTvStreams()]);
       renderMatches();
+      renderFinishedMatches();
       renderBracket();
       bindBracketResize();
       renderStats();
@@ -2093,6 +2198,11 @@
     document.getElementById('bracket-root').addEventListener('click', (e) => {
       const pair = e.target.closest('[data-espn]');
       if (pair?.dataset.espn) openMatchModal(pair.dataset.espn);
+    });
+
+    document.getElementById('finished-list').addEventListener('click', (e) => {
+      const row = e.target.closest('[data-espn]');
+      if (row?.dataset.espn) openMatchModal(row.dataset.espn);
     });
 
     document.getElementById('team-modal-close').onclick = closeTeamModal;
