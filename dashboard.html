@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visitor Analytics</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #4f46e5;
+      --accent-soft: #eef2ff;
+      --green: #059669;
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 48px; }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin-bottom: 28px; flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff; display: grid; place-items: center; font-weight: 700;
+    }
+    h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); font-size: 14px; margin-top: 2px; }
+    .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    select, input, button {
+      border: 1px solid var(--border); background: var(--card);
+      border-radius: 10px; padding: 9px 12px; font: inherit; color: var(--text);
+    }
+    button {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+      font-weight: 600; cursor: pointer;
+    }
+    button:hover { filter: brightness(1.05); }
+    .kpis {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px; margin-bottom: 18px;
+    }
+    .kpi {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px 18px 16px; box-shadow: var(--shadow);
+    }
+    .kpi .label { color: var(--muted); font-size: 13px; font-weight: 600; }
+    .kpi .value { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; margin-top: 6px; }
+    .kpi .hint { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .grid {
+      display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px;
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px; box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .card h2 {
+      font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--muted); margin-bottom: 14px; font-weight: 700;
+    }
+    .chart { display: flex; align-items: flex-end; gap: 6px; height: 180px; }
+    .bar-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .bar {
+      width: 100%; max-width: 28px; border-radius: 8px 8px 4px 4px;
+      background: linear-gradient(180deg, #818cf8, var(--accent));
+      min-height: 4px; transition: height 0.25s ease;
+    }
+    .bar.today { background: linear-gradient(180deg, #34d399, var(--green)); }
+    .bar-lbl { font-size: 10px; color: var(--muted); white-space: nowrap; }
+    .hours { height: 120px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 10px 0; border-bottom: 1px solid var(--border); text-align: left; }
+    th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    tr:last-child td { border-bottom: none; }
+    .num { text-align: right; font-weight: 700; color: var(--accent); }
+    .bar-cell { width: 42%; }
+    .row-bar {
+      height: 8px; background: #f1f5f9; border-radius: 99px; overflow: hidden;
+    }
+    .row-bar span {
+      display: block; height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, #a5b4fc, var(--accent));
+    }
+    .empty { color: var(--muted); font-size: 14px; padding: 12px 0; }
+    .foot { margin-top: 18px; color: var(--muted); font-size: 12px; }
+    .error {
+      background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+      border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: none;
+    }
+    @media (max-width: 900px) {
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .kpis { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">VA</div>
+        <div>
+          <h1>Visitor Analytics</h1>
+          <div class="sub" id="updated">Lade Daten…</div>
+        </div>
+      </div>
+      <div class="controls">
+        <select id="days">
+          <option value="7">7 Tage</option>
+          <option value="14">14 Tage</option>
+          <option value="30" selected>30 Tage</option>
+          <option value="90">90 Tage</option>
+        </select>
+        <input id="token" type="password" placeholder="Dashboard-Token (optional)" style="min-width:220px">
+        <button id="refresh" type="button">Aktualisieren</button>
+      </div>
+    </header>
+
+    <div class="error" id="error"></div>
+
+    <section class="kpis" id="kpis"></section>
+
+    <div class="grid">
+      <div>
+        <div class="card">
+          <h2>Verlauf · Seitenaufrufe</h2>
+          <div class="chart" id="chart-days"></div>
+        </div>
+        <div class="card">
+          <h2>Heute · Stunden</h2>
+          <div class="chart hours" id="chart-hours"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h2>Traffic-Quellen · heute</h2>
+          <div id="sources"></div>
+        </div>
+        <div class="card">
+          <h2>Top-Seiten · heute</h2>
+          <div id="pages"></div>
+        </div>
+        <div class="card">
+          <h2>Suchbegriffe · heute</h2>
+          <div id="terms"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="foot">Privacy-friendly · IPs werden gehasht · Eigene IP via <code>ANALYTICS_OWNER_IPS</code> ausgeschlossen</p>
+  </div>
+
+  <script>
+    const API = '/api/stats';
+    const tokenInput = document.getElementById('token');
+    const daysSelect = document.getElementById('days');
+    const errorEl = document.getElementById('error');
+
+    try {
+      const saved = localStorage.getItem('va_dashboard_token');
+      if (saved) tokenInput.value = saved;
+    } catch {}
+
+    function fmt(n) {
+      return Number(n || 0).toLocaleString('de-DE');
+    }
+
+    function fmtDay(day) {
+      const d = new Date(day + 'T12:00:00');
+      return new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit' }).format(d);
+    }
+
+    function renderBars(target, items, keyLabel) {
+      const el = document.getElementById(target);
+      if (!items.length) {
+        el.innerHTML = '<div class="empty">Noch keine Daten</div>';
+        return;
+      }
+      const max = Math.max(...items.map(i => i.views || i.value || 0), 1);
+      const today = new Date().toISOString().slice(0, 10);
+      el.innerHTML = items.map(item => {
+        const val = item.views ?? item.value ?? 0;
+        const h = Math.max(6, Math.round((val / max) * 100));
+        const lbl = item[keyLabel] ?? item.label ?? '';
+        const isToday = item.day === today;
+        return `<div class="bar-wrap" title="${lbl}: ${fmt(val)}">
+          <div class="bar${isToday ? ' today' : ''}" style="height:${h}%"></div>
+          <div class="bar-lbl">${lbl}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderTable(target, rows, labelHead = 'Eintrag') {
+      const el = document.getElementById(target);
+      if (!rows.length) {
+        el.innerHTML = '<div class="empty">Noch keine Daten</div>';
+        return;
+      }
+      const max = Math.max(...rows.map(r => r.value), 1);
+      el.innerHTML = `<table>
+        <thead><tr><th>${labelHead}</th><th class="bar-cell"></th><th class="num">Besuche</th></tr></thead>
+        <tbody>${rows.map(r => {
+          const pct = Math.round((r.value / max) * 100);
+          return `<tr>
+            <td>${r.label}</td>
+            <td class="bar-cell"><div class="row-bar"><span style="width:${pct}%"></span></div></td>
+            <td class="num">${fmt(r.value)}</td>
+          </tr>`;
+        }).join('')}</tbody></table>`;
+    }
+
+    function renderKpis(data) {
+      document.getElementById('kpis').innerHTML = `
+        <div class="kpi"><div class="label">Heute · Aufrufe</div><div class="value">${fmt(data.today.views)}</div><div class="hint">Seitenaufrufe</div></div>
+        <div class="kpi"><div class="label">Heute · Besucher</div><div class="value">${fmt(data.today.visitors)}</div><div class="hint">Unique (gehashte IPs)</div></div>
+        <div class="kpi"><div class="label">Zeitraum</div><div class="value">${fmt(data.rangeViews)}</div><div class="hint">${data.rangeDays} Tage</div></div>
+        <div class="kpi"><div class="label">Gesamt</div><div class="value">${fmt(data.totalViews)}</div><div class="hint">Alle Zeiten</div></div>`;
+    }
+
+    async function load() {
+      errorEl.style.display = 'none';
+      const days = daysSelect.value;
+      const token = tokenInput.value.trim();
+      try { if (token) localStorage.setItem('va_dashboard_token', token); } catch {}
+
+      const url = `${API}?days=${days}${token ? `&token=${encodeURIComponent(token)}` : ''}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(res.status === 401 ? 'Ungültiger Dashboard-Token' : `API-Fehler ${res.status}`);
+      const data = await res.json();
+
+      const updated = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(data.updated));
+      document.getElementById('updated').textContent = `Aktualisiert: ${updated}`;
+
+      renderKpis(data);
+      renderBars('chart-days', data.series.map(s => ({ day: s.day, views: s.views, label: fmtDay(s.day) })), 'label');
+      renderBars('chart-hours', data.hourSeries.map(h => ({ views: h.views, label: h.hour + 'h' })), 'label');
+      renderTable('sources', data.topSources, 'Quelle');
+      renderTable('pages', data.topPages, 'Seite');
+      renderTable('terms', data.topTerms, 'Suchbegriff');
+    }
+
+    document.getElementById('refresh').addEventListener('click', () => load().catch(showError));
+    daysSelect.addEventListener('change', () => load().catch(showError));
+
+    function showError(err) {
+      errorEl.textContent = err.message || 'Daten konnten nicht geladen werden';
+      errorEl.style.display = 'block';
+    }
+
+    load().catch(showError);
+    setInterval(() => load().catch(() => {}), 60000);
+  </script>
+</body>
+</html>
