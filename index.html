@@ -849,7 +849,10 @@
           <h2>📊 Besucherstatistik</h2>
           <div class="meta">Seitenaufrufe · WM 2026 Dashboard</div>
         </div>
-        <button class="modal-close" id="visitor-close" aria-label="Schließen">✕</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="modal-close" id="visitor-refresh" aria-label="Aktualisieren" title="Neu laden" style="font-size:16px">↻</button>
+          <button class="modal-close" id="visitor-close" aria-label="Schließen">✕</button>
+        </div>
       </div>
       <div class="modal-body visitor-body" id="visitor-body">
         <div class="modal-loading">Lade Statistik…</div>
@@ -861,8 +864,25 @@
     const ESPN_SCORE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
     const ESPN_STANDINGS = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
     const ESPN_SUMMARY = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary';
-    const HITS_URL = 'https://hits.sh/jay2090x.github.io/wm-spiele-2026.svg';
-    const HITS_REF_BASE = 'https://hits.sh/jay2090x.github.io/wm-spiele-2026/ref/';
+    const HITS_URN = 'jay2090x.github.io/wm-spiele-2026';
+    const HITS_URL = `https://hits.sh/${HITS_URN}.svg`;
+    const HITS_API = `https://hits.sh/api/urns/${HITS_URN}`;
+    const HITS_REF_BASE = `https://hits.sh/${HITS_URN}/ref/`;
+    const CORS_PROXY = 'https://corsproxy.io/?';
+    const VISITOR_REF_BUCKETS = [
+      ['direct', 'Direkt / Lesezeichen'],
+      ['google', 'Google'],
+      ['facebook', 'Facebook'],
+      ['instagram', 'Instagram'],
+      ['twitter', 'X / Twitter'],
+      ['reddit', 'Reddit'],
+      ['whatsapp', 'WhatsApp'],
+      ['telegram', 'Telegram'],
+      ['youtube', 'YouTube'],
+      ['bing', 'Bing'],
+      ['duckduckgo', 'DuckDuckGo'],
+      ['other', 'Sonstige'],
+    ];
     const VISITOR_STORE_KEY = 'wm26_visitor_ips';
     const SHORT_URL = 'https://jay2090x.github.io/wm2026/';
     const ESPN_TEAMS = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/teams';
@@ -1697,11 +1717,35 @@
       };
     }
 
+    async function fetchHitsJson(url, timeoutMs = 14000) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+      try {
+        const res = await fetch(CORS_PROXY + encodeURIComponent(url), {
+          signal: ctrl.signal,
+          cache: 'no-store',
+        });
+        if (!res.ok) throw new Error('proxy-' + res.status);
+        return await res.json();
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
     async function fetchVisitorStats() {
       try {
-        const res = await fetch('visitor-stats.json?' + Date.now());
+        const data = await fetchHitsJson(HITS_API);
+        data.updated = new Date().toISOString();
+        data._live = true;
+        visitorStatsCache = data;
+        return data;
+      } catch (_) {}
+
+      try {
+        const res = await fetch('visitor-stats.json?' + Date.now(), { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
+          data._live = false;
           visitorStatsCache = data;
           return data;
         }
@@ -1710,10 +1754,36 @@
     }
 
     async function fetchVisitorReferrers() {
+      let github = [];
       try {
-        const res = await fetch('visitor-referrers.json?' + Date.now());
+        const res = await fetch('visitor-referrers.json?' + Date.now(), { cache: 'no-store' });
+        if (res.ok) github = (await res.json()).github || [];
+      } catch (_) {}
+
+      try {
+        const buckets = await Promise.all(VISITOR_REF_BUCKETS.map(async ([id, label]) => {
+          try {
+            const d = await fetchHitsJson(`${HITS_API}/ref/${id}`, 10000);
+            return { id, label, count: parseInt(d.total, 10) || 0 };
+          } catch {
+            return { id, label, count: 0 };
+          }
+        }));
+        const data = {
+          updated: new Date().toISOString(),
+          buckets,
+          github,
+          _live: true,
+        };
+        visitorReferrersCache = data;
+        return data;
+      } catch (_) {}
+
+      try {
+        const res = await fetch('visitor-referrers.json?' + Date.now(), { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
+          data._live = false;
           visitorReferrersCache = data;
           return data;
         }
@@ -1805,6 +1875,7 @@
 
     function renderVisitorDashboard(data, refData) {
       const m = computeVisitorMetrics(data);
+      const live = !!(data?._live && refData?._live);
       const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
       let trendHtml = '';
       if (m.today > m.yesterday) {
@@ -1856,13 +1927,13 @@
           <tbody>${rows}</tbody>
         </table>
         <div class="visitor-foot">
-          <span>Aktualisiert: ${updated}</span>
-          <span>hits.sh · 1×/IP/Tag · alle 15 Min.</span>
+          <span>Aktualisiert: ${updated}${live ? ' · live' : ' · Cache'}</span>
+          <span>hits.sh · 1×/IP/Tag · ${live ? 'beim Öffnen geladen' : 'Fallback-Datei'}</span>
         </div>`;
     }
 
     async function loadVisitorDashboard() {
-      document.getElementById('visitor-body').innerHTML = '<div class="modal-loading">Lade Statistik…</div>';
+      document.getElementById('visitor-body').innerHTML = '<div class="modal-loading">Lade Live-Statistik…</div>';
       const [data, refs] = await Promise.all([fetchVisitorStats(), fetchVisitorReferrers()]);
       renderVisitorDashboard(data || { total: 0, items: [] }, refs || { buckets: [], github: [] });
     }
@@ -2461,6 +2532,7 @@
 
     document.getElementById('team-modal-close').onclick = closeTeamModal;
     document.getElementById('team-overlay').onclick = (e) => { if (e.target.id === 'team-overlay') closeTeamModal(); };
+    document.getElementById('visitor-refresh').onclick = () => loadVisitorDashboard();
     document.getElementById('visitor-close').onclick = () => document.getElementById('visitor-overlay').classList.remove('open');
     document.getElementById('visitor-overlay').onclick = (e) => { if (e.target.id === 'visitor-overlay') e.target.classList.remove('open'); };
 
