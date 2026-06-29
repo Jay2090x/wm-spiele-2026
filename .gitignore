@@ -1,6 +1,1 @@
-node_modules/
-.netlify/
-.env
 .DS_Store
-netlify/functions/*.zip
-netlify/functions/manifest.json
