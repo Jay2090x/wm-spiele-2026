@@ -271,6 +271,30 @@
 
     .group-KO { background: rgba(212,175,55,0.25); color: var(--accent); }
 
+    .round-row td {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 8px 6px 4px;
+      background: linear-gradient(90deg, rgba(212,175,55,0.18), rgba(212,175,55,0.04));
+      border-top: 2px solid rgba(212,175,55,0.45);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+    .round-row:first-child td { border-top: none; }
+
+    .flag-inline {
+      width: 18px; height: 12px; object-fit: cover;
+      border-radius: 2px; vertical-align: -2px;
+      margin-right: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.35);
+    }
+    .score .pen { font-size: 11px; font-weight: 600; color: var(--muted); }
+
+    .tv-ard { background: rgba(0,80,180,0.2); color: #8ec5ff; }
+    .tv-zdf { background: rgba(220,160,0,0.18); color: #ffd76a; }
+    .tv-srf { background: rgba(200,0,40,0.18); color: #ff9eb0; }
+
     .bracket-scroll { overflow: auto; padding: 4px 2px; }
     .bracket-wrap {
       position: relative; min-height: 400px; min-width: 300px;
@@ -318,6 +342,29 @@
     }
     .br-next-slot .br-emoji, .br-next-slot .br-flag { width: 16px; height: 11px; font-size: 11px; }
     .br-next-slot:empty { display: none; }
+
+    .br-ko-path {
+      margin-top: 10px; padding-top: 8px;
+      border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .br-ko-round-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--muted); margin-bottom: 4px;
+    }
+    .br-ko-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+      gap: 4px;
+    }
+    .br-ko-match {
+      display: flex; align-items: center; justify-content: center; gap: 3px;
+      padding: 3px 4px; border-radius: 5px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      cursor: pointer; min-height: 24px;
+    }
+    .br-ko-match:hover { background: rgba(255,255,255,0.08); }
+    .br-ko-match .br-flag, .br-ko-match .br-emoji { width: 18px; height: 12px; font-size: 11px; }
+    .br-ko-vs { font-size: 9px; color: var(--muted); font-weight: 700; }
 
     .finished-block {
       flex-shrink: 0;
@@ -888,6 +935,9 @@
     const ESPN_TEAMS = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/teams';
     const FINISHED_VISIBLE_MS = 24 * 60 * 60 * 1000;
     const MATCH_DURATION_MS = 105 * 60 * 1000;
+    const TOURNAMENT_START = new Date('2026-06-11T00:00:00Z');
+    const TOURNAMENT_END = new Date('2026-07-20T12:00:00Z');
+    const STATS_CACHE_MS = 5 * 60 * 1000;
     const tz = 'Europe/Berlin';
 
     const COUNTRIES = {
@@ -946,7 +996,7 @@
       Sweden:'schweden', Ecuador:'ecuador', 'Bosnia and Herzegovina':'bosnien',
       'Bosnia-Herzegovina':'bosnien', Paraguay:'paraguay', 'South Korea':'suedkorea',
       Scotland:'schottland', Germany:'deutschland', Netherlands:'niederlande',
-      USA:'usa', Brazil:'brasilien', Japan:'japan',
+      'United States':'usa', USA:'usa', Brazil:'brasilien', Japan:'japan',
       Morocco:'marokko', Mexico:'mexiko', Switzerland:'schweiz', Australia:'australien',
       'Ivory Coast':'elfenbeinkueste', 'Côte d\'Ivoire':'elfenbeinkueste',
     };
@@ -973,6 +1023,23 @@
     ];
     const R32_ALL = [...R32_LEFT, ...R32_RIGHT];
 
+    const KO_ROUND_META = {
+      R32: { order: 1, label: 'Sechzehntelfinale' },
+      AF:  { order: 2, label: 'Achtelfinale' },
+      VF:  { order: 3, label: 'Viertelfinale' },
+      HF:  { order: 4, label: 'Halbfinale' },
+      F:   { order: 5, label: 'Finale' },
+      '3P': { order: 6, label: 'Spiel um Platz 3' },
+    };
+
+    const KO_LATER_ROUNDS = [
+      { group: 'AF', label: 'Achtelfinale', ids: ['760502','760503','760507','760508','760504','760505','760506','760509'] },
+      { group: 'VF', label: 'Viertelfinale', ids: ['760510','760511','760512','760513'] },
+      { group: 'HF', label: 'Halbfinale', ids: ['760514','760515'] },
+      { group: 'F',  label: 'Finale', ids: ['760517'] },
+      { group: '3P', label: 'Platz 3', ids: ['760516'] },
+    ];
+
     // ORF 1 / ServusTV laut offiziellem Spielplan (tv.ORF.at, ServusTV, Stand Juni 2026)
     const TV_BY_ESPN = {
       '760486': 'ServusTV', '760487': 'ORF', '760489': 'ORF', '760488': 'ORF',
@@ -984,6 +1051,18 @@
       '760506': 'ServusTV', '760507': 'ServusTV', '760508': 'ORF', '760509': 'ORF',
       '760514': 'ORF', '760515': 'ORF',
       '760516': 'ServusTV', '760517': 'ORF',
+    };
+
+    // Öffentlich-rechtlich DE (ARD/ZDF, WM 2026) – Auswahl laut Sportschau/Anstoßzeiten
+    const TV_DE = {
+      '760486': 'ZDF', '760487': 'ARD', '760489': 'ARD', '760488': 'ZDF',
+      '760490': 'ZDF', '760492': 'ARD', '760491': 'ZDF', '760495': 'ARD',
+      '760493': 'ZDF', '760494': 'ARD', '760497': 'ZDF', '760496': 'ARD',
+      '760498': 'ZDF', '760499': 'ARD', '760500': 'ZDF', '760501': 'ARD',
+      '760502': 'ZDF', '760503': 'ARD', '760504': 'ZDF', '760505': 'ARD',
+      '760506': 'ZDF', '760507': 'ARD', '760508': 'ZDF', '760509': 'ARD',
+      '760510': 'ZDF', '760511': 'ARD', '760512': 'ZDF', '760513': 'ARD',
+      '760514': 'ZDF', '760515': 'ARD', '760516': 'ZDF', '760517': 'ARD',
     };
 
     // FIFA/Coca-Cola Weltrangliste, Stand 11. Juni 2026 (ESPN / FIFA)
@@ -1073,6 +1152,8 @@
     let finishedMatchCache = {};
     let knockoutMeta = {};
     let allEvents = [];
+    let statsEvents = [];
+    let statsEventsAt = 0;
     let lastFetch = null;
     let refreshCount = 0;
     let pageStart = Date.now();
@@ -1098,24 +1179,41 @@
       return { ...base, fifa: FIFA_RANK[key] ?? null };
     }
 
+    function visitorCountryCode() {
+      return (visitorGeo.countryCode || 'AT').toUpperCase();
+    }
+
     function resolveBroadcaster(espnId, lookup) {
+      const cc = visitorCountryCode();
+      if (cc === 'DE') return TV_DE[espnId] || lookup?.broadcaster || 'ARD';
+      if (cc === 'CH') return 'SRF';
+      if (cc === 'AT') return TV_BY_ESPN[espnId] || lookup?.broadcaster || '–';
       return TV_BY_ESPN[espnId] || lookup?.broadcaster || '–';
     }
 
     function tvLabel(b) {
       if (b === 'ORF') return 'ORF 1';
       if (b === 'ServusTV') return 'Servus';
+      if (b === 'ARD') return 'ARD';
+      if (b === 'ZDF') return 'ZDF';
+      if (b === 'SRF') return 'SRF';
       return b;
     }
 
     function tvCssClass(b) {
       if (b === 'ORF') return 'tv-orf';
       if (b === 'ServusTV') return 'tv-servus';
+      if (b === 'ARD') return 'tv-ard';
+      if (b === 'ZDF') return 'tv-zdf';
+      if (b === 'SRF') return 'tv-srf';
       return '';
     }
 
     function tvStreamUrl(b) {
       if (b === 'ORF' || b === 'ServusTV') return tvStreams[b] || null;
+      if (b === 'SRF') return 'https://www.srf.ch/sport';
+      if (b === 'ARD') return 'https://www.sportschau.de/fussball/fifa-wm-2026/';
+      if (b === 'ZDF') return 'https://www.zdf.de/sport/fussball-wm-2026';
       return null;
     }
 
@@ -1167,13 +1265,55 @@
 
     const DISPLAY_MATCHES = Object.entries(MATCH_LOOKUP).map(([id, m]) => matchFromLookup(id, m));
 
-    function roundLabel(name) {
+    function koRoundFromId(espnId) {
+      const id = parseInt(espnId, 10);
+      if (id === 760517) return 'F';
+      if (id === 760516) return '3P';
+      if (id >= 760514 && id <= 760515) return 'HF';
+      if (id >= 760510 && id <= 760513) return 'VF';
+      if (id >= 760502 && id <= 760509) return 'AF';
+      if (id >= 760486 && id <= 760501) return 'R32';
+      return 'KO';
+    }
+
+    function roundLabel(name, espnId) {
       if (/Semifinal 1 Winner.*Semifinal 2 Winner/i.test(name)) return 'F';
       if (/Semifinal.*Loser/i.test(name)) return '3P';
+      if (/Semifinal/i.test(name)) return 'HF';
       if (/Quarterfinal/i.test(name)) return 'VF';
       if (/Round of 16/i.test(name)) return 'AF';
-      if (/Round of 32/i.test(name) || parseInt(name, 10) >= 760486) return 'R32';
+      if (/Round of 32/i.test(name)) return 'R32';
+      if (espnId && parseInt(espnId, 10) >= 760486) return koRoundFromId(espnId);
       return 'KO';
+    }
+
+    function isKnockoutMatch(m) {
+      if (!m) return false;
+      if (m.isKnockout) return true;
+      const id = parseInt(m.espnId, 10);
+      if (id >= 760486) return true;
+      return ['R32', 'AF', 'VF', 'HF', 'F', '3P', 'KO'].includes(m.group);
+    }
+
+    function koRoundOrder(m) {
+      if (!isKnockoutMatch(m)) return 0;
+      return KO_ROUND_META[m.group]?.order ?? 9;
+    }
+
+    function koRoundLabel(group) {
+      return KO_ROUND_META[group]?.label || group || 'K.-o.-Runde';
+    }
+
+    function flagIcon(key, cls = 'flag-inline') {
+      if (!key) return '';
+      const iso = COUNTRY_ISO[key];
+      if (iso) return `<img class="${cls}" src="https://flagcdn.com/w20/${iso}.png" alt="" loading="lazy">`;
+      const f = c(key).flag;
+      return f ? `<span class="${cls}" style="font-size:14px">${f}</span>` : '';
+    }
+
+    function fixtureHtml(m) {
+      return `${flagIcon(m.homeKey)} ${m.home} – ${m.away} ${flagIcon(m.awayKey)}`;
     }
 
     function koPlaceholderDe(name) {
@@ -1214,7 +1354,7 @@
         homeFlag: homeMeta[1], awayFlag: awayMeta[1],
         homeKey: homeMeta[2] || ESPN_TO_KEY[homeEn] || '',
         awayKey: awayMeta[2] || ESPN_TO_KEY[awayEn] || '',
-        group: isKo ? roundLabel(e.name || '') : (lookup?.group || 'KO'),
+        group: isKo ? roundLabel(e.name || '', e.id) : (lookup?.group || 'KO'),
         broadcaster: resolveBroadcaster(e.id, lookup),
         espnHome: lookup?.espnHome ?? true,
         start: lookup?.start || e.date,
@@ -1240,10 +1380,42 @@
     function getMatchWinner(homeKey, awayKey, espnId) {
       const s = liveScores[espnId];
       if (!s || s.state !== 'post') return null;
+      if (s.homeWinner) return homeKey;
+      if (s.awayWinner) return awayKey;
       const hs = parseInt(s.homeScore, 10) || 0;
       const as = parseInt(s.awayScore, 10) || 0;
-      if (hs === as) return null;
-      return hs > as ? homeKey : awayKey;
+      if (hs > as) return homeKey;
+      if (as > hs) return awayKey;
+      if (s.hasPenalties && s.penHome != null && s.penAway != null) {
+        if (s.penHome > s.penAway) return homeKey;
+        if (s.penAway > s.penHome) return awayKey;
+      }
+      return null;
+    }
+
+    function formatScorePair(match, tiny = false) {
+      const s = liveScores[match.espnId];
+      if (!s || s.state === 'pre') return { html: '<span class="score" style="color:var(--muted)">–</span>', text: '–' };
+      const hs = match.espnHome ? s.homeScore : s.awayScore;
+      const as = match.espnHome ? s.awayScore : s.homeScore;
+      let text = `${hs}:${as}`;
+      let pen = '';
+      if (s.hasPenalties && s.penHome != null && s.penAway != null) {
+        const ph = match.espnHome ? s.penHome : s.penAway;
+        const pa = match.espnHome ? s.penAway : s.penHome;
+        pen = ` (${ph}:${pa} iE)`;
+        text += pen;
+      }
+      const cls = tiny ? 'score tiny' : 'score';
+      if (s.state === 'in') {
+        const min = s.clock ? `${s.clock}'` : 'LIVE';
+        return { html: `<span class="${cls} live-score">${text.replace(pen,'')} <span class="min">${min}</span></span>`, text };
+      }
+      if (s.state === 'post') {
+        const penHtml = pen ? `<span class="pen">${pen.trim()}</span>` : '';
+        return { html: `<span class="${cls} final-score">${hs}:${as}${penHtml}</span>`, text };
+      }
+      return { html: `<span class="${cls}">${text}</span>`, text };
     }
 
     function getR32Winner(slot) {
@@ -1309,12 +1481,17 @@
       const awayKey = m.awayKey || resolveTeamFromName(awayEn) || '';
       const home = teamDisplayFromKeyOrName(homeKey, homeEn);
       const away = teamDisplayFromKeyOrName(awayKey, awayEn);
+      const lookup = MATCH_LOOKUP[m.espnId];
+      const isKo = m.isKnockout || parseInt(m.espnId, 10) >= 760486
+        || ['R32', 'AF', 'VF', 'HF', 'F', '3P', 'KO'].includes(m.group);
       return {
         ...m,
         homeEn, awayEn,
         homeKey, awayKey,
         home: home.name, away: away.name,
         homeFlag: home.flag, awayFlag: away.flag,
+        broadcaster: resolveBroadcaster(m.espnId, lookup),
+        isKnockout: isKo,
       };
     }
 
@@ -1405,6 +1582,26 @@
       return `<div class="br-pair" data-espn="${m.id}"${liveDot}>${home}${bar}${away}</div>`;
     }
 
+    function renderKoPathMatch(id) {
+      const sides = getKoMatchSides(id);
+      if (!sides) return '';
+      const home = teamDisplayFromKeyOrName(sides.homeKey, sides.homeEn);
+      const away = teamDisplayFromKeyOrName(sides.awayKey, sides.awayEn);
+      const win = getKoMatchWinner(id);
+      const hCls = win === sides.homeKey ? 'win' : (win && win !== sides.homeKey ? 'dim' : '');
+      const aCls = win === sides.awayKey ? 'win' : (win && win !== sides.awayKey ? 'dim' : '');
+      const hFlag = sides.homeKey ? brFlagEl(sides.homeKey, hCls + ' sm') : `<span class="br-emoji sm">?</span>`;
+      const aFlag = sides.awayKey ? brFlagEl(sides.awayKey, aCls + ' sm') : `<span class="br-emoji sm">?</span>`;
+      return `<div class="br-ko-match" data-espn="${id}" title="${home.name} – ${away.name}">${hFlag}<span class="br-ko-vs">·</span>${aFlag}</div>`;
+    }
+
+    function renderKoPath() {
+      return KO_LATER_ROUNDS.map(round => {
+        const cells = round.ids.map(renderKoPathMatch).join('');
+        return `<div><div class="br-ko-round-title">${round.label}</div><div class="br-ko-grid">${cells}</div></div>`;
+      }).join('');
+    }
+
     function renderBracket() {
       const finKey = resolveTeamFromName('Semifinal 1 Winner');
       const finKey2 = resolveTeamFromName('Semifinal 2 Winner');
@@ -1415,6 +1612,15 @@
         ? `${brFlagEl(finKey, f1Cls)}${brFlagEl(finKey2, f2Cls)}`
         : '';
 
+      const thirdKey1 = resolveTeamFromName('Semifinal 1 Loser');
+      const thirdKey2 = resolveTeamFromName('Semifinal 2 Loser');
+      const thirdWin = getKoMatchWinner('760516');
+      const t1Cls = thirdWin === thirdKey1 ? 'win' : (thirdWin && thirdWin !== thirdKey1 ? 'dim' : '');
+      const t2Cls = thirdWin === thirdKey2 ? 'win' : (thirdWin && thirdWin !== thirdKey2 ? 'dim' : '');
+      const thirdHtml = (thirdKey1 && thirdKey2)
+        ? `${brFlagEl(thirdKey1, t1Cls)}${brFlagEl(thirdKey2, t2Cls)}`
+        : '';
+
       document.getElementById('bracket-root').innerHTML = `
         <div class="bracket-wrap">
           <svg class="bracket-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
@@ -1422,9 +1628,11 @@
           <div class="br-center-col">
             <div class="br-trophy">🏆</div>
             <div class="br-next-slot">${finalHtml}</div>
+            <div class="br-next-slot" style="margin-top:4px" title="Spiel um Platz 3">${thirdHtml}</div>
           </div>
           <div class="br-col right">${R32_RIGHT.map(m => renderBracketPair(m, 'right')).join('')}</div>
-        </div>`;
+        </div>
+        <div class="br-ko-path">${renderKoPath()}</div>`;
 
       const wrap = document.querySelector('#bracket-root .bracket-wrap');
       const svg = wrap?.querySelector('.bracket-svg');
@@ -1474,22 +1682,113 @@
     function getDateRange() {
       const now = new Date();
       const dates = new Set();
-      const end = new Date('2026-07-20T12:00:00Z');
-      for (let d = new Date(now); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+      for (let d = new Date(now); d <= TOURNAMENT_END; d.setUTCDate(d.getUTCDate() + 1)) {
         dates.add(espnDateParam(d));
       }
-      for (let i = 1; i <= 3; i++) {
+      for (let i = 1; i <= 5; i++) {
         const past = new Date(now);
         past.setUTCDate(past.getUTCDate() - i);
         dates.add(espnDateParam(past));
       }
       DISPLAY_MATCHES.forEach(m => dates.add(espnDateParam(new Date(m.start))));
+      R32_ALL.forEach(m => {
+        const s = liveScores[m.id];
+        if (s?.date) dates.add(espnDateParam(new Date(s.date)));
+      });
       return [...dates];
+    }
+
+    function getTournamentDates() {
+      const dates = [];
+      for (let d = new Date(TOURNAMENT_START); d <= TOURNAMENT_END; d.setUTCDate(d.getUTCDate() + 1)) {
+        dates.push(espnDateParam(d));
+      }
+      return dates;
+    }
+
+    async function fetchScoreboardDay(date) {
+      try {
+        const res = await fetch(`${ESPN_SCORE}?dates=${date}`);
+        const data = await res.json();
+        return data.events || [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function eventToStatsEntry(e) {
+      const c = e.competitions[0];
+      const st = c.status.type;
+      const comps = c.competitors;
+      const home = comps.find(x => x.homeAway === 'home');
+      const away = comps.find(x => x.homeAway === 'away');
+      const detail = st.detail || '';
+      const desc = st.description || '';
+      return {
+        id: e.id,
+        homeScore: home?.score ?? '0',
+        awayScore: away?.score ?? '0',
+        state: st.state,
+        hasPenalties: /Pen/i.test(detail) || /Penalt/i.test(desc),
+        homeWinner: home?.winner === true,
+        awayWinner: away?.winner === true,
+        homeEn: home?.team?.displayName || '',
+        awayEn: away?.team?.displayName || '',
+        penHome: null,
+        penAway: null,
+      };
+    }
+
+    async function enrichPenaltyScores(entries) {
+      const penIds = entries.filter(s => s.hasPenalties && s.state === 'post').map(s => s.id);
+      await Promise.all(penIds.map(async (id) => {
+        try {
+          const res = await fetch(`${ESPN_SUMMARY}?event=${id}`);
+          const data = await res.json();
+          const comp = data.header?.competitions?.[0];
+          const teams = comp?.competitors || [];
+          const h = teams.find(t => t.homeAway === 'home');
+          const a = teams.find(t => t.homeAway === 'away');
+          const hls = h?.linescores || [];
+          const als = a?.linescores || [];
+          const entry = entries.find(x => x.id === id);
+          if (entry && hls.length && als.length) {
+            entry.penHome = parseInt(hls[hls.length - 1]?.displayValue ?? hls[hls.length - 1]?.value, 10) || 0;
+            entry.penAway = parseInt(als[als.length - 1]?.displayValue ?? als[als.length - 1]?.value, 10) || 0;
+          }
+        } catch (_) {}
+      }));
+    }
+
+    async function fetchStatsEvents(force = false) {
+      if (!force && statsEvents.length && Date.now() - statsEventsAt < STATS_CACHE_MS) return statsEvents;
+      const dates = getTournamentDates();
+      const byId = new Map();
+      const chunkSize = 8;
+      for (let i = 0; i < dates.length; i += chunkSize) {
+        const chunk = dates.slice(i, i + chunkSize);
+        const batches = await Promise.all(chunk.map(fetchScoreboardDay));
+        for (const events of batches) {
+          for (const e of events) {
+            if (!byId.has(e.id)) byId.set(e.id, eventToStatsEntry(e));
+          }
+        }
+      }
+      const entries = [...byId.values()];
+      await enrichPenaltyScores(entries);
+      statsEvents = entries;
+      statsEventsAt = Date.now();
+      return statsEvents;
     }
 
     function teamFromEn(en) {
       const key = ESPN_TO_KEY[en];
-      return key ? c(key) : { name: en, flag: '' };
+      if (key) return c(key);
+      return { name: en, flag: '' };
+    }
+
+    function teamFromKey(key) {
+      return key ? c(key) : { name: '–', flag: '' };
     }
 
     function countryDe(name) { return COUNTRY_DE[name] || name; }
@@ -1961,12 +2260,19 @@
             const homeEn = home?.team?.displayName || '';
             const awayEn = away?.team?.displayName || '';
 
+            const detail = st.type.detail || '';
+            const desc = st.type.description || '';
+            const hasPenalties = /Pen/i.test(detail) || /Penalt/i.test(desc);
             const entry = {
               id: e.id,
               homeScore: home?.score ?? '0',
               awayScore: away?.score ?? '0',
               state: st.type.state,
-              description: st.type.description,
+              description: desc,
+              detail,
+              hasPenalties,
+              homeWinner: home?.winner === true,
+              awayWinner: away?.winner === true,
               clock: st.displayClock || '',
               period: st.period || 0,
               venue: c.venue?.fullName || '',
@@ -1977,6 +2283,8 @@
               awayAbbr: away?.team?.abbreviation || '',
               date: e.date,
               group,
+              penHome: null,
+              penAway: null,
             };
             scoreMap[e.id] = entry;
             events.push(entry);
@@ -2004,6 +2312,25 @@
       groupLive = gLive;
       allEvents = events;
       knockoutMeta = koMeta;
+
+      const penIds = Object.values(scoreMap).filter(s => s.hasPenalties && s.state === 'post').map(s => s.id);
+      await Promise.all(penIds.map(async (id) => {
+        try {
+          const res = await fetch(`${ESPN_SUMMARY}?event=${id}`);
+          const data = await res.json();
+          const comp = data.header?.competitions?.[0];
+          const teams = comp?.competitors || [];
+          const h = teams.find(t => t.homeAway === 'home');
+          const a = teams.find(t => t.homeAway === 'away');
+          const hls = h?.linescores || [];
+          const als = a?.linescores || [];
+          if (hls.length && als.length && liveScores[id]) {
+            liveScores[id].penHome = parseInt(hls[hls.length - 1]?.displayValue ?? hls[hls.length - 1]?.value, 10) || 0;
+            liveScores[id].penAway = parseInt(als[als.length - 1]?.displayValue ?? als[als.length - 1]?.value, 10) || 0;
+          }
+        } catch (_) {}
+      }));
+
       scheduleMatches = [...built.values()]
         .map(enrichScheduleMatch)
         .sort((a, b) => a.startDate - b.startDate);
@@ -2097,7 +2424,7 @@
 
     function getFinishedMatches(now = new Date()) {
       return getRenderableMatches()
-        .filter(m => isKnownMatch(m) && (liveScores[m.espnId]?.state === 'post' || isRecentlyFinished(m, now)))
+        .filter(m => isKnownMatch(m) && isKnockoutMatch(m) && (liveScores[m.espnId]?.state === 'post' || isRecentlyFinished(m, now)))
         .sort((a, b) => b.startDate - a.startDate);
     }
 
@@ -2108,18 +2435,7 @@
     }
 
     function getScoreHtml(match, tiny = false) {
-      const s = liveScores[match.espnId];
-      if (!s || s.state === 'pre') return '<span class="score" style="color:var(--muted)">–</span>';
-      const hs = match.espnHome ? s.homeScore : s.awayScore;
-      const as = match.espnHome ? s.awayScore : s.homeScore;
-      const score = `${hs}:${as}`;
-      const cls = tiny ? 'score tiny' : 'score';
-      if (s.state === 'in') {
-        const min = s.clock ? `${s.clock}'` : 'LIVE';
-        return `<span class="${cls} live-score">${score} <span class="min">${min}</span></span>`;
-      }
-      if (s.state === 'post') return `<span class="${cls} final-score">${score}</span>`;
-      return `<span class="${cls}">${score}</span>`;
+      return formatScorePair(match, tiny).html;
     }
 
     function getRowClass(match, now) {
@@ -2141,20 +2457,14 @@
         return;
       }
       block.classList.remove('is-empty');
-      head.textContent = `Beendet · 24h (${finished.length})`;
+      head.textContent = `K.-o. beendet · 24h (${finished.length})`;
       list.innerHTML = finished.map(m => {
-        const s = liveScores[m.espnId];
-        let score = '–';
-        if (s && (s.state === 'post' || s.state === 'in')) {
-          const hs = m.espnHome ? s.homeScore : s.awayScore;
-          const as = m.espnHome ? s.awayScore : s.homeScore;
-          score = `${hs}:${as}`;
-        }
-        const grp = m.isKnockout ? 'KO' : m.group;
+        const score = formatScorePair(m, true).text;
+        const rnd = koRoundLabel(m.group);
         return `<div class="finished-row" data-espn="${m.espnId}" title="${formatTime(m.startDate)} · ${m.home} – ${m.away}">
           <span class="finished-score">${score}</span>
-          <span class="finished-fixture">${m.homeFlag} ${m.home} – ${m.away} ${m.awayFlag}</span>
-          <span class="finished-grp">${grp}</span>
+          <span class="finished-fixture">${fixtureHtml(m)}</span>
+          <span class="finished-grp">${rnd}</span>
         </div>`;
       }).join('');
     }
@@ -2164,6 +2474,9 @@
       const visible = getRenderableMatches()
         .filter(m => isListedMatch(m, now))
         .sort((a, b) => {
+          const koA = koRoundOrder(a);
+          const koB = koRoundOrder(b);
+          if (koA !== koB) return koA - koB;
           const ka = activeMatchSortKey(a);
           const kb = activeMatchSortKey(b);
           if (ka[0] !== kb[0]) return ka[0] - kb[0];
@@ -2178,10 +2491,18 @@
 
       let html = '';
       let lastDate = '';
+      let lastRound = '';
 
       for (const m of visible) {
+        const isKo = isKnockoutMatch(m);
+        if (isKo && m.group !== lastRound) {
+          html += `<tr class="round-row"><td colspan="5">${koRoundLabel(m.group)}</td></tr>`;
+          lastRound = m.group;
+          lastDate = '';
+        }
+
         const dateKey = formatDateShort(m.startDate);
-        if (dateKey !== lastDate) {
+        if (!isKo && dateKey !== lastDate) {
           html += `<tr class="date-row"><td colspan="5">${dateKey}</td></tr>`;
           lastDate = dateKey;
         }
@@ -2195,14 +2516,17 @@
         else if (past) timeCell = '<span class="past-txt">Beendet</span>';
         else timeCell = `${formatTime(m.startDate)}${cd ? `<br><span class="cd">${cd}</span>` : ''}`;
 
-        const grpCls = m.isKnockout ? 'group-KO' : `group-${m.group}`;
+        const grpCell = isKo
+          ? '<td class="c"></td>'
+          : `<td class="c"><span class="grp group-${m.group}">${m.group}</span></td>`;
+        const bc = resolveBroadcaster(m.espnId, MATCH_LOOKUP[m.espnId]);
         html += `
           <tr class="match-row${getRowClass(m, now)}" data-espn="${m.espnId}">
             <td class="time">${timeCell}</td>
-            <td class="c"><span class="grp ${grpCls}">${m.group}</span></td>
-            <td class="fixture">${m.homeFlag} ${m.home} – ${m.away} ${m.awayFlag}</td>
+            ${grpCell}
+            <td class="fixture">${fixtureHtml(m)}</td>
             <td class="c">${getScoreHtml(m)}</td>
-            <td class="c">${tvLinkHtml(m.broadcaster)}</td>
+            <td class="c">${tvLinkHtml(bc)}</td>
           </tr>`;
       }
 
@@ -2377,15 +2701,14 @@
       const away = c(m.awayKey);
       const isLive = s.state === 'in';
 
-      document.getElementById('modal-title').textContent = `${home.flag} ${home.name} – ${away.name} ${away.flag}`;
+      document.getElementById('modal-title').innerHTML = `${flagIcon(m.homeKey)} ${home.name} – ${away.name} ${flagIcon(m.awayKey)}`;
+      const roundTxt = isKnockoutMatch(m) ? koRoundLabel(m.group) : `Gruppe ${m.group}`;
       document.getElementById('modal-meta').innerHTML =
-        `Gruppe ${m.group} · ${formatTime(m.startDate)} · ${tvLinkHtml(m.broadcaster)}`;
+        `${roundTxt} · ${formatTime(m.startDate)} · ${tvLinkHtml(resolveBroadcaster(m.espnId, MATCH_LOOKUP[m.espnId]))}`;
 
       let scoreText = '– : –';
       if (s.state === 'in' || s.state === 'post') {
-        const hs = m.espnHome ? s.homeScore : s.awayScore;
-        const as = m.espnHome ? s.awayScore : s.homeScore;
-        scoreText = `${hs} : ${as}`;
+        scoreText = formatScorePair(m).text.replace(':', ' : ');
         if (isLive) scoreText += `  (${s.clock || 'LIVE'}')`;
         if (s.state === 'post') scoreText += '  · Endstand';
       } else {
@@ -2422,55 +2745,70 @@
       document.getElementById('match-overlay').classList.remove('open');
     }
 
-    function computeCounterStats() {
-      const now = Date.now();
-      let totalGoals = 0, matchesDone = 0, matchesLive = 0, matchesUpcoming = 0, goalsToday = 0;
-      const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+    function computeWMStats() {
+      let totalGoals = 0;
+      let matchesDone = 0;
+      let matchesLive = 0;
+      let penShootouts = 0;
+      let biggestWin = { diff: 0, text: '–' };
+      const teamGoals = {};
+      const teamWins = {};
 
-      for (const e of allEvents) {
+      const source = statsEvents.length ? statsEvents : allEvents;
+      for (const e of source) {
         const hs = parseInt(e.homeScore, 10) || 0;
         const as = parseInt(e.awayScore, 10) || 0;
-        if (e.state === 'post') { totalGoals += hs + as; matchesDone++; }
-        if (e.state === 'in') { totalGoals += hs + as; matchesLive++; }
-        if (e.state === 'pre') matchesUpcoming++;
-        const evDay = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date(e.date));
-        if (evDay === todayStr && e.state === 'post') goalsToday += hs + as;
+        if (e.state === 'post') {
+          matchesDone++;
+          totalGoals += hs + as;
+          if (e.hasPenalties) penShootouts++;
+          const diff = Math.abs(hs - as);
+          if (diff > biggestWin.diff) biggestWin = { diff, text: `${Math.max(hs, as)}:${Math.min(hs, as)}` };
+          const homeKey = ESPN_TO_KEY[e.homeEn] || '';
+          const awayKey = ESPN_TO_KEY[e.awayEn] || '';
+          if (homeKey) teamGoals[homeKey] = (teamGoals[homeKey] || 0) + hs;
+          if (awayKey) teamGoals[awayKey] = (teamGoals[awayKey] || 0) + as;
+          if (e.homeWinner && homeKey) teamWins[homeKey] = (teamWins[homeKey] || 0) + 1;
+          else if (e.awayWinner && awayKey) teamWins[awayKey] = (teamWins[awayKey] || 0) + 1;
+          else if (hs > as && homeKey) teamWins[homeKey] = (teamWins[homeKey] || 0) + 1;
+          else if (as > hs && awayKey) teamWins[awayKey] = (teamWins[awayKey] || 0) + 1;
+        }
+        if (e.state === 'in') {
+          matchesLive++;
+          totalGoals += hs + as;
+        }
       }
 
-      const nextMatch = scheduleMatches
-        .filter(m => liveScores[m.espnId]?.state === 'pre' || liveScores[m.espnId]?.state === 'in')
-        .sort((a, b) => a.startDate - b.startDate)[0];
-
-      const austriaMatch = scheduleMatches.find(m => m.homeKey === 'oesterreich' || m.awayKey === 'oesterreich');
-      const uptimeMin = Math.floor((now - pageStart) / 60000);
-
-      const matchesRemaining = Math.max(0, 104 - matchesDone);
+      const topScorerTeam = Object.entries(teamGoals).sort((a, b) => b[1] - a[1])[0];
+      const topWinnerTeam = Object.entries(teamWins).sort((a, b) => b[1] - a[1])[0];
+      const avgGoals = matchesDone ? (totalGoals / matchesDone).toFixed(1) : '0.0';
+      const koDone = source.filter(e => e.state === 'post' && parseInt(e.id, 10) >= 760486).length;
+      const koTotal = 32;
 
       return {
-        totalGoals, matchesDone, matchesLive, matchesUpcoming, matchesRemaining,
-        goalsToday,
-        totalWMMatches: 104,
-        progress: Math.round((matchesDone / 104) * 100),
-        avgGoals: matchesDone ? (totalGoals / matchesDone).toFixed(2) : '0',
-        liveGroups: Object.keys(groupLive).length,
-        refreshCount, uptimeMin,
-        nextMatch: nextMatch ? `${nextMatch.home} – ${nextMatch.away} in ${formatCountdown(nextMatch.startDate - new Date())}` : '–',
-        austria: austriaMatch ? `${austriaMatch.home} vs ${austriaMatch.away} · ${formatTime(austriaMatch.startDate)}` : '–',
-        popPlaying: scheduleMatches.filter(m => liveScores[m.espnId]?.state === 'in')
-          .reduce((s, m) => s + c(m.homeKey).pop + c(m.awayKey).pop, 0).toFixed(1),
+        totalGoals,
+        avgGoals,
+        matchesDone,
+        matchesLive,
+        penShootouts,
+        biggestWin: biggestWin.text,
+        topScorer: topScorerTeam ? `${c(topScorerTeam[0]).flag} ${c(topScorerTeam[0]).name}` : '–',
+        topScorerVal: topScorerTeam ? topScorerTeam[1] : 0,
+        topWinner: topWinnerTeam ? `${c(topWinnerTeam[0]).flag} ${c(topWinnerTeam[0]).name}` : '–',
+        topWinnerVal: topWinnerTeam ? topWinnerTeam[1] : 0,
+        koProgress: `${koDone}/${koTotal}`,
       };
     }
 
     function renderStats() {
-      const s = computeCounterStats();
+      const s = computeWMStats();
       document.getElementById('stats-grid').innerHTML = `
-        <div class="stat-item"><div class="val">${s.matchesRemaining}</div><div class="lbl">Spiele offen</div></div>
         <div class="stat-item"><div class="val">${s.totalGoals}</div><div class="lbl">Tore gesamt</div></div>
-        <div class="stat-item"><div class="val">${s.goalsToday}</div><div class="lbl">Tore heute</div></div>
-        <div class="stat-item"><div class="val">${s.matchesLive}</div><div class="lbl">Live</div></div>
-        <div class="stat-item"><div class="val">${s.matchesDone}</div><div class="lbl">Beendet</div></div>
-        <div class="stat-item"><div class="val">${s.progress}%</div><div class="lbl">Fortschritt</div></div>
-        <div class="stat-item"><div class="val">${s.avgGoals}</div><div class="lbl">Ø Tore</div></div>`;
+        <div class="stat-item"><div class="val">${s.avgGoals}</div><div class="lbl">Ø Tore/Spiel</div></div>
+        <div class="stat-item"><div class="val">${s.biggestWin}</div><div class="lbl">Höchstsieg</div></div>
+        <div class="stat-item" title="${s.topScorer}"><div class="val">${s.topScorerVal}</div><div class="lbl">Tore · Top-Team</div></div>
+        <div class="stat-item"><div class="val">${s.penShootouts}</div><div class="lbl">Elfmeterschießen</div></div>
+        <div class="stat-item"><div class="val">${s.koProgress}</div><div class="lbl">K.-o.-Phase</div></div>`;
     }
 
     function formatDayLabel(dayStr) {
@@ -2493,7 +2831,7 @@
     }
 
     async function refresh() {
-      await Promise.all([fetchLiveData(), loadTvStreams()]);
+      await Promise.all([fetchLiveData(), loadTvStreams(), fetchStatsEvents()]);
       renderMatches();
       renderFinishedMatches();
       renderBracket();
@@ -2524,6 +2862,7 @@
       const pair = e.target.closest('[data-espn]');
       if (pair?.dataset.espn) openMatchModal(pair.dataset.espn);
     });
+    // bracket-root also handles .br-ko-match via same data-espn
 
     document.getElementById('finished-list').addEventListener('click', (e) => {
       const row = e.target.closest('[data-espn]');
@@ -2546,7 +2885,7 @@
     (async () => {
       await fetchVisitorGeo();
       await pingVisitorHit();
-      refresh();
+      await refresh();
     })();
     setInterval(refresh, 60000);
   </script>
