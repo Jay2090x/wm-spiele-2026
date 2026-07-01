@@ -304,6 +304,14 @@
     .tv-ard { background: rgba(0,80,180,0.2); color: #8ec5ff; }
     .tv-zdf { background: rgba(220,160,0,0.18); color: #ffd76a; }
     .tv-srf { background: rgba(200,0,40,0.18); color: #ff9eb0; }
+    .tv-fox { background: rgba(0,100,220,0.2); color: #7ec8ff; }
+    .tv-sbs { background: rgba(200,40,40,0.18); color: #ffaaaa; }
+    .tv-nostream {
+      color: #ff5c5c; background: rgba(255,70,70,0.14);
+      font-weight: 700; font-size: 11px; letter-spacing: 0.03em;
+      cursor: default;
+    }
+    .tv-pending { color: var(--muted); background: rgba(255,255,255,0.05); cursor: default; }
 
     .bracket-wrap {
       position: relative;
@@ -1153,8 +1161,13 @@
       '760499': 'ORF', '760500': 'ORF', '760501': 'ORF',
       '760502': 'ServusTV', '760503': 'ServusTV', '760504': 'ORF', '760505': 'ORF',
       '760506': 'ServusTV', '760507': 'ServusTV', '760508': 'ORF', '760509': 'ORF',
+      '760510': 'ORF', '760511': 'ServusTV', '760512': 'ORF', '760513': 'ServusTV',
       '760514': 'ORF', '760515': 'ORF',
       '760516': 'ServusTV', '760517': 'ORF',
+      '760475': 'ServusTV', '760474': 'ORF', '760478': 'ServusTV', '760479': 'ORF',
+      '760476': 'ServusTV', '760477': 'ORF', '760480': 'ServusTV', '760485': 'ORF',
+      '760481': 'ServusTV', '760482': 'ORF', '760484': 'ORF', '760483': 'ServusTV',
+      '760468': 'ORF', '760471': 'ORF',
     };
 
     // Öffentlich-rechtlich DE (ARD/ZDF, WM 2026) – Auswahl laut Sportschau/Anstoßzeiten
@@ -1167,6 +1180,19 @@
       '760506': 'ZDF', '760507': 'ARD', '760508': 'ZDF', '760509': 'ARD',
       '760510': 'ZDF', '760511': 'ARD', '760512': 'ZDF', '760513': 'ARD',
       '760514': 'ZDF', '760515': 'ARD', '760516': 'ZDF', '760517': 'ARD',
+      '760475': 'ARD', '760474': 'ZDF', '760478': 'ZDF', '760479': 'ARD',
+      '760476': 'ZDF', '760477': 'ARD', '760480': 'ZDF', '760485': 'ARD',
+      '760481': 'ZDF', '760482': 'ARD', '760484': 'ARD', '760483': 'ZDF',
+      '760468': 'ZDF', '760471': 'ARD',
+    };
+
+    const WM_ESPN_MIN = 760468;
+    const WM_ESPN_MAX = 760517;
+
+    const TV_SINGLE_BROADCASTER = {
+      CH: 'SRF',
+      US: 'FOX',
+      AU: 'SBS',
     };
 
     // FIFA/Coca-Cola Weltrangliste, Stand 11. Juni 2026 (ESPN / FIFA)
@@ -1264,6 +1290,7 @@
     let visitorClicks = 0;
     let visitorTimer = null;
     let visitorGeo = {};
+    let visitorGeoLoaded = false;
     let visitorStatsCache = null;
     let visitorReferrersCache = null;
     let visitorPingCounted = null;
@@ -1284,15 +1311,27 @@
     }
 
     function visitorCountryCode() {
-      return (visitorGeo.countryCode || 'AT').toUpperCase();
+      if (!visitorGeoLoaded || !visitorGeo.countryCode) return null;
+      return String(visitorGeo.countryCode).toUpperCase();
     }
 
-    function resolveBroadcaster(espnId, lookup) {
+    function isWmEspnId(espnId) {
+      const id = parseInt(espnId, 10);
+      return id >= WM_ESPN_MIN && id <= WM_ESPN_MAX;
+    }
+
+    function resolveBroadcaster(espnId) {
+      if (!visitorGeoLoaded) return 'LOADING';
       const cc = visitorCountryCode();
-      if (cc === 'DE') return TV_DE[espnId] || lookup?.broadcaster || 'ARD';
-      if (cc === 'CH') return 'SRF';
-      if (cc === 'AT') return TV_BY_ESPN[espnId] || lookup?.broadcaster || '–';
-      return TV_BY_ESPN[espnId] || lookup?.broadcaster || '–';
+      if (!cc || !espnId) return null;
+
+      if (cc === 'AT') return TV_BY_ESPN[espnId] || null;
+      if (cc === 'DE') return TV_DE[espnId] || null;
+
+      const single = TV_SINGLE_BROADCASTER[cc];
+      if (single && isWmEspnId(espnId)) return single;
+
+      return null;
     }
 
     function tvLabel(b) {
@@ -1301,6 +1340,8 @@
       if (b === 'ARD') return 'ARD';
       if (b === 'ZDF') return 'ZDF';
       if (b === 'SRF') return 'SRF';
+      if (b === 'FOX') return 'Fox';
+      if (b === 'SBS') return 'SBS';
       return b;
     }
 
@@ -1310,25 +1351,53 @@
       if (b === 'ARD') return 'tv-ard';
       if (b === 'ZDF') return 'tv-zdf';
       if (b === 'SRF') return 'tv-srf';
+      if (b === 'FOX') return 'tv-fox';
+      if (b === 'SBS') return 'tv-sbs';
       return '';
     }
 
-    function tvStreamUrl(b) {
-      if (b === 'ORF' || b === 'ServusTV') return tvStreams[b] || null;
-      if (b === 'SRF') return 'https://www.srf.ch/sport';
-      if (b === 'ARD') return 'https://www.sportschau.de/fussball/fifa-wm-2026/';
-      if (b === 'ZDF') return 'https://www.zdf.de/sport/fussball-wm-2026';
-      return null;
+    function tvStreamUrl(b, cc) {
+      cc = cc || visitorCountryCode();
+      if (!cc || !b) return null;
+
+      const byCountry = {
+        AT: {
+          ORF: tvStreams.ORF,
+          ServusTV: tvStreams.ServusTV,
+        },
+        DE: {
+          ARD: 'https://www.sportschau.de/fussball/fifa-wm-2026/',
+          ZDF: 'https://www.zdf.de/sport/fussball-wm-2026',
+        },
+        CH: {
+          SRF: 'https://www.srf.ch/play/tv',
+        },
+        US: {
+          FOX: 'https://www.foxsports.com/live',
+        },
+        AU: {
+          SBS: 'https://www.sbs.com.au/ondemand/',
+        },
+      };
+
+      return byCountry[cc]?.[b] || null;
     }
 
     function tvLinkHtml(b) {
+      if (b === 'LOADING') {
+        return '<span class="tv tv-pending">…</span>';
+      }
+      if (!b) {
+        return '<span class="tv tv-nostream">NO STREAM</span>';
+      }
+      const cc = visitorCountryCode();
       const label = tvLabel(b);
       const cls = tvCssClass(b) || 'tv-servus';
-      const url = tvStreamUrl(b);
-      if (url) {
-        return `<a class="tv ${cls}" href="${url}" target="_blank" rel="noopener" title="Livestream öffnen">${label} ↗</a>`;
+      const url = tvStreamUrl(b, cc);
+      if (!url) {
+        return '<span class="tv tv-nostream">NO STREAM</span>';
       }
-      return `<span class="tv ${cls}">${label}</span>`;
+      return `<a class="tv ${cls}" href="${url}" target="_blank" rel="noopener" title="Kostenloser Livestream (${visitorGeo.country || cc})">${label} ↗</a>`;
     }
 
     async function loadTvStreams() {
@@ -1360,7 +1429,7 @@
         homeFlag: home.flag, awayFlag: away.flag,
         homeKey: meta.homeKey, awayKey: meta.awayKey,
         group: meta.group,
-        broadcaster: resolveBroadcaster(id, meta),
+        broadcaster: resolveBroadcaster(id),
         espnHome: meta.espnHome,
         start: meta.start,
         startDate: new Date(meta.start),
@@ -1467,7 +1536,7 @@
         homeKey: homeMeta[2] || ESPN_TO_KEY[homeEn] || '',
         awayKey: awayMeta[2] || ESPN_TO_KEY[awayEn] || '',
         group: isKo ? roundLabel(e.name || '', e.id) : (lookup?.group || 'KO'),
-        broadcaster: resolveBroadcaster(e.id, lookup),
+        broadcaster: resolveBroadcaster(e.id),
         espnHome: lookup?.espnHome ?? true,
         start: lookup?.start || e.date,
         startDate: new Date(lookup?.start || e.date),
@@ -1602,7 +1671,7 @@
         homeKey, awayKey,
         home: home.name, away: away.name,
         homeFlag: home.flag, awayFlag: away.flag,
-        broadcaster: resolveBroadcaster(m.espnId, lookup),
+        broadcaster: resolveBroadcaster(m.espnId),
         isKnockout: isKo,
       };
     }
@@ -2090,18 +2159,20 @@
       try {
         const res = await fetch('https://ipwho.is/');
         const d = await res.json();
-        if (!d.success) return;
-        visitorGeo = {
-          city: d.city || '',
-          region: d.region || '',
-          country: d.country || '',
-          countryCode: d.country_code || '',
-          flag: d.flag?.emoji || '',
-          isp: d.connection?.isp || '',
-          timezone: d.timezone?.id || '',
-          ip: d.ip || '',
-        };
+        if (d.success) {
+          visitorGeo = {
+            city: d.city || '',
+            region: d.region || '',
+            country: d.country || '',
+            countryCode: d.country_code || '',
+            flag: d.flag?.emoji || '',
+            isp: d.connection?.isp || '',
+            timezone: d.timezone?.id || '',
+            ip: d.ip || '',
+          };
+        }
       } catch (_) {}
+      visitorGeoLoaded = true;
     }
 
     function referrerBucket(ref) {
@@ -2731,7 +2802,7 @@
         else if (past) timeCell = '<span class="past-txt">Beendet</span>';
         else timeCell = `${formatTime(m.startDate)}${cd ? `<br><span class="cd">${cd}</span>` : ''}`;
 
-        const bc = resolveBroadcaster(m.espnId, MATCH_LOOKUP[m.espnId]);
+        const bc = resolveBroadcaster(m.espnId);
         html += `
           <tr class="match-row${getRowClass(m, now)}" data-espn="${m.espnId}">
             <td class="time">${timeCell}</td>
@@ -2915,7 +2986,7 @@
       document.getElementById('modal-title').innerHTML = `${flagIcon(m.homeKey)} ${home.name} – ${away.name} ${flagIcon(m.awayKey)}`;
       const roundTxt = isKnockoutMatch(m) ? koRoundLabel(m.group) : `Gruppe ${m.group}`;
       document.getElementById('modal-meta').innerHTML =
-        `${roundTxt} · ${formatTime(m.startDate)} · ${tvLinkHtml(resolveBroadcaster(m.espnId, MATCH_LOOKUP[m.espnId]))}`;
+        `${roundTxt} · ${formatTime(m.startDate)} · ${tvLinkHtml(resolveBroadcaster(m.espnId))}`;
 
       let scoreText = '– : –';
       if (s.state === 'in' || s.state === 'post') {
