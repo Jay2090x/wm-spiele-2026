@@ -297,81 +297,91 @@
 
     .bracket-scroll { overflow: auto; padding: 4px 2px; }
     .bracket-wrap {
-      position: relative; min-height: 400px; min-width: 300px;
-      display: grid; grid-template-columns: 78px 1fr 52px 1fr 78px;
-      align-items: stretch;
+      position: relative; min-height: 430px; min-width: 320px;
+      display: grid;
+      grid-template-columns: 58px 46px 40px 34px 50px 34px 40px 46px 58px;
+      grid-template-rows: repeat(16, minmax(12px, 1fr));
+      align-items: center; gap: 0 2px;
+      padding: 6px 2px;
     }
     .bracket-svg {
       position: absolute; inset: 0; width: 100%; height: 100%;
       pointer-events: none; z-index: 0;
     }
-    .bracket-svg path { fill: none; stroke: var(--accent); stroke-width: 1.5; opacity: 0.8; vector-effect: non-scaling-stroke; }
+    .bracket-svg path {
+      fill: none; stroke: var(--accent); stroke-width: 1.4;
+      opacity: 0.85; vector-effect: non-scaling-stroke;
+    }
 
-    .br-col {
+    .br-slot {
       position: relative; z-index: 1;
-      display: flex; flex-direction: column; justify-content: space-between;
-      padding: 10px 0;
+      display: flex; flex-direction: column; justify-content: center;
+      align-self: center; min-width: 0;
     }
-    .br-col.left { grid-column: 1; align-items: flex-end; }
-    .br-col.right { grid-column: 5; align-items: flex-start; }
+    .br-slot.left { align-items: flex-end; }
+    .br-slot.right { align-items: flex-start; }
 
-    .br-pair {
+    .br-pair, .br-node {
+      cursor: pointer; border-radius: 4px;
+      background: rgba(0,0,0,0.22); border: 1px solid rgba(255,255,255,0.07);
+      padding: 2px 3px; transition: background 0.15s;
+    }
+    .br-pair:hover, .br-node:hover { background: rgba(255,255,255,0.08); }
+    .br-pair.live, .br-node.live { outline: 1.5px solid #4cc978; }
+
+    .br-team {
       display: flex; align-items: center; gap: 2px;
-      cursor: pointer; flex-shrink: 0;
+      font-size: 9px; font-weight: 700; line-height: 1.25;
+      white-space: nowrap;
     }
-    .br-col.right .br-pair { flex-direction: row-reverse; }
-    .br-pair:hover .br-flag { filter: brightness(1.15); }
+    .br-slot.right .br-team { flex-direction: row-reverse; }
+    .br-team.dim { opacity: 0.32; }
+    .br-team.win .br-sc { background: rgba(212,175,55,0.35); color: var(--accent); }
+
     .br-flag {
-      width: 24px; height: 16px; object-fit: cover;
-      border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.45);
-      background: #1a3a28; display: block;
+      width: 18px; height: 12px; object-fit: cover;
+      border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      background: #1a3a28; display: block; flex-shrink: 0;
     }
-    .br-flag.dim { opacity: 0.3; }
-    .br-flag.win { outline: 2px solid var(--accent); outline-offset: 1px; }
-    .br-emoji { font-size: 15px; line-height: 1; width: 24px; text-align: center; display: inline-block; }
-    .br-bar { width: 10px; height: 2px; background: var(--accent); opacity: 0.8; flex-shrink: 0; }
+    .br-flag.sm { width: 14px; height: 9px; }
+    .br-emoji { font-size: 11px; line-height: 1; width: 14px; text-align: center; display: inline-block; flex-shrink: 0; }
+
+    .br-abbr {
+      font-size: 8px; font-weight: 700; letter-spacing: 0.03em;
+      color: var(--muted); min-width: 18px;
+    }
+    .br-slot.right .br-abbr { text-align: right; }
+
+    .br-sc {
+      font-size: 8px; font-weight: 700; padding: 0 3px; border-radius: 2px;
+      background: rgba(255,255,255,0.08); color: var(--text); min-width: 12px; text-align: center;
+    }
+    .br-sc.pen { font-size: 7px; color: var(--muted); background: transparent; padding: 0; }
 
     .br-center-col {
-      grid-column: 3; z-index: 2;
+      grid-column: 5; grid-row: 1 / span 16; z-index: 2;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; align-self: stretch;
     }
-    .br-trophy { font-size: 32px; filter: drop-shadow(0 0 10px rgba(212,175,55,0.45)); line-height: 1; }
-    .br-next-slot {
-      margin-top: 8px; display: flex; gap: 3px; justify-content: center; align-items: center;
-      min-height: 14px;
+    .br-trophy { font-size: 28px; filter: drop-shadow(0 0 10px rgba(212,175,55,0.45)); line-height: 1; }
+    .br-final-label {
+      font-size: 8px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--accent); text-align: center;
     }
-    .br-next-slot .br-emoji, .br-next-slot .br-flag { width: 16px; height: 11px; font-size: 11px; }
-    .br-next-slot:empty { display: none; }
-
-    .br-ko-path {
-      margin-top: 10px; padding-top: 8px;
-      border-top: 1px solid var(--border);
-      display: flex; flex-direction: column; gap: 8px;
-    }
-    .br-ko-round-title {
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.07em; color: var(--muted); margin-bottom: 4px;
-    }
-    .br-ko-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
-      gap: 4px;
-    }
-    .br-ko-match {
-      display: flex; align-items: center; justify-content: center; gap: 3px;
+    .br-final-node, .br-third-node {
+      display: flex; gap: 3px; justify-content: center; align-items: center;
       padding: 3px 4px; border-radius: 5px;
-      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-      cursor: pointer; min-height: 24px;
+      background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.25);
+      cursor: pointer;
     }
-    .br-ko-match:hover { background: rgba(255,255,255,0.08); }
-    .br-ko-match .br-flag, .br-ko-match .br-emoji { width: 18px; height: 12px; font-size: 11px; }
-    .br-ko-vs { font-size: 9px; color: var(--muted); font-weight: 700; }
+    .br-third-label { font-size: 7px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
 
     .finished-block {
       flex-shrink: 0;
       border-top: 1px solid var(--border);
       padding: 4px 6px 5px;
       background: rgba(0,0,0,0.08);
-      max-height: 108px;
+      max-height: 140px;
       overflow-y: auto;
     }
     .finished-block:empty, .finished-block.is-empty { display: none; }
@@ -788,7 +798,7 @@
       .fixture { font-size: 15px; white-space: normal; line-height: 1.3; }
       .matches-table th, .matches-table td { padding: 5px 4px; }
       .bracket-panel { width: 100%; }
-      .bracket-wrap { min-height: 340px; min-width: 100%; grid-template-columns: 68px 1fr 46px 1fr 68px; }
+      .bracket-wrap { min-height: 360px; min-width: 100%; grid-template-columns: 50px 40px 34px 30px 42px 30px 34px 40px 50px; }
       .finished-block { max-height: none; }
       .finished-fixture { font-size: 11px; }
       .team-cards { grid-template-columns: 1fr; }
@@ -821,7 +831,6 @@
             <thead>
               <tr>
                 <th>Zeit</th>
-                <th class="c">Gr</th>
                 <th>Spiel</th>
                 <th class="c">Res</th>
                 <th class="c">TV</th>
@@ -836,7 +845,7 @@
         <h2 class="panel-head" id="bracket-heading">Spielbaum <span class="pill">K.-o.</span></h2>
         <div class="bracket-scroll" id="bracket-root"></div>
         <div class="finished-block is-empty" id="finished-block">
-          <div class="finished-head" id="finished-head">Beendet · 24h</div>
+          <div class="finished-head" id="finished-head">K.-o. beendet</div>
           <div class="finished-list" id="finished-list"></div>
         </div>
         <div class="stats-block" id="stats-block" aria-labelledby="stats-heading">
@@ -1039,6 +1048,48 @@
       { group: 'F',  label: 'Finale', ids: ['760517'] },
       { group: '3P', label: 'Platz 3', ids: ['760516'] },
     ];
+
+    const BRACKET_TREE = {
+      left: {
+        af: [
+          { id: '760503', r32: [0, 1] },
+          { id: '760502', r32: [2, 3] },
+          { id: '760508', r32: [4, 5] },
+          { id: '760505', r32: [6, 7] },
+        ],
+        vf: [
+          { id: '760510', af: [0, 1] },
+          { id: '760512', af: [2, 3] },
+        ],
+        hf: { id: '760514', vf: [0, 1] },
+      },
+      right: {
+        af: [
+          { id: '760504', r32: [0, 1] },
+          { id: '760507', r32: [2, 3] },
+          { id: '760506', r32: [4, 5] },
+          { id: '760509', r32: [6, 7] },
+        ],
+        vf: [
+          { id: '760511', af: [0, 1] },
+          { id: '760513', af: [2, 3] },
+        ],
+        hf: { id: '760515', vf: [0, 1] },
+      },
+      final: { id: '760517', hf: ['left', 'right'] },
+      third: { id: '760516', hf: ['left', 'right'] },
+    };
+
+    const TEAM_ABBR = {
+      deutschland:'GER', paraguay:'PAR', frankreich:'FRA', schweden:'SWE',
+      suedafrika:'RSA', kanada:'CAN', niederlande:'NED', marokko:'MAR',
+      portugal:'POR', kroatien:'CRO', spanien:'ESP', oesterreich:'AUT',
+      usa:'USA', bosnien:'BIH', belgien:'BEL', senegal:'SEN',
+      brasilien:'BRA', japan:'JPN', elfenbeinkueste:'CIV', norwegen:'NOR',
+      mexiko:'MEX', ecuador:'ECU', england:'ENG', drkongo:'COD',
+      argentinien:'ARG', kapverde:'CPV', australien:'AUS', aegypten:'EGY',
+      schweiz:'SUI', algerien:'ALG', kolumbien:'COL', ghana:'GHA',
+    };
 
     // ORF 1 / ServusTV laut offiziellem Spielplan (tv.ORF.at, ServusTV, Stand Juni 2026)
     const TV_BY_ESPN = {
@@ -1495,144 +1546,230 @@
       };
     }
 
-    function brPairYs(count = 8) {
-      return Array.from({ length: count }, (_, i) => ((2 * i + 1) / (2 * count)) * 100);
+    function brAbbr(key) {
+      return TEAM_ABBR[key] || (key ? key.slice(0, 3).toUpperCase() : '–');
     }
 
-    function buildSideBracketLines(leafX, centerX, ys) {
-      const paths = [];
-      const step = (centerX - leafX) / 3;
-      let nodes = ys.map(y => ({ y, x: leafX }));
-
-      for (let r = 0; r < 3; r++) {
-        const xVert = leafX + step * (r + 0.55);
-        const xOut = leafX + step * (r + 1);
-        const next = [];
-        for (let i = 0; i < nodes.length; i += 2) {
-          const a = nodes[i];
-          const b = nodes[i + 1];
-          const midY = (a.y + b.y) / 2;
-          paths.push(`M ${a.x} ${a.y} H ${xVert}`);
-          paths.push(`M ${b.x} ${b.y} H ${xVert}`);
-          paths.push(`M ${xVert} ${a.y} V ${b.y}`);
-          paths.push(`M ${xVert} ${midY} H ${xOut}`);
-          next.push({ y: midY, x: xOut });
-        }
-        nodes = next;
+    function brTeamScoreForKey(matchId, teamKey, homeKey, awayKey) {
+      const s = liveScores[matchId];
+      if (!s || s.state === 'pre') return { main: '', pen: '' };
+      const isHome = teamKey === homeKey;
+      const main = isHome ? s.homeScore : s.awayScore;
+      let pen = '';
+      if (s.hasPenalties && s.penHome != null && s.penAway != null) {
+        const p = isHome ? s.penHome : s.penAway;
+        pen = `P${p}`;
       }
-      paths.push(`M ${nodes[0].x} ${nodes[0].y} H ${centerX}`);
+      return { main: String(main), pen };
+    }
+
+    function brTeamRow(teamKey, matchId, homeKey, awayKey, winKey, side) {
+      const win = winKey === teamKey;
+      const dim = winKey && winKey !== teamKey;
+      const cls = [win ? 'win' : '', dim ? 'dim' : ''].filter(Boolean).join(' ');
+      const sc = brTeamScoreForKey(matchId, teamKey, homeKey, awayKey);
+      const flag = teamKey ? brFlagEl(teamKey, 'sm') : '<span class="br-emoji">?</span>';
+      const penHtml = sc.pen ? `<span class="br-sc pen">${sc.pen}</span>` : '';
+      const scoreHtml = sc.main ? `<span class="br-sc">${sc.main}</span>${penHtml}` : '<span class="br-sc">–</span>';
+      return `<div class="br-team ${cls}">${flag}<span class="br-abbr">${brAbbr(teamKey)}</span>${scoreHtml}</div>`;
+    }
+
+    function getR32WinnerByIdx(r32Arr, idx) {
+      const m = r32Arr[idx];
+      return m ? getMatchWinner(m.home, m.away, m.id) : null;
+    }
+
+    function resolveBracketSides(id, feeders, ctx) {
+      const known = id ? getKoMatchSides(id) : null;
+      if (known?.homeKey && known?.awayKey) return known;
+
+      let homeKey = null;
+      let awayKey = null;
+      if (feeders?.r32) {
+        homeKey = getR32WinnerByIdx(ctx.r32, feeders.r32[0]);
+        awayKey = getR32WinnerByIdx(ctx.r32, feeders.r32[1]);
+      } else if (feeders?.af) {
+        homeKey = getBracketWinner(ctx.tree.af[feeders.af[0]].id, ctx.tree.af[feeders.af[0]], ctx);
+        awayKey = getBracketWinner(ctx.tree.af[feeders.af[1]].id, ctx.tree.af[feeders.af[1]], ctx);
+      } else if (feeders?.vf) {
+        homeKey = getBracketWinner(ctx.tree.vf[feeders.vf[0]].id, ctx.tree.vf[feeders.vf[0]], ctx);
+        awayKey = getBracketWinner(ctx.tree.vf[feeders.vf[1]].id, ctx.tree.vf[feeders.vf[1]], ctx);
+      } else if (feeders?.hf) {
+        const leftCtx = { r32: R32_LEFT, tree: BRACKET_TREE.left };
+        const rightCtx = { r32: R32_RIGHT, tree: BRACKET_TREE.right };
+        homeKey = getBracketWinner(BRACKET_TREE.left.hf.id, BRACKET_TREE.left.hf, leftCtx);
+        awayKey = getBracketWinner(BRACKET_TREE.right.hf.id, BRACKET_TREE.right.hf, rightCtx);
+      }
+      return { id, homeKey, awayKey };
+    }
+
+    function getBracketWinner(id, feeders, ctx) {
+      const sides = resolveBracketSides(id, feeders, ctx);
+      if (!sides.homeKey || !sides.awayKey) return null;
+      return getMatchWinner(sides.homeKey, sides.awayKey, id);
+    }
+
+    function getBracketLoser(id, feeders, ctx) {
+      const sides = resolveBracketSides(id, feeders, ctx);
+      if (!sides.homeKey || !sides.awayKey) return null;
+      const win = getMatchWinner(sides.homeKey, sides.awayKey, id);
+      if (!win) return null;
+      return win === sides.homeKey ? sides.awayKey : sides.homeKey;
+    }
+
+    function renderBracketMatchBox(id, homeKey, awayKey, side, extraCls = '') {
+      const s = id ? liveScores[id] : null;
+      const live = s?.state === 'in';
+      const win = id ? getMatchWinner(homeKey, awayKey, id) : null;
+      const homeRow = brTeamRow(homeKey, id, homeKey, awayKey, win, side);
+      const awayRow = brTeamRow(awayKey, id, homeKey, awayKey, win, side);
+      const liveCls = live ? ' live' : '';
+      const dataId = id ? ` data-espn="${id}"` : '';
+      const title = `${c(homeKey).name || '?'} – ${c(awayKey).name || '?'}`;
+      return `<div class="br-node ${side}${liveCls}${extraCls ? ' ' + extraCls : ''}"${dataId} title="${title}">${homeRow}${awayRow}</div>`;
+    }
+
+    function renderBracketR32(m, side, row) {
+      const col = side === 'left' ? 1 : 9;
+      const s = liveScores[m.id];
+      const live = s?.state === 'in';
+      const win = getMatchWinner(m.home, m.away, m.id);
+      const homeRow = brTeamRow(m.home, m.id, m.home, m.away, win, side);
+      const awayRow = brTeamRow(m.away, m.id, m.home, m.away, win, side);
+      return `<div class="br-slot ${side} br-pair${live ? ' live' : ''}" style="grid-column:${col};grid-row:${row}/span 2" data-espn="${m.id}" data-br-tier="r32">${homeRow}${awayRow}</div>`;
+    }
+
+    function renderBracketTierNode(def, side, row, col, tier, ctx) {
+      const sides = resolveBracketSides(def.id, def, ctx);
+      const span = tier === 'af' ? 4 : tier === 'vf' ? 8 : 16;
+      return `<div class="br-slot ${side}" style="grid-column:${col};grid-row:${row}/span ${span}" data-br-tier="${tier}">${renderBracketMatchBox(def.id, sides.homeKey, sides.awayKey, side)}</div>`;
+    }
+
+    function bracketCenterFlags(id, homeKey, awayKey) {
+      if (!homeKey && !awayKey) return '';
+      const win = id ? getMatchWinner(homeKey, awayKey, id) : null;
+      const hCls = win === homeKey ? 'win' : (win && win !== homeKey ? 'dim' : '');
+      const aCls = win === awayKey ? 'win' : (win && win !== awayKey ? 'dim' : '');
+      const h = homeKey ? brFlagEl(homeKey, hCls + ' sm') : '<span class="br-emoji">?</span>';
+      const a = awayKey ? brFlagEl(awayKey, aCls + ' sm') : '<span class="br-emoji">?</span>';
+      return `${h}${a}`;
+    }
+
+    function renderBracketSide(side, r32Arr, tree) {
+      const ctx = { r32: r32Arr, tree };
+      const cols = side === 'left'
+        ? { r32: 1, af: 2, vf: 3, hf: 4 }
+        : { r32: 9, af: 8, vf: 7, hf: 6 };
+      let html = '';
+      r32Arr.forEach((m, i) => { html += renderBracketR32(m, side, i * 2 + 1); });
+      tree.af.forEach((af, i) => { html += renderBracketTierNode(af, side, i * 4 + 1, cols.af, 'af', ctx); });
+      tree.vf.forEach((vf, i) => { html += renderBracketTierNode(vf, side, i * 8 + 1, cols.vf, 'vf', ctx); });
+      html += renderBracketTierNode(tree.hf, side, 1, cols.hf, 'hf', ctx);
+      return html;
+    }
+
+    function bracketNodeCenter(el, wr, side) {
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      const y = ((r.top + r.height / 2 - wr.top) / wr.height) * 100;
+      const x = ((r.left + r.width / 2 - wr.left) / wr.width) * 100;
+      const nearX = side === 'left'
+        ? ((r.right - wr.left) / wr.width) * 100
+        : ((r.left - wr.left) / wr.width) * 100;
+      const farX = side === 'left'
+        ? ((r.left - wr.left) / wr.width) * 100
+        : ((r.right - wr.left) / wr.width) * 100;
+      return { x, y, nearX, farX };
+    }
+
+    function connectBracketPair(a, b, parent, side) {
+      const paths = [];
+      const midY = (a.y + b.y) / 2;
+      const forkX = side === 'left' ? a.nearX + 1.5 : a.nearX - 1.5;
+      const joinX = side === 'left' ? parent.farX - 0.8 : parent.farX + 0.8;
+      const stemX = side === 'left' ? parent.nearX + 0.6 : parent.nearX - 0.6;
+      paths.push(`M ${a.nearX} ${a.y} H ${forkX}`);
+      paths.push(`M ${b.nearX} ${b.y} H ${forkX}`);
+      paths.push(`M ${forkX} ${a.y} V ${b.y}`);
+      paths.push(`M ${forkX} ${midY} H ${joinX}`);
+      paths.push(`M ${joinX} ${midY} V ${parent.y}`);
+      paths.push(`M ${joinX} ${parent.y} H ${stemX}`);
       return paths;
     }
 
     function measureBracketLines(wrap) {
       const wr = wrap.getBoundingClientRect();
-      const pctX = x => ((x - wr.left) / wr.width) * 100;
-      const pctY = y => ((y - wr.top) / wr.height) * 100;
+      const paths = [];
+      const node = (sel, side) => [...wrap.querySelectorAll(sel)]
+        .map(el => bracketNodeCenter(el, wr, side))
+        .filter(Boolean);
 
-      const leftCol = wrap.querySelector('.br-col.left');
-      const rightCol = wrap.querySelector('.br-col.right');
-      const centerCol = wrap.querySelector('.br-center-col');
-      if (!leftCol || !rightCol || !centerCol) return buildBracketSvgPathsFallback();
+      ['left', 'right'].forEach(side => {
+        const r32 = node(`.br-slot.br-pair.${side}[data-br-tier="r32"]`, side);
+        const afNodes = node(`.br-slot.${side}[data-br-tier="af"] .br-node`, side);
+        const vfNodes = node(`.br-slot.${side}[data-br-tier="vf"] .br-node`, side);
+        const hfNodes = node(`.br-slot.${side}[data-br-tier="hf"] .br-node`, side);
 
-      const leftYs = [...leftCol.querySelectorAll('.br-pair')].map(el => {
-        const r = el.getBoundingClientRect();
-        return pctY(r.top + r.height / 2);
+        for (let i = 0; i < r32.length; i += 2) {
+          if (r32[i + 1] && afNodes[Math.floor(i / 2)]) {
+            paths.push(...connectBracketPair(r32[i], r32[i + 1], afNodes[Math.floor(i / 2)], side));
+          }
+        }
+        for (let i = 0; i < afNodes.length; i += 2) {
+          if (afNodes[i + 1] && vfNodes[Math.floor(i / 2)]) {
+            paths.push(...connectBracketPair(afNodes[i], afNodes[i + 1], vfNodes[Math.floor(i / 2)], side));
+          }
+        }
+        for (let i = 0; i < vfNodes.length; i += 2) {
+          if (vfNodes[i + 1] && hfNodes[0]) {
+            paths.push(...connectBracketPair(vfNodes[i], vfNodes[i + 1], hfNodes[0], side));
+          }
+        }
       });
-      const rightYs = [...rightCol.querySelectorAll('.br-pair')].map(el => {
-        const r = el.getBoundingClientRect();
-        return pctY(r.top + r.height / 2);
-      });
 
-      const leftRect = leftCol.getBoundingClientRect();
-      const rightRect = rightCol.getBoundingClientRect();
-      const centerRect = centerCol.getBoundingClientRect();
-      const leafLX = pctX(leftRect.right);
-      const leafRX = pctX(rightRect.left);
-      const centerX = pctX(centerRect.left + centerRect.width / 2);
-      const trophyY = pctY(centerRect.top + centerRect.height * 0.42);
-
-      const paths = [
-        ...buildSideBracketLines(leafLX, centerX, leftYs.length ? leftYs : brPairYs()),
-        ...buildSideBracketLines(leafRX, centerX, rightYs.length ? rightYs : brPairYs()),
-      ];
-      return paths.map(d => `<path d="${d}"/>`).join('');
-    }
-
-    function buildBracketSvgPathsFallback() {
-      const paths = [
-        ...buildSideBracketLines(19, 50, brPairYs()),
-        ...buildSideBracketLines(81, 50, brPairYs()),
-      ];
-      return paths.map(d => `<path d="${d}"/>`).join('');
-    }
-
-    function renderBracketPair(m, side) {
-      const s = liveScores[m.id];
-      const live = s?.state === 'in';
-      const win = getMatchWinner(m.home, m.away, m.id);
-      const homeCls = win === m.home ? 'win' : (win && win !== m.home ? 'dim' : '');
-      const awayCls = win === m.away ? 'win' : (win && win !== m.away ? 'dim' : '');
-      const bar = '<span class="br-bar"></span>';
-      const home = brFlagEl(m.home, homeCls);
-      const away = brFlagEl(m.away, awayCls);
-      const liveDot = live ? ' style="outline:2px solid #4cc978"' : '';
-      if (side === 'right') {
-        return `<div class="br-pair" data-espn="${m.id}"${liveDot}>${away}${bar}${home}</div>`;
+      const hfLEl = wrap.querySelector('.br-slot.left[data-br-tier="hf"] .br-node');
+      const hfREl = wrap.querySelector('.br-slot.right[data-br-tier="hf"] .br-node');
+      const hfL = bracketNodeCenter(hfLEl, wr, 'left');
+      const hfR = bracketNodeCenter(hfREl, wr, 'right');
+      const fin = wrap.querySelector('.br-final-node');
+      if (hfL && hfR && fin) {
+        const f = bracketNodeCenter(fin, wr, 'left');
+        paths.push(`M ${hfL.nearX} ${hfL.y} H ${f.x - 1.5} V ${f.y} H ${f.x}`);
+        paths.push(`M ${hfR.nearX} ${hfR.y} H ${f.x + 1.5} V ${f.y} H ${f.x}`);
       }
-      return `<div class="br-pair" data-espn="${m.id}"${liveDot}>${home}${bar}${away}</div>`;
-    }
 
-    function renderKoPathMatch(id) {
-      const sides = getKoMatchSides(id);
-      if (!sides) return '';
-      const home = teamDisplayFromKeyOrName(sides.homeKey, sides.homeEn);
-      const away = teamDisplayFromKeyOrName(sides.awayKey, sides.awayEn);
-      const win = getKoMatchWinner(id);
-      const hCls = win === sides.homeKey ? 'win' : (win && win !== sides.homeKey ? 'dim' : '');
-      const aCls = win === sides.awayKey ? 'win' : (win && win !== sides.awayKey ? 'dim' : '');
-      const hFlag = sides.homeKey ? brFlagEl(sides.homeKey, hCls + ' sm') : `<span class="br-emoji sm">?</span>`;
-      const aFlag = sides.awayKey ? brFlagEl(sides.awayKey, aCls + ' sm') : `<span class="br-emoji sm">?</span>`;
-      return `<div class="br-ko-match" data-espn="${id}" title="${home.name} – ${away.name}">${hFlag}<span class="br-ko-vs">·</span>${aFlag}</div>`;
-    }
+      const third = wrap.querySelector('.br-third-node');
+      if (hfL && hfR && third) {
+        const t = bracketNodeCenter(third, wr, 'left');
+        paths.push(`M ${hfL.nearX} ${hfL.y + 2} H ${hfL.nearX + 2} V ${t.y} H ${t.x}`);
+        paths.push(`M ${hfR.nearX} ${hfR.y + 2} H ${hfR.nearX - 2} V ${t.y} H ${t.x}`);
+      }
 
-    function renderKoPath() {
-      return KO_LATER_ROUNDS.map(round => {
-        const cells = round.ids.map(renderKoPathMatch).join('');
-        return `<div><div class="br-ko-round-title">${round.label}</div><div class="br-ko-grid">${cells}</div></div>`;
-      }).join('');
+      return paths.map(d => `<path d="${d}"/>`).join('');
     }
 
     function renderBracket() {
-      const finKey = resolveTeamFromName('Semifinal 1 Winner');
-      const finKey2 = resolveTeamFromName('Semifinal 2 Winner');
-      const finWin = knockoutMeta['760517'] ? getKoMatchWinner('760517') : null;
-      const f1Cls = finWin === finKey ? 'win' : (finWin && finWin !== finKey ? 'dim' : '');
-      const f2Cls = finWin === finKey2 ? 'win' : (finWin && finWin !== finKey2 ? 'dim' : '');
-      const finalHtml = (finKey && finKey2)
-        ? `${brFlagEl(finKey, f1Cls)}${brFlagEl(finKey2, f2Cls)}`
-        : '';
-
-      const thirdKey1 = resolveTeamFromName('Semifinal 1 Loser');
-      const thirdKey2 = resolveTeamFromName('Semifinal 2 Loser');
-      const thirdWin = getKoMatchWinner('760516');
-      const t1Cls = thirdWin === thirdKey1 ? 'win' : (thirdWin && thirdWin !== thirdKey1 ? 'dim' : '');
-      const t2Cls = thirdWin === thirdKey2 ? 'win' : (thirdWin && thirdWin !== thirdKey2 ? 'dim' : '');
-      const thirdHtml = (thirdKey1 && thirdKey2)
-        ? `${brFlagEl(thirdKey1, t1Cls)}${brFlagEl(thirdKey2, t2Cls)}`
-        : '';
+      const leftCtx = { r32: R32_LEFT, tree: BRACKET_TREE.left };
+      const rightCtx = { r32: R32_RIGHT, tree: BRACKET_TREE.right };
+      const finSides = resolveBracketSides(BRACKET_TREE.final.id, { hf: ['left', 'right'] }, leftCtx);
+      const thirdSides = {
+        homeKey: getBracketLoser(BRACKET_TREE.left.hf.id, BRACKET_TREE.left.hf, leftCtx),
+        awayKey: getBracketLoser(BRACKET_TREE.right.hf.id, BRACKET_TREE.right.hf, rightCtx),
+      };
 
       document.getElementById('bracket-root').innerHTML = `
         <div class="bracket-wrap">
           <svg class="bracket-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-          <div class="br-col left">${R32_LEFT.map(m => renderBracketPair(m, 'left')).join('')}</div>
+          ${renderBracketSide('left', R32_LEFT, BRACKET_TREE.left)}
           <div class="br-center-col">
             <div class="br-trophy">🏆</div>
-            <div class="br-next-slot">${finalHtml}</div>
-            <div class="br-next-slot" style="margin-top:4px" title="Spiel um Platz 3">${thirdHtml}</div>
+            <div class="br-final-label">Finale</div>
+            <div class="br-final-node" data-espn="760517">${bracketCenterFlags('760517', finSides.homeKey, finSides.awayKey)}</div>
+            <div class="br-third-label">Platz 3</div>
+            <div class="br-third-node" data-espn="760516">${bracketCenterFlags('760516', thirdSides.homeKey, thirdSides.awayKey)}</div>
           </div>
-          <div class="br-col right">${R32_RIGHT.map(m => renderBracketPair(m, 'right')).join('')}</div>
-        </div>
-        <div class="br-ko-path">${renderKoPath()}</div>`;
+          ${renderBracketSide('right', R32_RIGHT, BRACKET_TREE.right)}
+        </div>`;
 
       const wrap = document.querySelector('#bracket-root .bracket-wrap');
       const svg = wrap?.querySelector('.bracket-svg');
@@ -2422,9 +2559,16 @@
       return s !== 'post' && !isRecentlyFinished(m, now);
     }
 
-    function getFinishedMatches(now = new Date()) {
-      return getRenderableMatches()
-        .filter(m => isKnownMatch(m) && isKnockoutMatch(m) && (liveScores[m.espnId]?.state === 'post' || isRecentlyFinished(m, now)))
+    function getFinishedMatches() {
+      const byId = new Map();
+      const add = (m) => {
+        if (!m?.espnId) return;
+        byId.set(m.espnId, enrichScheduleMatch(m));
+      };
+      scheduleMatches.forEach(add);
+      DISPLAY_MATCHES.forEach(add);
+      return [...byId.values()]
+        .filter(m => isKnownMatch(m) && isKnockoutMatch(m) && liveScores[m.espnId]?.state === 'post')
         .sort((a, b) => b.startDate - a.startDate);
     }
 
@@ -2447,7 +2591,7 @@
 
     function renderFinishedMatches() {
       const now = new Date();
-      const finished = getFinishedMatches(now);
+      const finished = getFinishedMatches();
       const block = document.getElementById('finished-block');
       const head = document.getElementById('finished-head');
       const list = document.getElementById('finished-list');
@@ -2457,7 +2601,7 @@
         return;
       }
       block.classList.remove('is-empty');
-      head.textContent = `K.-o. beendet · 24h (${finished.length})`;
+      head.textContent = `K.-o. beendet (${finished.length})`;
       list.innerHTML = finished.map(m => {
         const score = formatScorePair(m, true).text;
         const rnd = koRoundLabel(m.group);
@@ -2485,7 +2629,7 @@
 
       const tbody = document.getElementById('matches');
       if (!visible.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:8px">Keine Spiele</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:8px">Keine Spiele</td></tr>';
         return;
       }
 
@@ -2496,14 +2640,13 @@
       for (const m of visible) {
         const isKo = isKnockoutMatch(m);
         if (isKo && m.group !== lastRound) {
-          html += `<tr class="round-row"><td colspan="5">${koRoundLabel(m.group)}</td></tr>`;
+          html += `<tr class="round-row"><td colspan="4">${koRoundLabel(m.group)}</td></tr>`;
           lastRound = m.group;
-          lastDate = '';
         }
 
         const dateKey = formatDateShort(m.startDate);
-        if (!isKo && dateKey !== lastDate) {
-          html += `<tr class="date-row"><td colspan="5">${dateKey}</td></tr>`;
+        if (dateKey !== lastDate) {
+          html += `<tr class="date-row"><td colspan="4">${dateKey}</td></tr>`;
           lastDate = dateKey;
         }
 
@@ -2516,14 +2659,10 @@
         else if (past) timeCell = '<span class="past-txt">Beendet</span>';
         else timeCell = `${formatTime(m.startDate)}${cd ? `<br><span class="cd">${cd}</span>` : ''}`;
 
-        const grpCell = isKo
-          ? '<td class="c"></td>'
-          : `<td class="c"><span class="grp group-${m.group}">${m.group}</span></td>`;
         const bc = resolveBroadcaster(m.espnId, MATCH_LOOKUP[m.espnId]);
         html += `
           <tr class="match-row${getRowClass(m, now)}" data-espn="${m.espnId}">
             <td class="time">${timeCell}</td>
-            ${grpCell}
             <td class="fixture">${fixtureHtml(m)}</td>
             <td class="c">${getScoreHtml(m)}</td>
             <td class="c">${tvLinkHtml(bc)}</td>
@@ -2750,7 +2889,7 @@
       let matchesDone = 0;
       let matchesLive = 0;
       let penShootouts = 0;
-      let biggestWin = { diff: 0, text: '–' };
+      let openMatches = 0;
       const teamGoals = {};
       const teamWins = {};
 
@@ -2762,8 +2901,6 @@
           matchesDone++;
           totalGoals += hs + as;
           if (e.hasPenalties) penShootouts++;
-          const diff = Math.abs(hs - as);
-          if (diff > biggestWin.diff) biggestWin = { diff, text: `${Math.max(hs, as)}:${Math.min(hs, as)}` };
           const homeKey = ESPN_TO_KEY[e.homeEn] || '';
           const awayKey = ESPN_TO_KEY[e.awayEn] || '';
           if (homeKey) teamGoals[homeKey] = (teamGoals[homeKey] || 0) + hs;
@@ -2777,6 +2914,7 @@
           matchesLive++;
           totalGoals += hs + as;
         }
+        if (e.state === 'pre' || e.state === 'in') openMatches++;
       }
 
       const topScorerTeam = Object.entries(teamGoals).sort((a, b) => b[1] - a[1])[0];
@@ -2791,7 +2929,7 @@
         matchesDone,
         matchesLive,
         penShootouts,
-        biggestWin: biggestWin.text,
+        openMatches,
         topScorer: topScorerTeam ? `${c(topScorerTeam[0]).flag} ${c(topScorerTeam[0]).name}` : '–',
         topScorerVal: topScorerTeam ? topScorerTeam[1] : 0,
         topWinner: topWinnerTeam ? `${c(topWinnerTeam[0]).flag} ${c(topWinnerTeam[0]).name}` : '–',
@@ -2805,7 +2943,7 @@
       document.getElementById('stats-grid').innerHTML = `
         <div class="stat-item"><div class="val">${s.totalGoals}</div><div class="lbl">Tore gesamt</div></div>
         <div class="stat-item"><div class="val">${s.avgGoals}</div><div class="lbl">Ø Tore/Spiel</div></div>
-        <div class="stat-item"><div class="val">${s.biggestWin}</div><div class="lbl">Höchstsieg</div></div>
+        <div class="stat-item"><div class="val">${s.openMatches}</div><div class="lbl">Offene Spiele</div></div>
         <div class="stat-item" title="${s.topScorer}"><div class="val">${s.topScorerVal}</div><div class="lbl">Tore · Top-Team</div></div>
         <div class="stat-item"><div class="val">${s.penShootouts}</div><div class="lbl">Elfmeterschießen</div></div>
         <div class="stat-item"><div class="val">${s.koProgress}</div><div class="lbl">K.-o.-Phase</div></div>`;
@@ -2862,7 +3000,7 @@
       const pair = e.target.closest('[data-espn]');
       if (pair?.dataset.espn) openMatchModal(pair.dataset.espn);
     });
-    // bracket-root also handles .br-ko-match via same data-espn
+
 
     document.getElementById('finished-list').addEventListener('click', (e) => {
       const row = e.target.closest('[data-espn]');
