@@ -66,9 +66,9 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://gc.zgo.at" crossorigin>
+  <link rel="preconnect" href="https://jay2090x.goatcounter.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
-  <script data-goatcounter="https://jay2090x.goatcounter.com/count"
-          async src="https://gc.zgo.at/count.js"></script>
   <style>
     :root {
       --bg: #0a1f14;
@@ -3219,6 +3219,21 @@
       await refresh();
     })();
     setInterval(refresh, 60000);
+  </script>
+  <script>
+    window.goatcounter = { no_onload: true };
+  </script>
+  <script data-goatcounter="https://jay2090x.goatcounter.com/count"
+          src="https://gc.zgo.at/count.js"></script>
+  <script>
+    (function () {
+      function gcCount() {
+        if (!window.goatcounter || typeof window.goatcounter.count !== 'function') return;
+        window.goatcounter.count();
+      }
+      if (document.readyState === 'complete') gcCount();
+      else window.addEventListener('load', gcCount, { once: true });
+    })();
   </script>
 </body>
 </html>
