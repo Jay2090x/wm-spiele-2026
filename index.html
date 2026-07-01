@@ -1759,30 +1759,85 @@
       return m ? getMatchWinner(m.home, m.away, m.id) : null;
     }
 
+    // Spielbaum-Paarungen kommen aus BRACKET_TREE — ESPN knockoutMeta kann falsche Teams liefern.
     function resolveBracketSides(id, feeders, ctx) {
+      if (feeders?.r32) {
+        return {
+          id,
+          homeKey: getR32WinnerByIdx(ctx.r32, feeders.r32[0]),
+          awayKey: getR32WinnerByIdx(ctx.r32, feeders.r32[1]),
+        };
+      }
+      if (feeders?.af) {
+        return {
+          id,
+          homeKey: getBracketWinner(ctx.tree.af[feeders.af[0]].id, ctx.tree.af[feeders.af[0]], ctx),
+          awayKey: getBracketWinner(ctx.tree.af[feeders.af[1]].id, ctx.tree.af[feeders.af[1]], ctx),
+        };
+      }
+      if (feeders?.vf) {
+        return {
+          id,
+          homeKey: getBracketWinner(ctx.tree.vf[feeders.vf[0]].id, ctx.tree.vf[feeders.vf[0]], ctx),
+          awayKey: getBracketWinner(ctx.tree.vf[feeders.vf[1]].id, ctx.tree.vf[feeders.vf[1]], ctx),
+        };
+      }
+      if (feeders?.hf) {
+        const leftCtx = { r32: R32_LEFT, tree: BRACKET_TREE.left };
+        const rightCtx = { r32: R32_RIGHT, tree: BRACKET_TREE.right };
+        return {
+          id,
+          homeKey: getBracketWinner(BRACKET_TREE.left.hf.id, BRACKET_TREE.left.hf, leftCtx),
+          awayKey: getBracketWinner(BRACKET_TREE.right.hf.id, BRACKET_TREE.right.hf, rightCtx),
+        };
+      }
       if (id) {
         const known = getKoMatchSides(id);
         if (known?.homeKey && known?.awayKey) return known;
       }
+      return { id, homeKey: null, awayKey: null };
+    }
 
-      let homeKey = null;
-      let awayKey = null;
+    function bracketAllowedKeys(feeders, ctx) {
+      const keys = new Set();
       if (feeders?.r32) {
-        homeKey = getR32WinnerByIdx(ctx.r32, feeders.r32[0]);
-        awayKey = getR32WinnerByIdx(ctx.r32, feeders.r32[1]);
-      } else if (feeders?.af) {
-        homeKey = getBracketWinner(ctx.tree.af[feeders.af[0]].id, ctx.tree.af[feeders.af[0]], ctx);
-        awayKey = getBracketWinner(ctx.tree.af[feeders.af[1]].id, ctx.tree.af[feeders.af[1]], ctx);
-      } else if (feeders?.vf) {
-        homeKey = getBracketWinner(ctx.tree.vf[feeders.vf[0]].id, ctx.tree.vf[feeders.vf[0]], ctx);
-        awayKey = getBracketWinner(ctx.tree.vf[feeders.vf[1]].id, ctx.tree.vf[feeders.vf[1]], ctx);
-      } else if (feeders?.hf) {
-        const leftCtx = { r32: R32_LEFT, tree: BRACKET_TREE.left };
-        const rightCtx = { r32: R32_RIGHT, tree: BRACKET_TREE.right };
-        homeKey = getBracketWinner(BRACKET_TREE.left.hf.id, BRACKET_TREE.left.hf, leftCtx);
-        awayKey = getBracketWinner(BRACKET_TREE.right.hf.id, BRACKET_TREE.right.hf, rightCtx);
+        for (const idx of feeders.r32) {
+          const m = ctx.r32[idx];
+          if (m?.home) keys.add(m.home);
+          if (m?.away) keys.add(m.away);
+        }
+        return keys;
       }
-      return { id, homeKey, awayKey };
+      if (feeders?.af) {
+        for (const i of feeders.af) {
+          const def = ctx.tree.af[i];
+          const sub = bracketAllowedKeys(def, ctx);
+          sub.forEach(k => keys.add(k));
+        }
+        return keys;
+      }
+      if (feeders?.vf) {
+        for (const i of feeders.vf) {
+          const def = ctx.tree.vf[i];
+          const sub = bracketAllowedKeys(def, ctx);
+          sub.forEach(k => keys.add(k));
+        }
+        return keys;
+      }
+      return keys;
+    }
+
+    function assertBracketSides(id, feeders, ctx) {
+      const sides = resolveBracketSides(id, feeders, ctx);
+      if (!sides.homeKey && !sides.awayKey) return sides;
+      const allowed = bracketAllowedKeys(feeders, ctx);
+      if (!allowed.size) return sides;
+      for (const k of [sides.homeKey, sides.awayKey]) {
+        if (k && !allowed.has(k)) {
+          console.warn(`Spielbaum: ${id || '?' } — Team ${k} passt nicht zu den Feeder-Paarungen`, feeders);
+        }
+      }
+      return sides;
     }
 
     function getBracketWinner(id, feeders, ctx) {
@@ -1823,7 +1878,7 @@
     }
 
     function renderBracketTierNode(def, side, row, col, tier, ctx) {
-      const sides = resolveBracketSides(def.id, def, ctx);
+      const sides = assertBracketSides(def.id, def, ctx);
       const span = tier === 'af' ? 4 : tier === 'vf' ? 8 : 16;
       return `<div class="br-slot ${side}" style="grid-column:${col};grid-row:${row}/span ${span}" data-br-tier="${tier}">${renderBracketMatchBox(def.id, sides.homeKey, sides.awayKey, side, tier)}</div>`;
     }
