@@ -191,7 +191,7 @@
     table { width: 100%; border-collapse: collapse; }
 
     th {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -206,7 +206,8 @@
     td { padding: 3px 6px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
 
-    .match-scroll, .bracket-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+    .match-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+    .bracket-scroll { flex: 1; min-height: 0; overflow: auto; padding: 4px 6px; }
 
     .match-row { cursor: pointer; transition: background 0.15s; }
     .match-row:hover td { background: rgba(255,255,255,0.04); }
@@ -215,10 +216,10 @@
     .match-row.past .fixture { text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.25); }
     .match-row.past + .match-row:not(.past) td { border-top: 1px solid rgba(255,255,255,0.1); }
 
-    .time { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 16px; }
-    .cd { font-weight: 400; color: var(--muted); font-size: 14px; }
-    .live-txt { color: #4cc978; font-size: 14px; font-weight: 700; }
-    .past-txt { color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase; }
+    .time { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 15px; }
+    .cd { font-weight: 400; color: var(--muted); font-size: 13px; }
+    .live-txt { color: #4cc978; font-size: 13px; font-weight: 700; }
+    .past-txt { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; }
 
     .grp {
       display: inline-block;
@@ -243,15 +244,15 @@
     .group-K { background:#e76f51; color:#fff3ed; }
     .group-L { background:#3a5a40; color:#d8f3dc; }
 
-    .fixture { font-weight: 600; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fixture { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .score { font-weight: 700; font-size: 16px; white-space: nowrap; }
+    .score { font-weight: 700; font-size: 15px; white-space: nowrap; }
     .score.live-score { color: #4cc978; }
     .score.final-score { color: var(--text); }
     .score .min { font-size: 13px; font-weight: 600; opacity: 0.85; }
     .score.tiny { font-size: 13px; }
 
-    .tv { font-size: 14px; font-weight: 700; padding: 2px 5px; border-radius: 3px; white-space: nowrap; display: inline-block; }
+    .tv { font-size: 13px; font-weight: 700; padding: 2px 5px; border-radius: 3px; white-space: nowrap; display: inline-block; }
     a.tv { text-decoration: none; cursor: pointer; transition: filter 0.15s, transform 0.15s; }
     a.tv:hover { filter: brightness(1.2); transform: scale(1.04); }
     .tv-orf { background:rgba(200,16,46,0.2); color:#ff8fa3; }
@@ -259,7 +260,7 @@
     .meta a.tv { font-size: 13px; vertical-align: baseline; }
 
     .date-row td {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--muted);
       text-transform: uppercase;
@@ -295,14 +296,14 @@
     .tv-zdf { background: rgba(220,160,0,0.18); color: #ffd76a; }
     .tv-srf { background: rgba(200,0,40,0.18); color: #ff9eb0; }
 
-    .bracket-scroll { overflow: auto; padding: 4px 2px; }
     .bracket-wrap {
-      position: relative; min-height: 430px; min-width: 320px;
+      position: relative; min-height: 440px; min-width: 100%; width: max-content;
+      margin: 0 auto;
       display: grid;
-      grid-template-columns: 58px 46px 40px 34px 50px 34px 40px 46px 58px;
-      grid-template-rows: repeat(16, minmax(12px, 1fr));
-      align-items: center; gap: 0 2px;
-      padding: 6px 2px;
+      grid-template-columns: 68px 54px 48px 42px 54px 42px 48px 54px 68px;
+      grid-template-rows: repeat(16, minmax(14px, 1fr));
+      align-items: center; gap: 0 3px;
+      padding: 8px 10px;
     }
     .bracket-svg {
       position: absolute; inset: 0; width: 100%; height: 100%;
@@ -324,14 +325,15 @@
     .br-pair, .br-node {
       cursor: pointer; border-radius: 4px;
       background: rgba(0,0,0,0.22); border: 1px solid rgba(255,255,255,0.07);
-      padding: 2px 3px; transition: background 0.15s;
+      padding: 3px 4px; transition: background 0.15s;
+      max-width: 100%;
     }
     .br-pair:hover, .br-node:hover { background: rgba(255,255,255,0.08); }
     .br-pair.live, .br-node.live { outline: 1.5px solid #4cc978; }
 
     .br-team {
-      display: flex; align-items: center; gap: 2px;
-      font-size: 9px; font-weight: 700; line-height: 1.25;
+      display: flex; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 700; line-height: 1.3;
       white-space: nowrap;
     }
     .br-slot.right .br-team { flex-direction: row-reverse; }
@@ -339,24 +341,24 @@
     .br-team.win .br-sc { background: rgba(212,175,55,0.35); color: var(--accent); }
 
     .br-flag {
-      width: 18px; height: 12px; object-fit: cover;
+      width: 22px; height: 14px; object-fit: cover;
       border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.4);
       background: #1a3a28; display: block; flex-shrink: 0;
     }
-    .br-flag.sm { width: 14px; height: 9px; }
-    .br-emoji { font-size: 11px; line-height: 1; width: 14px; text-align: center; display: inline-block; flex-shrink: 0; }
+    .br-flag.sm { width: 18px; height: 12px; }
+    .br-emoji { font-size: 13px; line-height: 1; width: 18px; text-align: center; display: inline-block; flex-shrink: 0; }
 
     .br-abbr {
-      font-size: 8px; font-weight: 700; letter-spacing: 0.03em;
-      color: var(--muted); min-width: 18px;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.03em;
+      color: var(--muted); min-width: 22px;
     }
     .br-slot.right .br-abbr { text-align: right; }
 
     .br-sc {
-      font-size: 8px; font-weight: 700; padding: 0 3px; border-radius: 2px;
-      background: rgba(255,255,255,0.08); color: var(--text); min-width: 12px; text-align: center;
+      font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.08); color: var(--text); min-width: 13px; text-align: center;
     }
-    .br-sc.pen { font-size: 7px; color: var(--muted); background: transparent; padding: 0; }
+    .br-sc.pen { font-size: 8px; color: var(--muted); background: transparent; padding: 0; }
 
     .br-center-col {
       grid-column: 5; grid-row: 1 / span 16; z-index: 2;
@@ -798,7 +800,7 @@
       .fixture { font-size: 15px; white-space: normal; line-height: 1.3; }
       .matches-table th, .matches-table td { padding: 5px 4px; }
       .bracket-panel { width: 100%; }
-      .bracket-wrap { min-height: 360px; min-width: 100%; grid-template-columns: 50px 40px 34px 30px 42px 30px 34px 40px 50px; }
+      .bracket-wrap { min-height: 380px; grid-template-columns: 62px 50px 44px 38px 50px 38px 44px 50px 62px; padding: 8px 8px; }
       .finished-block { max-height: none; }
       .finished-fixture { font-size: 11px; }
       .team-cards { grid-template-columns: 1fr; }
@@ -1049,12 +1051,13 @@
       { group: '3P', label: 'Platz 3', ids: ['760516'] },
     ];
 
+    // AF-Zuordnung laut ESPN: 760504 = Sieger R32-9/10 (nicht 760507 – gleiches Paar)
     const BRACKET_TREE = {
       left: {
         af: [
           { id: '760503', r32: [0, 1] },
           { id: '760502', r32: [2, 3] },
-          { id: '760508', r32: [4, 5] },
+          { id: null, r32: [4, 5] },
           { id: '760505', r32: [6, 7] },
         ],
         vf: [
@@ -1066,9 +1069,9 @@
       right: {
         af: [
           { id: '760504', r32: [0, 1] },
-          { id: '760507', r32: [2, 3] },
-          { id: '760506', r32: [4, 5] },
-          { id: '760509', r32: [6, 7] },
+          { id: '760506', r32: [2, 3] },
+          { id: '760508', r32: [4, 6] },
+          { id: '760509', r32: [5, 7] },
         ],
         vf: [
           { id: '760511', af: [0, 1] },
@@ -1346,6 +1349,14 @@
       return ['R32', 'AF', 'VF', 'HF', 'F', '3P', 'KO'].includes(m.group);
     }
 
+    function isKoPhaseMatch(m) {
+      if (!m?.espnId) return false;
+      const id = parseInt(m.espnId, 10);
+      if (id < 760486) return false;
+      const round = m.group && m.group !== 'KO' ? m.group : koRoundFromId(m.espnId);
+      return ['R32', 'AF', 'VF', 'HF', 'F', '3P'].includes(round);
+    }
+
     function koRoundOrder(m) {
       if (!isKnockoutMatch(m)) return 0;
       return KO_ROUND_META[m.group]?.order ?? 9;
@@ -1580,8 +1591,10 @@
     }
 
     function resolveBracketSides(id, feeders, ctx) {
-      const known = id ? getKoMatchSides(id) : null;
-      if (known?.homeKey && known?.awayKey) return known;
+      if (id) {
+        const known = getKoMatchSides(id);
+        if (known?.homeKey && known?.awayKey) return known;
+      }
 
       let homeKey = null;
       let awayKey = null;
@@ -2568,7 +2581,7 @@
       scheduleMatches.forEach(add);
       DISPLAY_MATCHES.forEach(add);
       return [...byId.values()]
-        .filter(m => isKnownMatch(m) && isKnockoutMatch(m) && liveScores[m.espnId]?.state === 'post')
+        .filter(m => isKnownMatch(m) && isKoPhaseMatch(m) && liveScores[m.espnId]?.state === 'post')
         .sort((a, b) => b.startDate - a.startDate);
     }
 
