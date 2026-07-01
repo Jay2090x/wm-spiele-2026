@@ -306,6 +306,10 @@
     .tv-srf { background: rgba(200,0,40,0.18); color: #ff9eb0; }
     .tv-fox { background: rgba(0,100,220,0.2); color: #7ec8ff; }
     .tv-sbs { background: rgba(200,40,40,0.18); color: #ffaaaa; }
+    .tv-rtve { background: rgba(0,100,200,0.2); color: #7ec8ff; }
+    .tv-hrt { background: rgba(200,0,60,0.18); color: #ff9eb8; }
+    .tv-bbc { background: rgba(0,60,180,0.22); color: #8ec5ff; }
+    .tv-intl { background: rgba(255,255,255,0.08); color: #c8d0e0; }
     .tv-nostream {
       color: #ff5c5c; background: rgba(255,70,70,0.14);
       font-weight: 700; font-size: 11px; letter-spacing: 0.03em;
@@ -1189,10 +1193,69 @@
     const WM_ESPN_MIN = 760468;
     const WM_ESPN_MAX = 760517;
 
-    const TV_SINGLE_BROADCASTER = {
-      CH: 'SRF',
-      US: 'FOX',
-      AU: 'SBS',
+    // Ein Free-TV-Sender für alle WM-Spiele (Wikipedia / LiveSoccerTV, Stand 2026)
+    const TV_ALL_MATCHES = {
+      CH: 'SRF', US: 'FOX', AU: 'SBS',
+      ES: 'RTVE', HR: 'HRT', IT: 'RAI', NL: 'NPO', PL: 'TVP', PT: 'RTP',
+      BE: 'VRT', GB: 'BBC', FR: 'TF1', IE: 'RTE',
+      BR: 'CazeTV', MX: 'Televisa', CA: 'TSN', JP: 'NHK', KR: 'KBS',
+      SE: 'SVT', NO: 'NRK', DK: 'DR', FI: 'YLE', IS: 'RUV',
+      CZ: 'CT', SK: 'STVR', HU: 'MTVA', GR: 'ERT', TR: 'TRT', BG: 'BNT',
+      NZ: 'TVNZ', SG: 'Mediacorp', IN: 'DDSports', ID: 'TVRI', MY: 'RTM', VN: 'VTV',
+      AR: 'TVPublica', UY: 'Antel', CO: 'Caracol', CL: 'Chilevision', EC: 'Teleamazonas',
+      ZA: 'SABC', DZ: 'ENTV', BA: 'BHRT', RS: 'RTS', SI: 'RTVSLO',
+      PH: 'Aleph', LU: 'RTL', MT: 'TVM',
+    };
+
+    const TV_BROADCASTER_META = {
+      SRF: { label: 'SRF', css: 'tv-srf', url: 'https://www.srf.ch/play/tv' },
+      FOX: { label: 'Fox', css: 'tv-fox', url: 'https://www.foxsports.com/live' },
+      SBS: { label: 'SBS', css: 'tv-sbs', url: 'https://www.sbs.com.au/ondemand/' },
+      RTVE: { label: 'RTVE', css: 'tv-rtve', url: 'https://www.rtve.es/play/' },
+      HRT: { label: 'HRT', css: 'tv-hrt', url: 'https://hrti.hrt.hr/' },
+      RAI: { label: 'RAI', css: 'tv-intl', url: 'https://www.raiplay.it/' },
+      NPO: { label: 'NPO', css: 'tv-intl', url: 'https://www.npostart.nl/' },
+      TVP: { label: 'TVP', css: 'tv-intl', url: 'https://vod.tvp.pl/' },
+      RTP: { label: 'RTP', css: 'tv-intl', url: 'https://www.rtp.pt/play/' },
+      VRT: { label: 'VRT', css: 'tv-intl', url: 'https://www.vrt.be/vrtmax/' },
+      BBC: { label: 'BBC', css: 'tv-bbc', url: 'https://www.bbc.co.uk/iplayer' },
+      TF1: { label: 'TF1', css: 'tv-intl', url: 'https://www.tf1.fr/tf1/direct' },
+      RTE: { label: 'RTÉ', css: 'tv-intl', url: 'https://www.rte.ie/player/' },
+      CazeTV: { label: 'CazéTV', css: 'tv-intl', url: 'https://www.youtube.com/@cazetv' },
+      Televisa: { label: 'TUDN', css: 'tv-intl', url: 'https://www.tudn.com/envivo' },
+      TSN: { label: 'TSN', css: 'tv-intl', url: 'https://www.tsn.ca/' },
+      NHK: { label: 'NHK', css: 'tv-intl', url: 'https://www3.nhk.or.jp/nhkworld/en/live/' },
+      KBS: { label: 'KBS', css: 'tv-intl', url: 'https://www.kbs.co.kr/' },
+      SVT: { label: 'SVT', css: 'tv-intl', url: 'https://www.svtplay.se/' },
+      NRK: { label: 'NRK', css: 'tv-intl', url: 'https://tv.nrk.no/' },
+      DR: { label: 'DR', css: 'tv-intl', url: 'https://www.dr.dk/drtv/' },
+      YLE: { label: 'Yle', css: 'tv-intl', url: 'https://areena.yle.fi/' },
+      RUV: { label: 'RÚV', css: 'tv-intl', url: 'https://www.ruv.is/sjonvarp/beint' },
+      CT: { label: 'ČT', css: 'tv-intl', url: 'https://www.ceskatelevize.cz/sport/' },
+      STVR: { label: 'RTVS', css: 'tv-intl', url: 'https://www.rtvs.sk/' },
+      MTVA: { label: 'M4', css: 'tv-intl', url: 'https://mediaklikk.hu/' },
+      ERT: { label: 'ERT', css: 'tv-intl', url: 'https://www.ertflix.gr/' },
+      TRT: { label: 'TRT', css: 'tv-intl', url: 'https://www.trt.net.tr/' },
+      BNT: { label: 'BNT', css: 'tv-intl', url: 'https://bnt.bg/' },
+      TVNZ: { label: 'TVNZ+', css: 'tv-intl', url: 'https://www.tvnz.co.nz/' },
+      Mediacorp: { label: 'mewatch', css: 'tv-intl', url: 'https://www.mewatch.sg/' },
+      DDSports: { label: 'DD Sports', css: 'tv-intl', url: 'https://www.sports18.com/' },
+      TVRI: { label: 'TVRI', css: 'tv-intl', url: 'https://www.tvri.go.id/' },
+      RTM: { label: 'RTM', css: 'tv-intl', url: 'https://www.rtmklik.rtm.gov.my/' },
+      VTV: { label: 'VTV', css: 'tv-intl', url: 'https://vtvgo.vn/' },
+      TVPublica: { label: 'TV Pública', css: 'tv-intl', url: 'https://www.tvpublica.com.ar/' },
+      Antel: { label: 'Antel', css: 'tv-intl', url: 'https://www.antel.tv/' },
+      Caracol: { label: 'Caracol', css: 'tv-intl', url: 'https://www.caracoltv.com/' },
+      Chilevision: { label: 'CHV', css: 'tv-intl', url: 'https://www.chilevision.cl/' },
+      Teleamazonas: { label: 'Teleamazonas', css: 'tv-intl', url: 'https://www.teleamazonas.com/' },
+      SABC: { label: 'SABC', css: 'tv-intl', url: 'https://www.sabc.co.za/' },
+      ENTV: { label: 'ENTV', css: 'tv-intl', url: 'https://www.entv.dz/' },
+      BHRT: { label: 'BHRT', css: 'tv-intl', url: 'https://www.bhrt.ba/' },
+      RTS: { label: 'RTS', css: 'tv-intl', url: 'https://www.rts.rs/' },
+      RTVSLO: { label: 'RTV SLO', css: 'tv-intl', url: 'https://www.rtvslo.si/' },
+      Aleph: { label: 'Aleph', css: 'tv-intl', url: 'https://www.youtube.com/@AlephArena' },
+      RTL: { label: 'RTL', css: 'tv-intl', url: 'https://www.rtl.lu/' },
+      TVM: { label: 'TVM', css: 'tv-intl', url: 'https://tvm.mt/' },
     };
 
     // FIFA/Coca-Cola Weltrangliste, Stand 11. Juni 2026 (ESPN / FIFA)
@@ -1328,8 +1391,8 @@
       if (cc === 'AT') return TV_BY_ESPN[espnId] || null;
       if (cc === 'DE') return TV_DE[espnId] || null;
 
-      const single = TV_SINGLE_BROADCASTER[cc];
-      if (single && isWmEspnId(espnId)) return single;
+      const all = TV_ALL_MATCHES[cc];
+      if (all && isWmEspnId(espnId)) return all;
 
       return null;
     }
@@ -1339,10 +1402,7 @@
       if (b === 'ServusTV') return 'Servus';
       if (b === 'ARD') return 'ARD';
       if (b === 'ZDF') return 'ZDF';
-      if (b === 'SRF') return 'SRF';
-      if (b === 'FOX') return 'Fox';
-      if (b === 'SBS') return 'SBS';
-      return b;
+      return TV_BROADCASTER_META[b]?.label || b;
     }
 
     function tvCssClass(b) {
@@ -1350,10 +1410,7 @@
       if (b === 'ServusTV') return 'tv-servus';
       if (b === 'ARD') return 'tv-ard';
       if (b === 'ZDF') return 'tv-zdf';
-      if (b === 'SRF') return 'tv-srf';
-      if (b === 'FOX') return 'tv-fox';
-      if (b === 'SBS') return 'tv-sbs';
-      return '';
+      return TV_BROADCASTER_META[b]?.css || 'tv-intl';
     }
 
     function tvStreamUrl(b, cc) {
@@ -1369,18 +1426,9 @@
           ARD: 'https://www.sportschau.de/fussball/fifa-wm-2026/',
           ZDF: 'https://www.zdf.de/sport/fussball-wm-2026',
         },
-        CH: {
-          SRF: 'https://www.srf.ch/play/tv',
-        },
-        US: {
-          FOX: 'https://www.foxsports.com/live',
-        },
-        AU: {
-          SBS: 'https://www.sbs.com.au/ondemand/',
-        },
       };
 
-      return byCountry[cc]?.[b] || null;
+      return byCountry[cc]?.[b] || TV_BROADCASTER_META[b]?.url || null;
     }
 
     function tvLinkHtml(b) {
