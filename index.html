@@ -1077,25 +1077,26 @@
     };
 
     const R32_LEFT = [
-      { id:'760489', slot:1, home:'deutschland', away:'paraguay' },
-      { id:'760492', slot:2, home:'frankreich', away:'schweden' },
-      { id:'760486', slot:3, home:'suedafrika', away:'kanada' },
-      { id:'760488', slot:4, home:'niederlande', away:'marokko' },
-      { id:'760496', slot:5, home:'portugal', away:'kroatien' },
-      { id:'760497', slot:6, home:'spanien', away:'oesterreich' },
-      { id:'760494', slot:7, home:'usa', away:'bosnien' },
-      { id:'760493', slot:8, home:'belgien', away:'senegal' },
-    ];
-    const R32_RIGHT = [
-      { id:'760487', slot:9, home:'brasilien', away:'japan' },
-      { id:'760490', slot:10, home:'elfenbeinkueste', away:'norwegen' },
-      { id:'760491', slot:11, home:'mexiko', away:'ecuador' },
-      { id:'760495', slot:12, home:'england', away:'drkongo' },
-      { id:'760500', slot:13, home:'argentinien', away:'kapverde' },
-      { id:'760499', slot:14, home:'australien', away:'aegypten' },
-      { id:'760498', slot:15, home:'schweiz', away:'algerien' },
-      { id:'760501', slot:16, home:'kolumbien', away:'ghana' },
-    ];
+  { id:'760489', slot:1, home:'paraguay', away:'frankreich' },   // Frankreich gewinnt
+  { id:'760492', slot:2, home:'frankreich', away:'schweden' },   // Frankreich
+  { id:'760486', slot:3, home:'suedafrika', away:'kanada' },     // Marokko (andere Seite)
+  { id:'760488', slot:4, home:'niederlande', away:'marokko' },   // Marokko
+  { id:'760496', slot:5, home:'portugal', away:'kroatien' },     // Spanien Seite
+  { id:'760497', slot:6, home:'spanien', away:'oesterreich' },   // Spanien
+  { id:'760494', slot:7, home:'usa', away:'bosnien' },           // Belgien
+  { id:'760493', slot:8, home:'belgien', away:'senegal' },       // Belgien
+];
+
+const R32_RIGHT = [
+  { id:'760487', slot:9, home:'brasilien', away:'japan' },       // Norwegen
+  { id:'760490', slot:10, home:'elfenbeinkueste', away:'norwegen' }, // Norwegen
+  { id:'760491', slot:11, home:'mexiko', away:'ecuador' },       // England
+  { id:'760495', slot:12, home:'england', away:'drkongo' },      // England
+  { id:'760500', slot:13, home:'argentinien', away:'kapverde' }, // Argentinien
+  { id:'760499', slot:14, home:'australien', away:'aegypten' },  // Argentinien
+  { id:'760498', slot:15, home:'schweiz', away:'algerien' },     // Schweiz
+  { id:'760501', slot:16, home:'kolumbien', away:'ghana' },      // Schweiz
+];
     const R32_ALL = [...R32_LEFT, ...R32_RIGHT];
 
     const KO_ROUND_META = {
@@ -3298,6 +3299,24 @@ setTimeout(() => {
   knockoutMeta['760509'] = {id:'760509', homeEn:'Argentina', awayEn:'Switzerland'};
   if (typeof renderBracket === 'function') renderBracket();
 }, 800);
+    
+    // === STARKER REPARATUR-BLOCK (8. Juli) ===
+setTimeout(() => {
+  knockoutMeta = knockoutMeta || {};
+  knockoutMeta['760503'] = {id:'760503', homeEn:'France', awayEn:'Morocco'};
+  knockoutMeta['760504'] = {id:'760504', homeEn:'Spain', awayEn:'Belgium'};
+  knockoutMeta['760506'] = {id:'760506', homeEn:'Norway', awayEn:'England'};
+  knockoutMeta['760509'] = {id:'760509', homeEn:'Argentina', awayEn:'Switzerland'};
+  
+  // Force re-render
+  if (typeof renderBracket === 'function') {
+    renderBracket();
+  }
+  if (typeof updateBracketLayout === 'function') {
+    updateBracketLayout();
+  }
+  console.log('%c[WM2026] Bracket stark repariert - aktuelle Viertelfinale', 'color:#22c55e;font-size:14px');
+}, 600);
     
   </script>
 </body>
