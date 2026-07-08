@@ -1117,35 +1117,35 @@
 
     // AF-Zuordnung laut ESPN: 760504 = Sieger R32-9/10 (nicht 760507 – gleiches Paar)
     const BRACKET_TREE = {
-      left: {
-        af: [
-          { id: '760503', r32: [0, 1] },
-          { id: '760502', r32: [2, 3] },
-          { id: null, r32: [4, 5] },
-          { id: '760505', r32: [6, 7] },
-        ],
-        vf: [
-          { id: '760510', af: [0, 1] },
-          { id: '760512', af: [2, 3] },
-        ],
-        hf: { id: '760514', vf: [0, 1] },
-      },
-      right: {
-        af: [
-          { id: '760504', r32: [0, 1] },
-          { id: '760506', r32: [2, 3] },
-          { id: '760508', r32: [4, 6] },
-          { id: '760509', r32: [5, 7] },
-        ],
-        vf: [
-          { id: '760511', af: [0, 1] },
-          { id: '760513', af: [2, 3] },
-        ],
-        hf: { id: '760515', vf: [0, 1] },
-      },
-      final: { id: '760517', hf: ['left', 'right'] },
-      third: { id: '760516', hf: ['left', 'right'] },
-    };
+  left: {
+    af: [
+      { id: '760503', r32: [0, 1] },   // Frankreich vs Marokko ✓
+      { id: '760502', r32: [2, 3] },   // Marokko ✓
+      { id: null, r32: [4, 5] },
+      { id: '760505', r32: [6, 7] },   // Belgien ✓
+    ],
+    vf: [
+      { id: '760510', af: [0, 1] },
+      { id: '760512', af: [2, 3] },
+    ],
+    hf: { id: '760514', vf: [0, 1] },
+  },
+  right: {
+    af: [
+      { id: '760504', r32: [0, 1] },   // Spanien vs Belgien ✓
+      { id: '760506', r32: [2, 3] },   // Norwegen vs England ✓
+      { id: '760508', r32: [4, 6] },
+      { id: '760509', r32: [5, 7] },   // Argentinien vs Schweiz ✓
+    ],
+    vf: [
+      { id: '760511', af: [0, 1] },
+      { id: '760513', af: [2, 3] },
+    ],
+    hf: { id: '760515', vf: [0, 1] },
+  },
+  final: { id: '760517', hf: ['left', 'right'] },
+  third: { id: '760516', hf: ['left', 'right'] },
+};
 
     const TEAM_ABBR = {
       deutschland:'GER', paraguay:'PAR', frankreich:'FRA', schweden:'SWE',
@@ -3289,6 +3289,16 @@
       if (document.readyState === 'complete') gcCount();
       else window.addEventListener('load', gcCount, { once: true });
     })();
+    
+    // Reparatur: Aktueller Stand 8. Juli erzwingen
+setTimeout(() => {
+  knockoutMeta['760503'] = {id:'760503', homeEn:'France', awayEn:'Morocco'};
+  knockoutMeta['760504'] = {id:'760504', homeEn:'Spain', awayEn:'Belgium'};
+  knockoutMeta['760506'] = {id:'760506', homeEn:'Norway', awayEn:'England'};
+  knockoutMeta['760509'] = {id:'760509', homeEn:'Argentina', awayEn:'Switzerland'};
+  if (typeof renderBracket === 'function') renderBracket();
+}, 800);
+    
   </script>
 </body>
 </html>
