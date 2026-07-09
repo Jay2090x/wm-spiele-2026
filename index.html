@@ -1985,32 +1985,56 @@ const R32_RIGHT = [
     }
 
     function renderBracket() {
-      const leftCtx = { r32: R32_LEFT, tree: BRACKET_TREE.left };
-      const rightCtx = { r32: R32_RIGHT, tree: BRACKET_TREE.right };
-      const finSides = resolveBracketSides(BRACKET_TREE.final.id, { hf: ['left', 'right'] }, leftCtx);
-      const thirdSides = {
-        homeKey: getBracketLoser(BRACKET_TREE.left.hf.id, BRACKET_TREE.left.hf, leftCtx),
-        awayKey: getBracketLoser(BRACKET_TREE.right.hf.id, BRACKET_TREE.right.hf, rightCtx),
-      };
+  const leftCtx = { r32: R32_LEFT, tree: BRACKET_TREE.left };
+  const rightCtx = { r32: R32_RIGHT, tree: BRACKET_TREE.right };
 
-      document.getElementById('bracket-root').innerHTML = `
-        <div class="bracket-stage">
-          <div class="bracket-wrap">
-            <svg class="bracket-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-            ${renderBracketSide('left', R32_LEFT, BRACKET_TREE.left)}
-            <div class="br-center-col">
-              <div class="br-trophy">🏆</div>
-              <div class="br-final-label">Finale</div>
-              <div class="br-final-node" data-espn="760517">${bracketCenterFlags('760517', finSides.homeKey, finSides.awayKey)}</div>
-              <div class="br-third-label">Platz 3</div>
-              <div class="br-third-node" data-espn="760516">${bracketCenterFlags('760516', thirdSides.homeKey, thirdSides.awayKey)}</div>
-            </div>
-            ${renderBracketSide('right', R32_RIGHT, BRACKET_TREE.right)}
+  // === STARKER OVERRIDE für aktuelle Viertelfinale ===
+  // Diese 4 Matches werden direkt in die AF-Slots gezwungen
+  const forcedAF = {
+    '760503': { homeKey: 'frankreich', awayKey: 'marokko' },   // France vs Morocco
+    '760504': { homeKey: 'spanien', awayKey: 'belgien' },     // Spain vs Belgium
+    '760506': { homeKey: 'norwegen', awayKey: 'england' },    // Norway vs England
+    '760509': { homeKey: 'argentinien', awayKey: 'schweiz' }  // Argentina vs Switzerland
+  };
+
+  // Temporär override in knockoutMeta
+  Object.keys(forcedAF).forEach(id => {
+    knockoutMeta[id] = {
+      ...knockoutMeta[id],
+      homeEn: forcedAF[id].homeKey,
+      awayEn: forcedAF[id].awayKey
+    };
+  });
+
+  const finSides = resolveBracketSides(BRACKET_TREE.final.id, { hf: ['left', 'right'] }, leftCtx);
+  const thirdSides = {
+    homeKey: getBracketLoser(BRACKET_TREE.left.hf.id, BRACKET_TREE.left.hf, leftCtx),
+    awayKey: getBracketLoser(BRACKET_TREE.right.hf.id, BRACKET_TREE.right.hf, rightCtx),
+  };
+
+  document.getElementById('bracket-root').innerHTML = `
+    <div class="bracket-stage">
+      <div class="bracket-wrap">
+        <svg class="bracket-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+        ${renderBracketSide('left', R32_LEFT, BRACKET_TREE.left)}
+        <div class="br-center-col">
+          <div class="br-trophy">🏆</div>
+          <div class="br-final-label">Finale</div>
+          <div class="br-final-node" data-espn="760517">
+            ${bracketCenterFlags('760517', finSides.homeKey, finSides.awayKey)}
           </div>
-        </div>`;
+          <div class="br-third-label">Platz 3</div>
+          <div class="br-third-node" data-espn="760516">
+            ${bracketCenterFlags('760516', thirdSides.homeKey, thirdSides.awayKey)}
+          </div>
+        </div>
+        ${renderBracketSide('right', R32_RIGHT, BRACKET_TREE.right)}
+      </div>
+    </div>
+  `;
 
-      updateBracketLayout();
-    }
+  updateBracketLayout();
+}
 
     function updateBracketLayout() {
       const wrap = document.querySelector('#bracket-root .bracket-wrap');
@@ -3317,6 +3341,15 @@ setTimeout(() => {
   }
   console.log('%c[WM2026] Bracket stark repariert - aktuelle Viertelfinale', 'color:#22c55e;font-size:14px');
 }, 600);
+
+
+// === VOLLER BAUM + AKTUELLE TEAMS ERZWINGEN ===
+setTimeout(() => {
+  if (typeof renderBracket === 'function') {
+    renderBracket();
+    console.log('%c[WM2026] Voller Spielbaum mit aktuellen Viertelfinale gerendert', 'color:#22c55e');
+  }
+}, 500);
     
   </script>
 </body>
