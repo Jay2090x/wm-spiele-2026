@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-12T11:43:54Z",
+  "updated": "2026-07-12T14:44:33Z",
   "buckets": [
     {
       "id": "direct",
@@ -9,7 +9,7 @@
     {
       "id": "google",
       "label": "Google",
-      "count": 6
+      "count": 7
     },
     {
       "id": "facebook",
