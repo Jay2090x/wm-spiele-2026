@@ -1,10 +1,10 @@
 {
-  "updated": "2026-07-15T16:52:57Z",
+  "updated": "2026-07-15T20:37:54Z",
   "buckets": [
     {
       "id": "direct",
       "label": "Direkt / Lesezeichen",
-      "count": 397
+      "count": 400
     },
     {
       "id": "google",
