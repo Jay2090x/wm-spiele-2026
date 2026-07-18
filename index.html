@@ -1116,37 +1116,38 @@ const R32_RIGHT = [
       { group: '3P', label: 'Platz 3', ids: ['760516'] },
     ];
 
-    // AF-Zuordnung laut ESPN: 760504 = Sieger R32-9/10 (nicht 760507 – gleiches Paar)
+    // Bracket-IDs an ESPN angepasst für korrekte Score/Live-Links pro Feeder-Paarung.
+    // Teams werden immer über R32-Feeder berechnet (nicht ESPN-Meta).
     const BRACKET_TREE = {
-  left: {
-    af: [
-      { id: '760503', r32: [0, 1] },   // Frankreich vs Marokko ✓
-      { id: '760502', r32: [2, 3] },   // Marokko ✓
-      { id: null, r32: [4, 5] },
-      { id: '760505', r32: [6, 7] },   // Belgien ✓
-    ],
-    vf: [
-      { id: '760510', af: [0, 1] },
-      { id: '760512', af: [2, 3] },
-    ],
-    hf: { id: '760514', vf: [0, 1] },
-  },
-  right: {
-    af: [
-      { id: '760504', r32: [0, 1] },   // Spanien vs Belgien ✓
-      { id: '760506', r32: [2, 3] },   // Norwegen vs England ✓
-      { id: '760508', r32: [4, 6] },
-      { id: '760509', r32: [5, 7] },   // Argentinien vs Schweiz ✓
-    ],
-    vf: [
-      { id: '760511', af: [0, 1] },
-      { id: '760513', af: [2, 3] },
-    ],
-    hf: { id: '760515', vf: [0, 1] },
-  },
-  final: { id: '760517', hf: ['left', 'right'] },
-  third: { id: '760516', hf: ['left', 'right'] },
-};
+left: {
+        af: [
+          { id: '760503', r32: [0, 1] },
+          { id: '760502', r32: [2, 3] },
+          { id: null, r32: [4, 5] },
+          { id: '760506', r32: [6, 7] },
+        ],
+        vf: [
+          { id: '760510', af: [0, 1] },
+          { id: '760512', af: [2, 3] },
+        ],
+        hf: { id: '760514', vf: [0, 1] },
+      },
+      right: {
+        af: [
+          { id: '760504', r32: [0, 1] },
+          { id: '760505', r32: [2, 3] },
+          { id: '760508', r32: [4, 6] },
+          { id: '760509', r32: [5, 7] },
+        ],
+        vf: [
+          { id: '760511', af: [0, 1] },
+          { id: '760513', af: [2, 3] },
+        ],
+        hf: { id: '760515', vf: [0, 1] },
+      },
+      final: { id: '760517', hf: ['left', 'right'] },
+      third: { id: '760516', hf: ['left', 'right'] },
+    };
 
     const TEAM_ABBR = {
       deutschland:'GER', paraguay:'PAR', frankreich:'FRA', schweden:'SWE',
@@ -1346,6 +1347,8 @@ const R32_RIGHT = [
     let groupStandings = {};
     let scheduleMatches = [];
     let finishedMatchCache = {};
+    let koFinished = {};
+    try { koFinished = JSON.parse(localStorage.getItem('wm26_ko_finished') || '{}') || {}; } catch (e) { koFinished = {}; }
     let knockoutMeta = {};
     let allEvents = [];
     let statsEvents = [];
@@ -2748,9 +2751,16 @@ const R32_RIGHT = [
       const nowMs = Date.now();
       for (const m of scheduleMatches) {
         const s = liveScores[m.espnId];
-        if (s?.state === 'post') finishedMatchCache[m.espnId] = m;
+        if (s?.state === 'post') {
+          finishedMatchCache[m.espnId] = m;
+          if (isKoPhaseMatch(m)) {
+            koFinished[m.espnId] = m;
+            try { localStorage.setItem('wm26_ko_finished', JSON.stringify(koFinished)); } catch (e) {}
+          }
+        }
       }
       for (const [id, m] of Object.entries(finishedMatchCache)) {
+        if (isKoPhaseMatch(m)) continue; // keep all KO finished forever
         const end = m.startDate.getTime() + MATCH_DURATION_MS;
         if (end + FINISHED_VISIBLE_MS < nowMs) delete finishedMatchCache[id];
       }
@@ -2840,6 +2850,8 @@ const R32_RIGHT = [
       };
       scheduleMatches.forEach(add);
       DISPLAY_MATCHES.forEach(add);
+      Object.values(finishedMatchCache).forEach(add);
+      Object.values(koFinished).forEach(add);
       return [...byId.values()]
         .filter(m => isKnownMatch(m) && isKoPhaseMatch(m) && liveScores[m.espnId]?.state === 'post')
         .sort((a, b) => b.startDate - a.startDate);
