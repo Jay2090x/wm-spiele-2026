@@ -1618,9 +1618,8 @@
       const size = sm ? ' sm' : '';
       if (!key) return `<span class="br-emoji${size} ${state}">?</span>`;
       const nkey = normKey(key);
-      const iso = COUNTRY_ISO[nkey];
-      if (iso) return `<img class="br-flag${size} ${state}" src="https://flagcdn.com/w40/${iso}.png" alt="">`;
-      return `<span class="br-emoji${size} ${state}">${c(nkey).flag || '?'}</span>`;
+      const f = c(nkey).flag;
+      return `<span class="br-emoji${size} ${state}">${f || '?'}</span>`;
     }
 
     function getMatchWinner(homeKey, awayKey, espnId) {
