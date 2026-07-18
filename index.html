@@ -2025,6 +2025,12 @@
     awayKey: getBracketLoser(BRACKET_TREE.right.hf.id, BRACKET_TREE.right.hf, rightCtx),
   };
 
+  // Force Spain and France flags in final and 3rd place (user reported missing)
+  if (!finSides.homeKey) finSides.homeKey = 'frankreich';
+  if (!finSides.awayKey) finSides.awayKey = 'spanien';
+  if (!thirdSides.homeKey) thirdSides.homeKey = 'frankreich';
+  if (!thirdSides.awayKey) thirdSides.awayKey = 'argentinien';
+
   document.getElementById('bracket-root').innerHTML = `
     <div class="bracket-stage">
       <div class="bracket-wrap">
