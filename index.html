@@ -2852,8 +2852,13 @@ left: {
       DISPLAY_MATCHES.forEach(add);
       Object.values(finishedMatchCache).forEach(add);
       Object.values(koFinished).forEach(add);
+      // ensure persisted KO finished are treated as post even if not in current API response
+      Object.keys(koFinished).forEach(id => {
+        if (!liveScores[id]) liveScores[id] = { state: 'post' };
+      });
       return [...byId.values()]
-        .filter(m => isKnownMatch(m) && isKoPhaseMatch(m) && liveScores[m.espnId]?.state === 'post')
+        .filter(m => isKnownMatch(m) && isKoPhaseMatch(m))
+        .filter(m => (liveScores[m.espnId]?.state === 'post') || koFinished[m.espnId])
         .sort((a, b) => b.startDate - a.startDate);
     }
 
