@@ -1538,11 +1538,22 @@
       return KO_ROUND_META[group]?.label || group || 'K.-o.-Runde';
     }
 
+    function normKey(k) {
+      if (!k) return null;
+      let key = String(k).trim();
+      if (ESPN_TO_KEY[key]) key = ESPN_TO_KEY[key];
+      if (COUNTRIES[key]) return key;
+      const low = key.toLowerCase();
+      if (COUNTRIES[low]) return low;
+      return key;
+    }
+
     function flagIcon(key, cls = 'flag-inline') {
       if (!key) return '';
-      const iso = COUNTRY_ISO[key];
+      const nkey = normKey(key);
+      const iso = COUNTRY_ISO[nkey];
       if (iso) return `<img class="${cls}" src="https://flagcdn.com/w20/${iso}.png" alt="" loading="lazy">`;
-      const f = c(key).flag;
+      const f = c(nkey).flag;
       return f ? `<span class="${cls}" style="font-size:14px">${f}</span>` : '';
     }
 
@@ -1606,9 +1617,10 @@
       const state = parts.filter(c => c !== 'sm').join(' ');
       const size = sm ? ' sm' : '';
       if (!key) return `<span class="br-emoji${size} ${state}">?</span>`;
-      const iso = COUNTRY_ISO[key];
+      const nkey = normKey(key);
+      const iso = COUNTRY_ISO[nkey];
       if (iso) return `<img class="br-flag${size} ${state}" src="https://flagcdn.com/w40/${iso}.png" alt="">`;
-      return `<span class="br-emoji${size} ${state}">${c(key).flag || '?'}</span>`;
+      return `<span class="br-emoji${size} ${state}">${c(nkey).flag || '?'}</span>`;
     }
 
     function getMatchWinner(homeKey, awayKey, espnId) {
@@ -2249,7 +2261,8 @@
     }
 
     function countryFlagUrl(key) {
-      const iso = COUNTRY_ISO[key];
+      const nkey = normKey(key);
+      const iso = COUNTRY_ISO[nkey];
       return iso ? `https://flagcdn.com/w320/${iso}.png` : null;
     }
 
@@ -3331,42 +3344,7 @@
       else window.addEventListener('load', gcCount, { once: true });
     })();
     
-    // Reparatur: Aktueller Stand 8. Juli erzwingen
-setTimeout(() => {
-  knockoutMeta['760503'] = {id:'760503', homeEn:'France', awayEn:'Morocco'};
-  knockoutMeta['760504'] = {id:'760504', homeEn:'Spain', awayEn:'Belgium'};
-  knockoutMeta['760506'] = {id:'760506', homeEn:'Norway', awayEn:'England'};
-  knockoutMeta['760509'] = {id:'760509', homeEn:'Argentina', awayEn:'Switzerland'};
-  if (typeof renderBracket === 'function') renderBracket();
-}, 800);
-    
-    // === STARKER REPARATUR-BLOCK (8. Juli) ===
-setTimeout(() => {
-  knockoutMeta = knockoutMeta || {};
-  knockoutMeta['760503'] = {id:'760503', homeEn:'France', awayEn:'Morocco'};
-  knockoutMeta['760504'] = {id:'760504', homeEn:'Spain', awayEn:'Belgium'};
-  knockoutMeta['760506'] = {id:'760506', homeEn:'Norway', awayEn:'England'};
-  knockoutMeta['760509'] = {id:'760509', homeEn:'Argentina', awayEn:'Switzerland'};
-  
-  // Force re-render
-  if (typeof renderBracket === 'function') {
-    renderBracket();
-  }
-  if (typeof updateBracketLayout === 'function') {
-    updateBracketLayout();
-  }
-  console.log('%c[WM2026] Bracket stark repariert - aktuelle Viertelfinale', 'color:#22c55e;font-size:14px');
-}, 600);
-
-
-// === VOLLER BAUM + AKTUELLE TEAMS ERZWINGEN ===
-setTimeout(() => {
-  if (typeof renderBracket === 'function') {
-    renderBracket();
-    console.log('%c[WM2026] Voller Spielbaum mit aktuellen Viertelfinale gerendert', 'color:#22c55e');
-  }
-}, 500);
-    
+    // (old 8. Juli manual debug blocks removed - logic is now clean)
   </script>
 </body>
 </html>
