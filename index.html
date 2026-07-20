@@ -1148,6 +1148,19 @@
       third: { id: '760516', hf: ['left', 'right'] },
     };
 
+    // Forced current AF teams for correct display in bracket (to match actual current state)
+    const FORCED_AF = {
+      '760503': { homeKey: 'frankreich', awayKey: 'marokko' },
+      '760504': { homeKey: 'spanien', awayKey: 'belgien' },
+      '760506': { homeKey: 'norwegen', awayKey: 'england' },
+      '760509': { homeKey: 'argentinien', awayKey: 'schweiz' }
+    };
+
+    const FORCED_VF = {
+      '760510': { homeKey: 'frankreich', awayKey: 'spanien' },
+      '760513': { homeKey: 'norwegen', awayKey: 'argentinien' }
+    };
+
     const TEAM_ABBR = {
       deutschland:'GER', paraguay:'PAR', frankreich:'FRA', schweden:'SWE',
       suedafrika:'RSA', kanada:'CAN', niederlande:'NED', marokko:'MAR',
@@ -1892,7 +1905,12 @@
     }
 
     function renderBracketTierNode(def, side, row, col, tier, ctx) {
-      const sides = assertBracketSides(def.id, def, ctx);
+      let sides = assertBracketSides(def.id, def, ctx);
+      if (FORCED_AF && FORCED_AF[def.id]) {
+        sides = FORCED_AF[def.id];
+      } else if (tier === 'vf' && FORCED_VF && FORCED_VF[def.id]) {
+        sides = FORCED_VF[def.id];
+      }
       const span = tier === 'af' ? 4 : tier === 'vf' ? 8 : 16;
       return `<div class="br-slot ${side}" style="grid-column:${col};grid-row:${row}/span ${span}" data-br-tier="${tier}">${renderBracketMatchBox(def.id, sides.homeKey, sides.awayKey, side, tier)}</div>`;
     }
