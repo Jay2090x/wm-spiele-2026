@@ -1122,7 +1122,7 @@
         af: [
           { id: '760503', r32: [1, 3] },  // FRA + MAR (actual)
           { id: '760502', r32: [0, 2] },
-          { id: '760504', r32: [5, 7] },  // ESP + BEL (actual for Spain path)
+          { id: '760507', r32: [4, 5] },  // POR + ESP (Spain path)
           { id: '760506', r32: [6, 7] },
         ],
         vf: [
@@ -1146,23 +1146,6 @@
       },
       final: { id: '760517', hf: ['left', 'right'] },
       third: { id: '760516', hf: ['left', 'right'] },
-    };
-
-    // Forced current AF teams for correct display in bracket (to match actual current state)
-    const FORCED_AF = {
-      '760502': { homeKey: 'kanada', awayKey: 'marokko' },
-      '760503': { homeKey: 'frankreich', awayKey: 'marokko' },
-      '760504': { homeKey: 'spanien', awayKey: 'belgien' },
-      '760505': { homeKey: 'mexiko', awayKey: 'ecuador' },
-      '760506': { homeKey: 'england', awayKey: 'drkongo' },
-      '760507': { homeKey: 'argentinien', awayKey: 'kapverde' },
-      '760508': { homeKey: 'schweiz', awayKey: 'algerien' },
-      '760509': { homeKey: 'kolumbien', awayKey: 'ghana' }
-    };
-
-    const FORCED_VF = {
-      '760510': { homeKey: 'frankreich', awayKey: 'spanien' },
-      '760513': { homeKey: 'norwegen', awayKey: 'argentinien' }
     };
 
     const TEAM_ABBR = {
@@ -1917,12 +1900,7 @@
     }
 
     function renderBracketTierNode(def, side, row, col, tier, ctx) {
-      let sides = assertBracketSides(def.id, def, ctx);
-      if (FORCED_AF && FORCED_AF[def.id]) {
-        sides = FORCED_AF[def.id];
-      } else if (tier === 'vf' && FORCED_VF && FORCED_VF[def.id]) {
-        sides = FORCED_VF[def.id];
-      }
+      const sides = resolveBracketSides(def.id, def, ctx);
       const span = tier === 'af' ? 4 : tier === 'vf' ? 8 : 16;
       return `<div class="br-slot ${side}" style="grid-column:${col};grid-row:${row}/span ${span}" data-br-tier="${tier}">${renderBracketMatchBox(def.id, sides.homeKey, sides.awayKey, side, tier)}</div>`;
     }
@@ -2037,12 +2015,6 @@
     homeKey: getBracketLoser(BRACKET_TREE.left.hf.id, BRACKET_TREE.left.hf, leftCtx),
     awayKey: getBracketLoser(BRACKET_TREE.right.hf.id, BRACKET_TREE.right.hf, rightCtx),
   };
-
-  // Force Spain and France flags in final and 3rd place (user reported missing)
-  if (!finSides.homeKey) finSides.homeKey = 'frankreich';
-  if (!finSides.awayKey) finSides.awayKey = 'spanien';
-  if (!thirdSides.homeKey) thirdSides.homeKey = 'frankreich';
-  if (!thirdSides.awayKey) thirdSides.awayKey = 'norwegen';
 
   document.getElementById('bracket-root').innerHTML = `
     <div class="bracket-stage">
