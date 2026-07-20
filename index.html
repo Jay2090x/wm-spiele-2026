@@ -1150,10 +1150,14 @@
 
     // Forced current AF teams for correct display in bracket (to match actual current state)
     const FORCED_AF = {
+      '760502': { homeKey: 'kanada', awayKey: 'marokko' },
       '760503': { homeKey: 'frankreich', awayKey: 'marokko' },
       '760504': { homeKey: 'spanien', awayKey: 'belgien' },
-      '760506': { homeKey: 'norwegen', awayKey: 'england' },
-      '760509': { homeKey: 'argentinien', awayKey: 'schweiz' }
+      '760505': { homeKey: 'mexiko', awayKey: 'ecuador' },
+      '760506': { homeKey: 'england', awayKey: 'drkongo' },
+      '760507': { homeKey: 'argentinien', awayKey: 'kapverde' },
+      '760508': { homeKey: 'schweiz', awayKey: 'algerien' },
+      '760509': { homeKey: 'kolumbien', awayKey: 'ghana' }
     };
 
     const FORCED_VF = {
@@ -1788,6 +1792,14 @@
 
     // Spielbaum-Paarungen kommen aus BRACKET_TREE — ESPN knockoutMeta kann falsche Teams liefern.
     function resolveBracketSides(id, feeders, ctx) {
+      if (id) {
+        if (FORCED_AF && FORCED_AF[id]) {
+          return { id, ...FORCED_AF[id] };
+        }
+        if (FORCED_VF && FORCED_VF[id]) {
+          return { id, ...FORCED_VF[id] };
+        }
+      }
       if (feeders?.r32) {
         return {
           id,
@@ -2018,24 +2030,6 @@
     function renderBracket() {
   const leftCtx = { r32: R32_LEFT, tree: BRACKET_TREE.left };
   const rightCtx = { r32: R32_RIGHT, tree: BRACKET_TREE.right };
-
-  // === STARKER OVERRIDE für aktuelle Viertelfinale ===
-  // Diese 4 Matches werden direkt in die AF-Slots gezwungen
-  const forcedAF = {
-    '760503': { homeKey: 'frankreich', awayKey: 'marokko' },   // France vs Morocco
-    '760504': { homeKey: 'spanien', awayKey: 'belgien' },     // Spain vs Belgium
-    '760506': { homeKey: 'norwegen', awayKey: 'england' },    // Norway vs England
-    '760509': { homeKey: 'argentinien', awayKey: 'schweiz' }  // Argentina vs Switzerland
-  };
-
-  // Temporär override in knockoutMeta
-  Object.keys(forcedAF).forEach(id => {
-    knockoutMeta[id] = {
-      ...knockoutMeta[id],
-      homeEn: forcedAF[id].homeKey,
-      awayEn: forcedAF[id].awayKey
-    };
-  });
 
   const finSides = resolveBracketSides(BRACKET_TREE.final.id, { hf: ['left', 'right'] }, leftCtx);
   const thirdSides = {
