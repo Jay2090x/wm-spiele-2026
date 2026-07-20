@@ -1989,21 +1989,22 @@
         const vfNodes = node(`.br-slot.${side}[data-br-tier="vf"] .br-node`, side);
         const hfNodes = node(`.br-slot.${side}[data-br-tier="hf"] .br-node`, side);
 
-        for (let i = 0; i < r32.length; i += 2) {
-          if (r32[i + 1] && afNodes[Math.floor(i / 2)]) {
-            paths.push(...connectBracketPair(r32[i], r32[i + 1], afNodes[Math.floor(i / 2)], side));
+        const tree = side === 'left' ? BRACKET_TREE.left : BRACKET_TREE.right;
+
+        // Connect using the actual r32 indices from the tree def (supports non-adjacent for correct bracket)
+        for (let i = 0; i < tree.af.length; i++) {
+          const def = tree.af[i];
+          if (def && def.r32 && r32[def.r32[0]] && r32[def.r32[1]] && afNodes[i]) {
+            paths.push(...connectBracketPair(r32[def.r32[0]], r32[def.r32[1]], afNodes[i], side));
           }
         }
-        for (let i = 0; i < afNodes.length; i += 2) {
-          if (afNodes[i + 1] && vfNodes[Math.floor(i / 2)]) {
-            paths.push(...connectBracketPair(afNodes[i], afNodes[i + 1], vfNodes[Math.floor(i / 2)], side));
+        for (let i = 0; i < tree.vf.length; i++) {
+          const def = tree.vf[i];
+          if (def && def.af && afNodes[def.af[0]] && afNodes[def.af[1]] && vfNodes[i]) {
+            paths.push(...connectBracketPair(afNodes[def.af[0]], afNodes[def.af[1]], vfNodes[i], side));
           }
         }
-        for (let i = 0; i < vfNodes.length; i += 2) {
-          if (vfNodes[i + 1] && hfNodes[0]) {
-            paths.push(...connectBracketPair(vfNodes[i], vfNodes[i + 1], hfNodes[0], side));
-          }
-        }
+        // hf connect remains special for center
       });
 
       const hfLEl = wrap.querySelector('.br-slot.left[data-br-tier="hf"] .br-node');
@@ -2041,7 +2042,7 @@
   if (!finSides.homeKey) finSides.homeKey = 'frankreich';
   if (!finSides.awayKey) finSides.awayKey = 'spanien';
   if (!thirdSides.homeKey) thirdSides.homeKey = 'frankreich';
-  if (!thirdSides.awayKey) thirdSides.awayKey = 'argentinien';
+  if (!thirdSides.awayKey) thirdSides.awayKey = 'norwegen';
 
   document.getElementById('bracket-root').innerHTML = `
     <div class="bracket-stage">
