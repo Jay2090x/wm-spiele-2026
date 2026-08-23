@@ -1,13 +1,13 @@
 {
-  "updated": "2026-08-23T01:24:50Z",
+  "updated": "2026-08-23T03:03:31Z",
   "ORF": {
     "url": "https://on.orf.at/live?channel=orf1",
     "status": "ok",
-    "checked": "2026-08-23T01:24:50Z"
+    "checked": "2026-08-23T03:03:31Z"
   },
   "ServusTV": {
     "url": "https://www.servustv.com/de/page/PN0B1EC15B2FE10/servustv-live",
     "status": "ok",
-    "checked": "2026-08-23T01:24:50Z"
+    "checked": "2026-08-23T03:03:31Z"
   }
 }
